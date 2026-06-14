@@ -1,5 +1,5 @@
 {
-  "extends": "@workspace/typescript-config/base.json",
+  "extends": "@openschedule/typescript-config/base.json",
   "compilerOptions": {
     "target": "ESNext",
     "types": ["node"],
