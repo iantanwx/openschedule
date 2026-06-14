@@ -28,6 +28,7 @@ dist
 .DS_Store
 *.pem
 .sisyphus
+.superpowers
 
 # debug
 npm-debug.log*
