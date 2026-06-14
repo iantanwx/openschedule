@@ -1,0 +1,9 @@
+.rdp-day--available .rdp-day_button::after {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  margin: 2px auto 0;
+}
