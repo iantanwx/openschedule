@@ -2036,6 +2036,80 @@ git commit -m "fix: resolve type errors in convex functions"
 
 ---
 
+## Task 14: Package Exports and App Dependencies
+
+**Files:**
+- Modify: `packages/convex/package.json`
+- Modify: `apps/web/package.json`
+
+The `@openschedule/convex` package needs to export its generated types and function references so apps can import them cleanly. Apps need both the `convex` client SDK (for `ConvexProvider`, `useQuery`, etc.) and `@openschedule/convex` (for project-specific types/api).
+
+- [ ] **Step 1: Add exports to packages/convex/package.json**
+
+Update the `exports` field:
+
+```json
+{
+  "name": "@openschedule/convex",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api": "./src/_generated/api.ts",
+    "./dataModel": "./src/_generated/dataModel.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "convex": "^1.21.0"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "^4.0.0",
+    "@openschedule/typescript-config": "workspace:*",
+    "convex-test": "^0.0.36",
+    "typescript": "^5",
+    "vitest": "^3.2.0"
+  }
+}
+```
+
+- [ ] **Step 2: Add convex and @openschedule/convex to apps/web**
+
+```json
+{
+  "dependencies": {
+    "@openschedule/convex": "workspace:*",
+    "@openschedule/ui": "workspace:*",
+    "convex": "^1.21.0",
+    "lucide-react": "^1.18.0",
+    "next": "16.2.6",
+    "next-themes": "^0.4.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  }
+}
+```
+
+- [ ] **Step 3: Install dependencies**
+
+Run: `pnpm install`
+Expected: Clean install, lockfile updated.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add packages/convex/package.json apps/web/package.json pnpm-lock.yaml
+git commit -m "chore: add convex package exports and app dependencies"
+```
+
+---
+
 ## Summary
 
 | Task | What it builds |
@@ -2053,3 +2127,4 @@ git commit -m "fix: resolve type errors in convex functions"
 | 11 | Availability query (wires slot computation to Convex) |
 | 12 | Booking integration tests |
 | 13 | Final type verification |
+| 14 | Package exports and app dependencies |
