@@ -8,6 +8,8 @@
 
 **Tech Stack:** Convex (schema, queries, mutations, actions), convex-test + vitest for testing, TypeScript 5 strict.
 
+**Typing Rule:** Always use Convex generated types (`Doc<>`, `Id<>`) as single source of truth. DTOs are `Pick<>`-derived, never hand-rolled interfaces that duplicate schema fields. Split per domain: `types/{domain}.queries.ts` for query return shapes, `types/{domain}.mutations.ts` for mutation input shapes. Internal lib types (e.g. slot computation) are colocated with their module. The `types/` directory is exported for upstream app consumers.
+
 ---
 
 ## File Structure
@@ -17,8 +19,21 @@ packages/convex/
 ├── src/
 │   ├── schema.ts                    # Full schema (9 tables + indexes)
 │   ├── lib/
-│   │   ├── slots.ts                 # Slot computation logic (pure function)
+│   │   ├── slots.ts                 # Slot computation logic (pure function, colocated types)
 │   │   └── time.ts                  # Time utility helpers
+│   ├── types/
+│   │   ├── organizations.queries.ts # Query return DTOs for organizations
+│   │   ├── organizations.mutations.ts # Mutation input DTOs for organizations
+│   │   ├── venues.queries.ts
+│   │   ├── venues.mutations.ts
+│   │   ├── schedules.queries.ts
+│   │   ├── schedules.mutations.ts
+│   │   ├── blockouts.queries.ts
+│   │   ├── blockouts.mutations.ts
+│   │   ├── customers.queries.ts
+│   │   ├── customers.mutations.ts
+│   │   ├── bookings.queries.ts
+│   │   └── bookings.mutations.ts
 │   ├── queries/
 │   │   ├── organizations.ts         # Org lookup by slug
 │   │   ├── venues.ts                # Venue queries (by org, by slug)
@@ -508,43 +523,26 @@ Expected: FAIL — module `../lib/slots` not found.
 - [ ] **Step 3: Implement the slot computation**
 
 ```typescript
+import { Doc } from "../_generated/dataModel";
 import { timeToMinutes, minutesToTime, getDayOfWeek, timeRangesOverlap } from "./time";
 
-export interface ScheduleInput {
-  workingDays: number[];
-  startTime: string;
-  endTime: string;
-  slotDuration: number;
-}
+// Internal types — colocated, derived from generated Doc types
+type ScheduleForSlots = Pick<Doc<"schedules">, "workingDays" | "startTime" | "endTime" | "slotDuration">;
+type BlockoutForSlots = Pick<Doc<"blockouts">, "date" | "startTime" | "endTime">;
+type BookingForSlots = Pick<Doc<"bookings">, "date" | "startTime" | "endTime" | "status">;
+type VenueBookingSlot = Pick<Doc<"bookings">, "startTime" | "endTime">;
 
-export interface BlockoutInput {
-  date: string;
-  startTime: string;
-  endTime: string;
-}
-
-export interface BookingInput {
-  date: string;
-  startTime: string;
-  endTime: string;
-  status: "pending" | "confirmed" | "cancelled";
-}
-
-export interface VenueBookingSlot {
-  startTime: string;
-  endTime: string;
-}
-
+/** Computed output — not a Doc derivative, it's a result shape */
 export interface TimeSlot {
   startTime: string;
   endTime: string;
 }
 
 export interface ComputeSlotsInput {
-  schedule: ScheduleInput;
+  schedule: ScheduleForSlots;
   dates: string[];
-  blockouts: BlockoutInput[];
-  bookings: BookingInput[];
+  blockouts: BlockoutForSlots[];
+  bookings: BookingForSlots[];
   venueCapacity: number;
   /** All active bookings (any therapist) at the venue, grouped by date — for capacity check */
   allBookingsForVenueByDate: Record<string, VenueBookingSlot[]>;
@@ -661,7 +659,208 @@ git commit -m "feat: implement slot computation algorithm with tests"
 
 ---
 
-## Task 5: Organization Queries and Mutations
+## Task 5: Define DTOs
+
+**Files:**
+- Create: `packages/convex/src/types/organizations.queries.ts`
+- Create: `packages/convex/src/types/organizations.mutations.ts`
+- Create: `packages/convex/src/types/venues.queries.ts`
+- Create: `packages/convex/src/types/venues.mutations.ts`
+- Create: `packages/convex/src/types/schedules.queries.ts`
+- Create: `packages/convex/src/types/schedules.mutations.ts`
+- Create: `packages/convex/src/types/blockouts.queries.ts`
+- Create: `packages/convex/src/types/blockouts.mutations.ts`
+- Create: `packages/convex/src/types/customers.queries.ts`
+- Create: `packages/convex/src/types/customers.mutations.ts`
+- Create: `packages/convex/src/types/bookings.queries.ts`
+- Create: `packages/convex/src/types/bookings.mutations.ts`
+
+All types derived from `Doc<>` and `Id<>` via `Pick`. Never hand-roll interfaces that mirror schema fields.
+
+- [ ] **Step 1: Create organization DTOs**
+
+`packages/convex/src/types/organizations.queries.ts`:
+```typescript
+import { Doc } from "../_generated/dataModel";
+
+/** Full organization returned by admin queries */
+export type Organization = Pick<Doc<"organizations">, "_id" | "_creationTime" | "name" | "slug">;
+```
+
+`packages/convex/src/types/organizations.mutations.ts`:
+```typescript
+/** Input for creating an organization (id is auto-generated) */
+export type CreateOrganizationInput = {
+  name: string;
+  slug: string;
+};
+
+/** Input for updating an organization (all fields optional) */
+export type UpdateOrganizationInput = {
+  name?: string;
+  slug?: string;
+};
+```
+
+- [ ] **Step 2: Create venue DTOs**
+
+`packages/convex/src/types/venues.queries.ts`:
+```typescript
+import { Doc } from "../_generated/dataModel";
+
+/** Full venue for admin */
+export type Venue = Pick<Doc<"venues">, "_id" | "_creationTime" | "orgId" | "name" | "slug" | "timezone" | "capacity" | "dayStart" | "dayEnd">;
+
+/** Public venue info for customer app (no capacity exposed) */
+export type VenuePublic = Pick<Doc<"venues">, "_id" | "name" | "slug" | "timezone">;
+```
+
+`packages/convex/src/types/venues.mutations.ts`:
+```typescript
+import { Id } from "../_generated/dataModel";
+
+export type CreateVenueInput = {
+  orgId: Id<"organizations">;
+  name: string;
+  slug: string;
+  timezone: string;
+  capacity: number;
+  dayStart: string;
+  dayEnd: string;
+};
+
+export type UpdateVenueInput = {
+  name?: string;
+  slug?: string;
+  timezone?: string;
+  capacity?: number;
+  dayStart?: string;
+  dayEnd?: string;
+};
+```
+
+- [ ] **Step 3: Create schedule DTOs**
+
+`packages/convex/src/types/schedules.queries.ts`:
+```typescript
+import { Doc } from "../_generated/dataModel";
+
+/** Full schedule */
+export type Schedule = Pick<Doc<"schedules">, "_id" | "_creationTime" | "therapistId" | "venueId" | "workingDays" | "startTime" | "endTime" | "slotDuration" | "availabilityHorizonDays">;
+```
+
+`packages/convex/src/types/schedules.mutations.ts`:
+```typescript
+import { Id } from "../_generated/dataModel";
+
+export type UpsertScheduleInput = {
+  therapistId: Id<"users">;
+  venueId: Id<"venues">;
+  workingDays: number[];
+  startTime: string;
+  endTime: string;
+  slotDuration: number;
+  availabilityHorizonDays: number;
+};
+```
+
+- [ ] **Step 4: Create blockout DTOs**
+
+`packages/convex/src/types/blockouts.queries.ts`:
+```typescript
+import { Doc } from "../_generated/dataModel";
+
+/** Full blockout */
+export type Blockout = Pick<Doc<"blockouts">, "_id" | "_creationTime" | "therapistId" | "date" | "startTime" | "endTime" | "reason">;
+```
+
+`packages/convex/src/types/blockouts.mutations.ts`:
+```typescript
+import { Id } from "../_generated/dataModel";
+
+export type CreateBlockoutInput = {
+  therapistId: Id<"users">;
+  date: string;
+  startTime: string;
+  endTime: string;
+  reason?: string;
+};
+
+export type UpdateBlockoutInput = {
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  reason?: string;
+};
+```
+
+- [ ] **Step 5: Create customer DTOs**
+
+`packages/convex/src/types/customers.queries.ts`:
+```typescript
+import { Doc } from "../_generated/dataModel";
+
+/** Full customer */
+export type Customer = Pick<Doc<"customers">, "_id" | "_creationTime" | "orgId" | "email" | "name" | "phone">;
+```
+
+`packages/convex/src/types/customers.mutations.ts`:
+```typescript
+import { Id } from "../_generated/dataModel";
+
+export type GetOrCreateCustomerInput = {
+  orgId: Id<"organizations">;
+  email: string;
+  name: string;
+  phone?: string;
+};
+
+export type UpdateCustomerInput = {
+  name?: string;
+  email?: string;
+  phone?: string;
+};
+```
+
+- [ ] **Step 6: Create booking DTOs**
+
+`packages/convex/src/types/bookings.queries.ts`:
+```typescript
+import { Doc } from "../_generated/dataModel";
+
+/** Full booking for admin */
+export type Booking = Pick<Doc<"bookings">, "_id" | "_creationTime" | "venueId" | "therapistId" | "customerId" | "date" | "startTime" | "endTime" | "status" | "createdBy" | "overCapacity">;
+
+/** Booking for customer app (no createdBy/overCapacity exposed) */
+export type BookingPublic = Pick<Doc<"bookings">, "_id" | "venueId" | "therapistId" | "date" | "startTime" | "endTime" | "status">;
+```
+
+`packages/convex/src/types/bookings.mutations.ts`:
+```typescript
+import { Id } from "../_generated/dataModel";
+
+export type CreateBookingInput = {
+  venueId: Id<"venues">;
+  therapistId: Id<"users">;
+  customerId: Id<"customers">;
+  date: string;
+  startTime: string;
+  endTime: string;
+  createdBy: "customer" | "therapist" | "owner";
+  overCapacity?: boolean;
+};
+```
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add packages/convex/src/types/
+git commit -m "feat: define Pick-derived DTOs for all domains"
+```
+
+---
+
+## Task 6: Organization Queries and Mutations
 
 **Files:**
 - Create: `packages/convex/src/queries/organizations.ts`
@@ -755,7 +954,7 @@ git commit -m "feat: add organization queries and mutations"
 
 ---
 
-## Task 6: Venue Queries and Mutations
+## Task 7: Venue Queries and Mutations
 
 **Files:**
 - Create: `packages/convex/src/queries/venues.ts`
@@ -874,7 +1073,7 @@ git commit -m "feat: add venue queries and mutations"
 
 ---
 
-## Task 7: Schedule Queries and Mutations
+## Task 8: Schedule Queries and Mutations
 
 **Files:**
 - Create: `packages/convex/src/queries/schedules.ts`
@@ -979,7 +1178,7 @@ git commit -m "feat: add schedule queries and mutations"
 
 ---
 
-## Task 8: Blockout Queries and Mutations
+## Task 9: Blockout Queries and Mutations
 
 **Files:**
 - Create: `packages/convex/src/queries/blockouts.ts`
@@ -1086,7 +1285,7 @@ git commit -m "feat: add blockout queries and mutations"
 
 ---
 
-## Task 9: Customer Queries and Mutations
+## Task 10: Customer Queries and Mutations
 
 **Files:**
 - Create: `packages/convex/src/queries/customers.ts`
@@ -1211,7 +1410,7 @@ git commit -m "feat: add customer queries and mutations"
 
 ---
 
-## Task 10: Booking Queries and Mutations
+## Task 11: Booking Queries and Mutations
 
 **Files:**
 - Create: `packages/convex/src/queries/bookings.ts`
@@ -1409,7 +1608,7 @@ git commit -m "feat: add booking queries and mutations with conflict checks"
 
 ---
 
-## Task 11: Availability Query (Slot Computation as Convex Query)
+## Task 12: Availability Query (Slot Computation as Convex Query)
 
 **Files:**
 - Create: `packages/convex/src/queries/availability.ts`
@@ -1639,7 +1838,7 @@ git commit -m "feat: add availability query with slot computation"
 
 ---
 
-## Task 12: Integration Tests for Bookings
+## Task 13: Integration Tests for Bookings
 
 **Files:**
 - Create: `packages/convex/src/tests/bookings.test.ts`
@@ -2007,7 +2206,7 @@ git commit -m "test: add booking mutation integration tests"
 
 ---
 
-## Task 13: Generate Convex Types and Final Verification
+## Task 14: Generate Convex Types and Final Verification
 
 After all functions are written, the Convex codegen needs to run to generate the `_generated` directory with proper types. This can only happen with a Convex project configured.
 
@@ -2034,7 +2233,7 @@ git commit -m "fix: resolve type errors in convex functions"
 
 ---
 
-## Task 14: Package Exports and App Dependencies
+## Task 15: Package Exports and App Dependencies
 
 **Files:**
 - Modify: `packages/convex/package.json`
@@ -2055,7 +2254,8 @@ Update the `exports` field:
   "exports": {
     "./api": "./src/_generated/api.ts",
     "./dataModel": "./src/_generated/dataModel.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./types/*": "./src/types/*"
   },
   "scripts": {
     "dev": "convex dev",
@@ -2116,15 +2316,16 @@ git commit -m "chore: add convex package exports and app dependencies"
 |------|---------------|
 | 1 | Project setup (deps, tsconfig, vitest) |
 | 2 | Schema (9 tables with indexes) |
-| 3 | Time utility helpers |
+| 3 | Time utility helpers (date-fns) |
 | 4 | Slot computation algorithm + unit tests |
-| 5 | Organization CRUD |
-| 6 | Venue CRUD |
-| 7 | Schedule CRUD |
-| 8 | Blockout CRUD |
-| 9 | Customer CRUD |
-| 10 | Booking CRUD with conflict/capacity checks |
-| 11 | Availability query (wires slot computation to Convex) |
-| 12 | Booking integration tests |
-| 13 | Final type verification |
-| 14 | Package exports and app dependencies |
+| 5 | Pick-derived DTOs for all domains |
+| 6 | Organization CRUD |
+| 7 | Venue CRUD |
+| 8 | Schedule CRUD |
+| 9 | Blockout CRUD |
+| 10 | Customer CRUD |
+| 11 | Booking CRUD with conflict/capacity checks |
+| 12 | Availability query (wires slot computation to Convex) |
+| 13 | Booking integration tests |
+| 14 | Final type verification |
+| 15 | Package exports and app dependencies |
