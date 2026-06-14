@@ -18,10 +18,12 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "lucide-react": "^1.18.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.5.0",
     "react": "19.2.4",
+    "react-day-picker": "^10.0.1",
     "react-dom": "19.2.4",
     "shadcn": "^4.11.0",
     "tailwind-merge": "^3.6.0",
@@ -29,12 +31,12 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@openschedule/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "@turbo/gen": "^2.9.15",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@openschedule/typescript-config": "workspace:*",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
