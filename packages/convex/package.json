@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./api": "./src/_generated/api.ts",
+    "./dataModel": "./src/_generated/dataModel.ts",
+    "./schema": "./src/schema.ts",
+    "./types/*": "./src/types/*"
+  },
   "scripts": {
     "dev": "convex dev",
     "deploy": "convex deploy",
