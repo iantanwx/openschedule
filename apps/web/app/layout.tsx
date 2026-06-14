@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google"
 
 import "@openschedule/ui/globals.css"
+import { ConvexClientProvider } from "@/components/convex-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@openschedule/ui/lib/utils"
 
@@ -28,7 +29,9 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ConvexClientProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   )
