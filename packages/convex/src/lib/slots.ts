@@ -1,0 +1,140 @@
+import { timeToMinutes, minutesToTime, getDayOfWeek, timeRangesOverlap } from "./time";
+
+// Internal types — these are not Doc-derived because the function is pure and testable
+// without Convex. The caller maps Doc fields to these shapes.
+interface ScheduleForSlots {
+  workingDays: number[];
+  startTime: string;
+  endTime: string;
+  slotDuration: number;
+}
+
+interface BlockoutForSlots {
+  date: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface BookingForSlots {
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+}
+
+interface VenueBookingSlot {
+  startTime: string;
+  endTime: string;
+}
+
+/** Computed output — not a Doc derivative, it's a result shape */
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
+}
+
+export interface ComputeSlotsInput {
+  schedule: ScheduleForSlots;
+  dates: string[];
+  blockouts: BlockoutForSlots[];
+  bookings: BookingForSlots[];
+  venueCapacity: number;
+  /** All active bookings (any therapist) at the venue, grouped by date — for capacity check */
+  allBookingsForVenueByDate: Record<string, VenueBookingSlot[]>;
+}
+
+/**
+ * Compute available slots for a therapist over a date range.
+ *
+ * Algorithm per date:
+ * 1. If not a working day → empty
+ * 2. Generate candidate slots from schedule template
+ * 3. Remove slots overlapping blockouts
+ * 4. Remove slots overlapping active (pending/confirmed) bookings for this therapist
+ * 5. Remove slots where venue is at capacity
+ */
+export function computeAvailableSlots(
+  input: ComputeSlotsInput,
+): Record<string, TimeSlot[]> {
+  const { schedule, dates, blockouts, bookings, venueCapacity, allBookingsForVenueByDate } = input;
+  const result: Record<string, TimeSlot[]> = {};
+
+  for (const date of dates) {
+    const dayOfWeek = getDayOfWeek(date);
+
+    // Step 1: Not a working day
+    if (!schedule.workingDays.includes(dayOfWeek)) {
+      result[date] = [];
+      continue;
+    }
+
+    // Step 2: Generate candidate slots
+    const candidates = generateCandidateSlots(
+      schedule.startTime,
+      schedule.endTime,
+      schedule.slotDuration,
+    );
+
+    // Step 3: Filter out blockouts for this date
+    const dateBlockouts = blockouts.filter((b) => b.date === date);
+
+    // Step 4: Filter out active bookings for this therapist on this date
+    const dateBookings = bookings.filter(
+      (b) => b.date === date && b.status !== "cancelled",
+    );
+
+    // Step 5: Get venue-wide bookings for capacity check
+    const venueBookingsForDate = allBookingsForVenueByDate[date] ?? [];
+
+    const available = candidates.filter((slot) => {
+      // Check blockout overlap
+      for (const blockout of dateBlockouts) {
+        if (timeRangesOverlap(slot.startTime, slot.endTime, blockout.startTime, blockout.endTime)) {
+          return false;
+        }
+      }
+
+      // Check therapist booking overlap
+      for (const booking of dateBookings) {
+        if (timeRangesOverlap(slot.startTime, slot.endTime, booking.startTime, booking.endTime)) {
+          return false;
+        }
+      }
+
+      // Check venue capacity
+      const overlappingVenueBookings = venueBookingsForDate.filter((vb) =>
+        timeRangesOverlap(slot.startTime, slot.endTime, vb.startTime, vb.endTime),
+      );
+      if (overlappingVenueBookings.length >= venueCapacity) {
+        return false;
+      }
+
+      return true;
+    });
+
+    result[date] = available;
+  }
+
+  return result;
+}
+
+function generateCandidateSlots(
+  startTime: string,
+  endTime: string,
+  slotDuration: number,
+): TimeSlot[] {
+  const slots: TimeSlot[] = [];
+  const startMin = timeToMinutes(startTime);
+  const endMin = timeToMinutes(endTime);
+
+  let current = startMin;
+  while (current + slotDuration <= endMin) {
+    slots.push({
+      startTime: minutesToTime(current),
+      endTime: minutesToTime(current + slotDuration),
+    });
+    current += slotDuration;
+  }
+
+  return slots;
+}
