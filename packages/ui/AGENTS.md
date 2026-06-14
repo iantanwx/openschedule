@@ -7,6 +7,9 @@ Shared UI component library based on shadcn/ui (radix-nova).
 When working on this package, use the installed agent skills:
 
 - **shadcn** — Use when adding, composing, customizing, or debugging components.
+- **building-components** — Use when building reusable UI components.
+- **vercel-react-best-practices** — Use when writing React components or hooks.
+- **vercel-composition-patterns** — Use when composing components or deciding boundaries.
 
 ## Stack
 
