@@ -1,13 +1,25 @@
 {
   "name": "@openschedule/convex",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "convex dev",
+    "deploy": "convex deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.33.4"
+  "dependencies": {
+    "convex": "^1.21.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "^4.0.0",
+    "@openschedule/typescript-config": "workspace:*",
+    "convex-test": "^0.0.36",
+    "typescript": "^5",
+    "vitest": "^3.2.0"
+  }
 }
