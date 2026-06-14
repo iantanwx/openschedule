@@ -83,14 +83,16 @@ cd packages/ui
 pnpm add react-day-picker date-fns
 ```
 
-- [ ] **Step 3: Add shadcn components to packages/ui**
+- [ ] **Step 3: Add shadcn components (from apps/web)**
+
+Per the [monorepo docs](https://ui.shadcn.com/docs/monorepo#add-components-to-your-project), install from the consuming app — its `components.json` routes the `ui` alias to `@openschedule/ui/components`.
 
 ```bash
-cd packages/ui
+cd apps/web
 pnpm dlx shadcn@latest add card input label badge avatar skeleton
 ```
 
-If shadcn CLI doesn't work with the current config, create each component manually following the radix-nova patterns from the existing `button.tsx`.
+This writes component files to `packages/ui/src/components/` via the `"ui"` alias in `apps/web/components.json`.
 
 - [ ] **Step 4: Verify exports work**
 
