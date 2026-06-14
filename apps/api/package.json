@@ -1,0 +1,13 @@
+{
+  "name": "api",
+  "type": "module",
+  "dependencies": {
+    "hono": "^4.12.25"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "@workspace/typescript-config": "workspace:*",
+    "tsx": "^4.7.1"
+  }
+}
+
