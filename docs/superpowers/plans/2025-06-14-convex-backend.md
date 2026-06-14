@@ -871,21 +871,26 @@ git commit -m "feat: define Pick-derived DTOs for all domains"
 ```typescript
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import type { Organization } from "../types/organizations.queries";
 
 export const getBySlug = query({
   args: { slug: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Organization | null> => {
+    const org = await ctx.db
       .query("organizations")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .unique();
+    if (!org) return null;
+    return { _id: org._id, _creationTime: org._creationTime, name: org.name, slug: org.slug };
   },
 });
 
 export const get = query({
   args: { id: v.id("organizations") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+  handler: async (ctx, args): Promise<Organization | null> => {
+    const org = await ctx.db.get(args.id);
+    if (!org) return null;
+    return { _id: org._id, _creationTime: org._creationTime, name: org.name, slug: org.slug };
   },
 });
 ```
@@ -965,33 +970,56 @@ git commit -m "feat: add organization queries and mutations"
 ```typescript
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import type { Venue, VenuePublic } from "../types/venues.queries";
 
 export const listByOrg = query({
   args: { orgId: v.id("organizations") },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Venue[]> => {
+    const venues = await ctx.db
       .query("venues")
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
+    return venues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd }) => ({
+      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd,
+    }));
+  },
+});
+
+export const listByOrgPublic = query({
+  args: { orgId: v.id("organizations") },
+  handler: async (ctx, args): Promise<VenuePublic[]> => {
+    const venues = await ctx.db
+      .query("venues")
+      .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
+      .take(100);
+    return venues.map(({ _id, name, slug, timezone }) => ({ _id, name, slug, timezone }));
   },
 });
 
 export const getBySlug = query({
   args: { orgId: v.id("organizations"), slug: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<VenuePublic | null> => {
+    const venue = await ctx.db
       .query("venues")
       .withIndex("by_orgId_and_slug", (q) =>
         q.eq("orgId", args.orgId).eq("slug", args.slug),
       )
       .unique();
+    if (!venue) return null;
+    return { _id: venue._id, name: venue.name, slug: venue.slug, timezone: venue.timezone };
   },
 });
 
 export const get = query({
   args: { id: v.id("venues") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+  handler: async (ctx, args): Promise<Venue | null> => {
+    const venue = await ctx.db.get(args.id);
+    if (!venue) return null;
+    return {
+      _id: venue._id, _creationTime: venue._creationTime, orgId: venue.orgId,
+      name: venue.name, slug: venue.slug, timezone: venue.timezone,
+      capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
+    };
   },
 });
 ```
@@ -1084,36 +1112,51 @@ git commit -m "feat: add venue queries and mutations"
 ```typescript
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import type { Schedule } from "../types/schedules.queries";
 
 export const getByTherapistAndVenue = query({
   args: { therapistId: v.id("users"), venueId: v.id("venues") },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Schedule | null> => {
+    const schedule = await ctx.db
       .query("schedules")
       .withIndex("by_therapistId_and_venueId", (q) =>
         q.eq("therapistId", args.therapistId).eq("venueId", args.venueId),
       )
       .unique();
+    if (!schedule) return null;
+    return {
+      _id: schedule._id, _creationTime: schedule._creationTime,
+      therapistId: schedule.therapistId, venueId: schedule.venueId,
+      workingDays: schedule.workingDays, startTime: schedule.startTime,
+      endTime: schedule.endTime, slotDuration: schedule.slotDuration,
+      availabilityHorizonDays: schedule.availabilityHorizonDays,
+    };
   },
 });
 
 export const listByVenue = query({
   args: { venueId: v.id("venues") },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Schedule[]> => {
+    const schedules = await ctx.db
       .query("schedules")
       .withIndex("by_venueId", (q) => q.eq("venueId", args.venueId))
       .take(100);
+    return schedules.map(({ _id, _creationTime, therapistId, venueId, workingDays, startTime, endTime, slotDuration, availabilityHorizonDays }) => ({
+      _id, _creationTime, therapistId, venueId, workingDays, startTime, endTime, slotDuration, availabilityHorizonDays,
+    }));
   },
 });
 
 export const listByTherapist = query({
   args: { therapistId: v.id("users") },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Schedule[]> => {
+    const schedules = await ctx.db
       .query("schedules")
       .withIndex("by_therapistId", (q) => q.eq("therapistId", args.therapistId))
       .take(100);
+    return schedules.map(({ _id, _creationTime, therapistId, venueId, workingDays, startTime, endTime, slotDuration, availabilityHorizonDays }) => ({
+      _id, _creationTime, therapistId, venueId, workingDays, startTime, endTime, slotDuration, availabilityHorizonDays,
+    }));
   },
 });
 ```
@@ -1189,14 +1232,18 @@ git commit -m "feat: add schedule queries and mutations"
 ```typescript
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import type { Blockout } from "../types/blockouts.queries";
 
 export const listByTherapist = query({
   args: { therapistId: v.id("users") },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Blockout[]> => {
+    const blockouts = await ctx.db
       .query("blockouts")
       .withIndex("by_therapistId", (q) => q.eq("therapistId", args.therapistId))
       .take(200);
+    return blockouts.map(({ _id, _creationTime, therapistId, date, startTime, endTime, reason }) => ({
+      _id, _creationTime, therapistId, date, startTime, endTime, reason,
+    }));
   },
 });
 
@@ -1206,9 +1253,8 @@ export const listByTherapistAndDateRange = query({
     startDate: v.string(),
     endDate: v.string(),
   },
-  handler: async (ctx, args) => {
-    // Use the by_therapistId_and_date index to get blockouts in date range
-    return await ctx.db
+  handler: async (ctx, args): Promise<Blockout[]> => {
+    const blockouts = await ctx.db
       .query("blockouts")
       .withIndex("by_therapistId_and_date", (q) =>
         q
@@ -1217,6 +1263,9 @@ export const listByTherapistAndDateRange = query({
           .lte("date", args.endDate),
       )
       .take(200);
+    return blockouts.map(({ _id, _creationTime, therapistId, date, startTime, endTime, reason }) => ({
+      _id, _creationTime, therapistId, date, startTime, endTime, reason,
+    }));
   },
 });
 ```
@@ -1296,33 +1345,47 @@ git commit -m "feat: add blockout queries and mutations"
 ```typescript
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import type { Customer } from "../types/customers.queries";
 
 export const getByEmail = query({
   args: { orgId: v.id("organizations"), email: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Customer | null> => {
+    const customer = await ctx.db
       .query("customers")
       .withIndex("by_orgId_and_email", (q) =>
         q.eq("orgId", args.orgId).eq("email", args.email),
       )
       .unique();
+    if (!customer) return null;
+    return {
+      _id: customer._id, _creationTime: customer._creationTime,
+      orgId: customer.orgId, email: customer.email, name: customer.name, phone: customer.phone,
+    };
   },
 });
 
 export const listByOrg = query({
   args: { orgId: v.id("organizations") },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Customer[]> => {
+    const customers = await ctx.db
       .query("customers")
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(200);
+    return customers.map(({ _id, _creationTime, orgId, email, name, phone }) => ({
+      _id, _creationTime, orgId, email, name, phone,
+    }));
   },
 });
 
 export const get = query({
   args: { id: v.id("customers") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+  handler: async (ctx, args): Promise<Customer | null> => {
+    const customer = await ctx.db.get(args.id);
+    if (!customer) return null;
+    return {
+      _id: customer._id, _creationTime: customer._creationTime,
+      orgId: customer.orgId, email: customer.email, name: customer.name, phone: customer.phone,
+    };
   },
 });
 ```
@@ -1421,23 +1484,35 @@ git commit -m "feat: add customer queries and mutations"
 ```typescript
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import type { Booking } from "../types/bookings.queries";
 
 export const get = query({
   args: { id: v.id("bookings") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+  handler: async (ctx, args): Promise<Booking | null> => {
+    const booking = await ctx.db.get(args.id);
+    if (!booking) return null;
+    return {
+      _id: booking._id, _creationTime: booking._creationTime,
+      venueId: booking.venueId, therapistId: booking.therapistId,
+      customerId: booking.customerId, date: booking.date,
+      startTime: booking.startTime, endTime: booking.endTime,
+      status: booking.status, createdBy: booking.createdBy, overCapacity: booking.overCapacity,
+    };
   },
 });
 
 export const listByVenueAndDate = query({
   args: { venueId: v.id("venues"), date: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Booking[]> => {
+    const bookings = await ctx.db
       .query("bookings")
       .withIndex("by_venueId_and_date", (q) =>
         q.eq("venueId", args.venueId).eq("date", args.date),
       )
       .take(200);
+    return bookings.map(({ _id, _creationTime, venueId, therapistId, customerId, date, startTime, endTime, status, createdBy, overCapacity }) => ({
+      _id, _creationTime, venueId, therapistId, customerId, date, startTime, endTime, status, createdBy, overCapacity,
+    }));
   },
 });
 
@@ -1447,8 +1522,8 @@ export const listByTherapistAndDateRange = query({
     startDate: v.string(),
     endDate: v.string(),
   },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Booking[]> => {
+    const bookings = await ctx.db
       .query("bookings")
       .withIndex("by_therapistId_and_date", (q) =>
         q
@@ -1457,17 +1532,23 @@ export const listByTherapistAndDateRange = query({
           .lte("date", args.endDate),
       )
       .take(500);
+    return bookings.map(({ _id, _creationTime, venueId, therapistId, customerId, date, startTime, endTime, status, createdBy, overCapacity }) => ({
+      _id, _creationTime, venueId, therapistId, customerId, date, startTime, endTime, status, createdBy, overCapacity,
+    }));
   },
 });
 
 export const listByCustomer = query({
   args: { customerId: v.id("customers") },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Booking[]> => {
+    const bookings = await ctx.db
       .query("bookings")
       .withIndex("by_customerId", (q) => q.eq("customerId", args.customerId))
       .order("desc")
       .take(50);
+    return bookings.map(({ _id, _creationTime, venueId, therapistId, customerId, date, startTime, endTime, status, createdBy, overCapacity }) => ({
+      _id, _creationTime, venueId, therapistId, customerId, date, startTime, endTime, status, createdBy, overCapacity,
+    }));
   },
 });
 
@@ -1477,8 +1558,8 @@ export const listByVenueDateRange = query({
     startDate: v.string(),
     endDate: v.string(),
   },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Booking[]> => {
+    const bookings = await ctx.db
       .query("bookings")
       .withIndex("by_venueId_and_date", (q) =>
         q
@@ -1487,6 +1568,9 @@ export const listByVenueDateRange = query({
           .lte("date", args.endDate),
       )
       .take(500);
+    return bookings.map(({ _id, _creationTime, venueId, therapistId, customerId, date, startTime, endTime, status, createdBy, overCapacity }) => ({
+      _id, _creationTime, venueId, therapistId, customerId, date, startTime, endTime, status, createdBy, overCapacity,
+    }));
   },
 });
 ```
