@@ -71,7 +71,9 @@ packages/convex/
     "test:watch": "vitest"
   },
   "dependencies": {
-    "convex": "^1.21.0"
+    "convex": "^1.21.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^4.0.0",
@@ -270,7 +272,7 @@ git commit -m "feat: define convex schema with 9 tables and indexes"
 **Files:**
 - Create: `packages/convex/src/lib/time.ts`
 
-These are pure functions with no Convex dependencies, used by the slot computation logic.
+These are pure functions used by the slot computation logic. Date operations use `date-fns` for correctness (DST, month boundaries). The "HH:MM" string utilities are custom since no library operates at that abstraction.
 
 - [ ] **Step 1: Create the time utility module**
 
@@ -280,6 +282,9 @@ These are pure functions with no Convex dependencies, used by the slot computati
  * All time strings are in "HH:MM" 24-hour format.
  * All dates are in "YYYY-MM-DD" ISO format.
  */
+
+import { addDays, getDay, format, parseISO } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 /** Convert "HH:MM" to minutes since midnight */
 export function timeToMinutes(time: string): number {
@@ -296,19 +301,17 @@ export function minutesToTime(minutes: number): string {
 
 /** Generate an array of dates from startDate for N days (inclusive of startDate) */
 export function generateDateRange(startDate: string, days: number): string[] {
+  const start = parseISO(startDate);
   const dates: string[] = [];
-  const start = new Date(startDate + "T00:00:00");
   for (let i = 0; i < days; i++) {
-    const d = new Date(start);
-    d.setDate(d.getDate() + i);
-    dates.push(d.toISOString().split("T")[0]);
+    dates.push(format(addDays(start, i), "yyyy-MM-dd"));
   }
   return dates;
 }
 
 /** Get the day of week (0=Sun, 6=Sat) for a date string */
 export function getDayOfWeek(date: string): number {
-  return new Date(date + "T00:00:00").getDay();
+  return getDay(parseISO(date));
 }
 
 /** Check if two time ranges overlap. Ranges are [start, end) half-open intervals. */
@@ -328,13 +331,8 @@ export function timeRangesOverlap(
 /** Get today's date as "YYYY-MM-DD" in a given IANA timezone */
 export function todayInTimezone(timezone: string): string {
   const now = new Date();
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  return formatter.format(now);
+  const zonedNow = toZonedTime(now, timezone);
+  return format(zonedNow, "yyyy-MM-dd");
 }
 ```
 
@@ -2067,7 +2065,9 @@ Update the `exports` field:
     "test:watch": "vitest"
   },
   "dependencies": {
-    "convex": "^1.21.0"
+    "convex": "^1.21.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^4.0.0",
