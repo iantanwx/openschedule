@@ -11,6 +11,19 @@ When working on this package, use the installed agent skills:
 - **vercel-react-best-practices** — Use when writing React components or hooks.
 - **vercel-composition-patterns** — Use when composing components or deciding boundaries.
 
+## shadcn (monorepo)
+
+Components in this package are managed via shadcn CLI, but **must be installed from `apps/web`**, not from here:
+
+```bash
+cd apps/web
+pnpm dlx shadcn@latest add <component>
+```
+
+The `apps/web/components.json` routes the `"ui"` alias to this package (`@openschedule/ui/components`), so the CLI writes files here automatically.
+
+See: https://ui.shadcn.com/docs/monorepo#add-components-to-your-project
+
 ## Stack
 
 - React 19

@@ -20,6 +20,19 @@ When working on this app, use the installed agent skills:
 
 Path-based: `/:orgSlug/:venueSlug/...`
 
+## shadcn (monorepo)
+
+This is a monorepo. shadcn components live in `packages/ui/src/components/` but **must be installed from this directory** (`apps/web`):
+
+```bash
+cd apps/web
+pnpm dlx shadcn@latest add <component>
+```
+
+The `components.json` here routes the `"ui"` alias to `@openschedule/ui/components`, so the CLI writes files to the shared package automatically. Never run `shadcn add` from `packages/ui` directly.
+
+See: https://ui.shadcn.com/docs/monorepo#add-components-to-your-project
+
 ## Stack
 
 - Next.js 16 (App Router)
