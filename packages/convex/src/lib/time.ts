@@ -9,7 +9,9 @@ import { toZonedTime } from "date-fns-tz";
 
 /** Convert "HH:MM" to minutes since midnight */
 export function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(":").map(Number);
+  const parts = time.split(":").map(Number);
+  const hours = parts[0] ?? 0;
+  const minutes = parts[1] ?? 0;
   return hours * 60 + minutes;
 }
 

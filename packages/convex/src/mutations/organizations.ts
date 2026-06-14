@@ -34,12 +34,13 @@ export const update = mutation({
       throw new Error("Organization not found");
     }
     if (fields.slug && fields.slug !== org.slug) {
+      const newSlug = fields.slug;
       const existing = await ctx.db
         .query("organizations")
-        .withIndex("by_slug", (q) => q.eq("slug", fields.slug!))
+        .withIndex("by_slug", (q) => q.eq("slug", newSlug))
         .unique();
       if (existing) {
-        throw new Error(`Organization with slug "${fields.slug}" already exists`);
+        throw new Error(`Organization with slug "${newSlug}" already exists`);
       }
     }
     const patch: Record<string, string> = {};

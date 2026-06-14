@@ -48,14 +48,15 @@ export const update = mutation({
       throw new Error("Customer not found");
     }
     if (fields.email && fields.email !== customer.email) {
+      const newEmail = fields.email;
       const existing = await ctx.db
         .query("customers")
         .withIndex("by_orgId_and_email", (q) =>
-          q.eq("orgId", customer.orgId).eq("email", fields.email!),
+          q.eq("orgId", customer.orgId).eq("email", newEmail),
         )
         .unique();
       if (existing) {
-        throw new Error(`Customer with email "${fields.email}" already exists in this org`);
+        throw new Error(`Customer with email "${newEmail}" already exists in this org`);
       }
     }
     const patch: Record<string, string> = {};

@@ -42,14 +42,15 @@ export const update = mutation({
       throw new Error("Venue not found");
     }
     if (fields.slug && fields.slug !== venue.slug) {
+      const newSlug = fields.slug;
       const existing = await ctx.db
         .query("venues")
         .withIndex("by_orgId_and_slug", (q) =>
-          q.eq("orgId", venue.orgId).eq("slug", fields.slug!),
+          q.eq("orgId", venue.orgId).eq("slug", newSlug),
         )
         .unique();
       if (existing) {
-        throw new Error(`Venue with slug "${fields.slug}" already exists in this org`);
+        throw new Error(`Venue with slug "${newSlug}" already exists in this org`);
       }
     }
     const patch: Record<string, string | number> = {};

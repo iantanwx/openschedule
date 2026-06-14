@@ -28,6 +28,12 @@ Convex agent skills for common tasks can be installed by running
 - Use `date-fns` and `date-fns-tz` for date operations (generating ranges, day-of-week, timezone conversions).
 - Custom "HH:MM" string utilities (`timeToMinutes`, `minutesToTime`, `timeRangesOverlap`) are domain-specific and live in `src/lib/time.ts`.
 
+## Testing
+
+- Tests use `vitest` with `convex-test` and `@edge-runtime/vm`.
+- Type support for `import.meta.glob` comes from `"types": ["vite/client"]` in `tsconfig.json`. Do NOT use `/// <reference types="..." />` directives in test files.
+- `import.meta.glob` is used by `convex-test` to discover modules.
+
 ## Code Organization
 
 - Queries go in `src/queries/{domain}.ts`

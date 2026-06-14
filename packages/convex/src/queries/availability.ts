@@ -68,10 +68,13 @@ export const getSlots = query({
     const allBookingsForVenueByDate: Record<string, { startTime: string; endTime: string }[]> = {};
     for (const booking of venueBookings) {
       if (booking.status === "cancelled") continue;
-      if (!allBookingsForVenueByDate[booking.date]) {
-        allBookingsForVenueByDate[booking.date] = [];
+      const dateKey = booking.date;
+      let dateBookings = allBookingsForVenueByDate[dateKey];
+      if (!dateBookings) {
+        dateBookings = [];
+        allBookingsForVenueByDate[dateKey] = dateBookings;
       }
-      allBookingsForVenueByDate[booking.date].push({
+      dateBookings.push({
         startTime: booking.startTime,
         endTime: booking.endTime,
       });
@@ -143,10 +146,13 @@ export const getSlotsForAllTherapists = query({
     const allBookingsForVenueByDate: Record<string, { startTime: string; endTime: string }[]> = {};
     for (const booking of venueBookings) {
       if (booking.status === "cancelled") continue;
-      if (!allBookingsForVenueByDate[booking.date]) {
-        allBookingsForVenueByDate[booking.date] = [];
+      const dateKey = booking.date;
+      let dateBookings = allBookingsForVenueByDate[dateKey];
+      if (!dateBookings) {
+        dateBookings = [];
+        allBookingsForVenueByDate[dateKey] = dateBookings;
       }
-      allBookingsForVenueByDate[booking.date].push({
+      dateBookings.push({
         startTime: booking.startTime,
         endTime: booking.endTime,
       });

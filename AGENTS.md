@@ -6,6 +6,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
+## Code Hygiene
+
+- Never use non-null assertions (`!`). Narrow the type properly with guards, variables, or early returns.
+- Never use `/// <reference types="..." />` directives. Add type packages to `tsconfig.json` `"types"` instead.
+- Prefer `const` narrowing over inline assertions. Extract a variable, check it, then use it.
+
 ## Git
 
 Use semantic commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`, `ci:`, `perf:`, `style:`.
