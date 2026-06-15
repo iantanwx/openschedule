@@ -19,3 +19,5 @@ This project uses **pnpm**. Always use `pnpm dlx` (not `npx`) when running one-o
 ## Git
 
 Use semantic commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`, `ci:`, `perf:`, `style:`.
+
+When the user says "merge", they mean merge the PR via `gh pr merge` — not a local `git merge`.
