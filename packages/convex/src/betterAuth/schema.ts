@@ -17,6 +17,7 @@ export default defineSchema({
     expiresAt: v.number(),
     ipAddress: v.optional(v.string()),
     userAgent: v.optional(v.string()),
+    activeOrganizationId: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
