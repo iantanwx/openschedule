@@ -11,7 +11,9 @@ import authConfig from "../auth.config";
 import schema from "./schema";
 
 export const authComponent = createClient<DataModel, typeof schema>(
+  // @ts-ignore - components.betterAuth requires codegen from `convex dev`
   components.betterAuth,
+  // @ts-ignore - authFunctions generated after first deploy
   {
     local: { schema },
     verbose: false,
@@ -164,14 +166,13 @@ export const authComponent = createClient<DataModel, typeof schema>(
   },
 );
 
-export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
+export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions => {
   return {
     appName: "OpenSchedule",
     baseURL: process.env.SITE_URL,
     secret: process.env.BETTER_AUTH_SECRET,
     database: authComponent.adapter(ctx),
     emailAndPassword: { enabled: true },
-    emailVerification: { sendVerificationEmail: false },
     socialProviders: {
       google: {
         clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -189,11 +190,11 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
         },
       }),
     ],
-  } satisfies BetterAuthOptions;
+  };
 };
 
-export const options = createAuthOptions({} as GenericCtx<DataModel>);
+export const options: BetterAuthOptions = createAuthOptions({} as GenericCtx<DataModel>);
 
-export const createAuth = (ctx: GenericCtx<DataModel>) => {
+export const createAuth = (ctx: GenericCtx<DataModel>): ReturnType<typeof betterAuth> => {
   return betterAuth(createAuthOptions(ctx));
 };

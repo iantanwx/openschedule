@@ -2,7 +2,8 @@ import { convexClient } from "@convex-dev/better-auth/client/plugins";
 import { organizationClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const authClient: any = createAuthClient({
   plugins: [convexClient(), organizationClient()],
 });
 
