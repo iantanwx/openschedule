@@ -1,13 +1,16 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
+import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 
 export const create = mutation({
   args: {
-    authId: v.string(),
     name: v.string(),
     slug: v.string(),
+    authId: v.string(),
   },
   handler: async (ctx, args) => {
+    // Org creation is handled by better-auth org plugin trigger.
+    // This mutation is for internal/seed use only.
     const existing = await ctx.db
       .query("organizations")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
@@ -30,11 +33,16 @@ export const update = mutation({
     slug: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    assertRole(user, ["owner"]);
+
     const { id, ...fields } = args;
     const org = await ctx.db.get(id);
     if (!org) {
       throw new Error("Organization not found");
     }
+    assertOrgAccess(user, org._id);
+
     if (fields.slug && fields.slug !== org.slug) {
       const newSlug = fields.slug;
       const existing = await ctx.db
