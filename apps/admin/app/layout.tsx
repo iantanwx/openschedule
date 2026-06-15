@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "@openschedule/ui/globals.css";
 import { ConvexClientProvider } from "@/components/convex-provider";
 import { cn } from "@openschedule/ui/lib/utils";
 
