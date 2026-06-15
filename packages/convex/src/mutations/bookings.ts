@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { timeRangesOverlap } from "../lib/time";
+import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 
 export const create = mutation({
   args: {
@@ -21,6 +22,21 @@ export const create = mutation({
     const venue = await ctx.db.get(args.venueId);
     if (!venue) {
       throw new Error("Venue not found");
+    }
+
+    if (args.overCapacity) {
+      // Only owners can override capacity
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) {
+        throw new Error("Authentication required for capacity override");
+      }
+      const authUser = await ctx.db
+        .query("users")
+        .withIndex("by_authId", (q) => q.eq("authId", identity.subject))
+        .unique();
+      if (!authUser || authUser.role !== "owner") {
+        throw new Error("Only owners can override venue capacity");
+      }
     }
 
     // Check therapist isn't already booked for this slot
@@ -82,10 +98,20 @@ export const create = mutation({
 export const confirm = mutation({
   args: { id: v.id("bookings") },
   handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    assertRole(user, ["owner", "therapist"]);
+
     const booking = await ctx.db.get(args.id);
     if (!booking) {
       throw new Error("Booking not found");
     }
+
+    // Verify org access via venue
+    const venue = await ctx.db.get(booking.venueId);
+    if (venue) {
+      assertOrgAccess(user, venue.orgId);
+    }
+
     if (booking.status !== "pending") {
       throw new Error(
         `Cannot confirm a booking with status "${booking.status}"`,

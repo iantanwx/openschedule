@@ -3,9 +3,12 @@ import { v } from "convex/values";
 
 export default defineSchema({
   organizations: defineTable({
+    authId: v.string(),
     name: v.string(),
     slug: v.string(),
-  }).index("by_slug", ["slug"]),
+  })
+    .index("by_authId", ["authId"])
+    .index("by_slug", ["slug"]),
 
   venues: defineTable({
     orgId: v.id("organizations"),
@@ -15,6 +18,7 @@ export default defineSchema({
     capacity: v.number(),
     dayStart: v.string(),
     dayEnd: v.string(),
+    status: v.union(v.literal("active"), v.literal("archived")),
   })
     .index("by_orgId", ["orgId"])
     .index("by_orgId_and_slug", ["orgId", "slug"]),
@@ -27,6 +31,7 @@ export default defineSchema({
     endTime: v.string(),
     slotDuration: v.number(),
     availabilityHorizonDays: v.number(),
+    status: v.union(v.literal("active"), v.literal("inactive")),
   })
     .index("by_therapistId", ["therapistId"])
     .index("by_venueId", ["venueId"])
@@ -38,6 +43,7 @@ export default defineSchema({
     startTime: v.string(),
     endTime: v.string(),
     reason: v.optional(v.string()),
+    status: v.union(v.literal("active"), v.literal("inactive")),
   })
     .index("by_therapistId", ["therapistId"])
     .index("by_therapistId_and_date", ["therapistId", "date"]),
@@ -98,13 +104,14 @@ export default defineSchema({
     .index("by_scopeId", ["scopeId"])
     .index("by_scopeId_and_provider", ["scopeId", "provider"]),
 
-  // better-auth managed table — schema defined by better-auth adapter
   users: defineTable({
+    authId: v.string(),
     email: v.string(),
     name: v.string(),
-    role: v.union(v.literal("owner"), v.literal("therapist")),
-    orgId: v.id("organizations"),
+    role: v.optional(v.union(v.literal("owner"), v.literal("therapist"))),
+    orgId: v.optional(v.id("organizations")),
   })
+    .index("by_authId", ["authId"])
     .index("by_email", ["email"])
     .index("by_orgId", ["orgId"])
     .index("by_orgId_and_role", ["orgId", "role"]),

@@ -10,7 +10,8 @@
     },
     "./dataModel": "./src/_generated/dataModel.d.ts",
     "./schema": "./src/schema.ts",
-    "./types/*": "./src/types/*"
+    "./types/*": "./src/types/*",
+    "./lib/auth": "./src/lib/auth.ts"
   },
   "scripts": {
     "dev": "convex dev",
@@ -20,6 +21,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@convex-dev/better-auth": "^0.12.3",
+    "better-auth": "^1.6.18",
     "convex": "^1.21.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0"

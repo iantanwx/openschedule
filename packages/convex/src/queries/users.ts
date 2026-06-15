@@ -13,10 +13,11 @@ export const getPublic = query({
 export const listByVenue = query({
   args: { venueId: v.id("venues") },
   handler: async (ctx, args) => {
-    const schedules = await ctx.db
+    const allSchedules = await ctx.db
       .query("schedules")
       .withIndex("by_venueId", (q) => q.eq("venueId", args.venueId))
       .take(100);
+    const schedules = allSchedules.filter((s) => s.status === "active");
     const therapistIds = [...new Set(schedules.map((s) => s.therapistId))];
     const users = await Promise.all(
       therapistIds.map(async (id) => {

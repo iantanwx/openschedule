@@ -21,7 +21,7 @@ export const getSlots = query({
       )
       .unique();
 
-    if (!schedule) {
+    if (!schedule || schedule.status !== "active") {
       return {};
     }
 
@@ -32,7 +32,7 @@ export const getSlots = query({
     const endDate = dates[dates.length - 1]!;
 
     // Fetch blockouts for this therapist in the date range
-    const blockouts = await ctx.db
+    const allBlockouts = await ctx.db
       .query("blockouts")
       .withIndex("by_therapistId_and_date", (q) =>
         q
@@ -41,6 +41,7 @@ export const getSlots = query({
           .lte("date", endDate),
       )
       .take(200);
+    const blockouts = allBlockouts.filter((b) => b.status === "active");
 
     // Fetch therapist's bookings in the date range
     const therapistBookings = await ctx.db
@@ -116,10 +117,11 @@ export const getSlotsForAllTherapists = query({
     }
 
     // Get all schedules for this venue
-    const schedules = await ctx.db
+    const allSchedules = await ctx.db
       .query("schedules")
       .withIndex("by_venueId", (q) => q.eq("venueId", args.venueId))
       .take(100);
+    const schedules = allSchedules.filter((s) => s.status === "active");
 
     if (schedules.length === 0) {
       return {};
@@ -164,7 +166,7 @@ export const getSlotsForAllTherapists = query({
     for (const schedule of schedules) {
       const therapistId = schedule.therapistId;
 
-      const blockouts = await ctx.db
+      const allBlockouts = await ctx.db
         .query("blockouts")
         .withIndex("by_therapistId_and_date", (q) =>
           q
@@ -173,6 +175,7 @@ export const getSlotsForAllTherapists = query({
             .lte("date", endDate),
         )
         .take(200);
+      const blockouts = allBlockouts.filter((b) => b.status === "active");
 
       const therapistBookings = await ctx.db
         .query("bookings")
