@@ -30,7 +30,7 @@ export const upsert = mutation({
       return existing._id;
     }
 
-    return await ctx.db.insert("schedules", args);
+    return await ctx.db.insert("schedules", { ...args, status: "active" });
   },
 });
 

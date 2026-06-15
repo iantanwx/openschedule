@@ -10,7 +10,7 @@ export const create = mutation({
     reason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("blockouts", args);
+    return await ctx.db.insert("blockouts", { ...args, status: "active" });
   },
 });
 

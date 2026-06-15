@@ -9,8 +9,9 @@ export const listByOrg = query({
       .query("venues")
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
-    return venues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd }) => ({
-      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd,
+    const activeVenues = venues.filter((v) => v.status === "active");
+    return activeVenues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status }) => ({
+      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status,
     }));
   },
 });
@@ -22,7 +23,8 @@ export const listByOrgPublic = query({
       .query("venues")
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
-    return venues.map(({ _id, name, slug, timezone }) => ({ _id, name, slug, timezone }));
+    const activeVenues = venues.filter((v) => v.status === "active");
+    return activeVenues.map(({ _id, name, slug, timezone }) => ({ _id, name, slug, timezone }));
   },
 });
 
@@ -35,7 +37,7 @@ export const getBySlug = query({
         q.eq("orgId", args.orgId).eq("slug", args.slug),
       )
       .unique();
-    if (!venue) return null;
+    if (!venue || venue.status !== "active") return null;
     return { _id: venue._id, name: venue.name, slug: venue.slug, timezone: venue.timezone };
   },
 });
@@ -49,6 +51,7 @@ export const get = query({
       _id: venue._id, _creationTime: venue._creationTime, orgId: venue.orgId,
       name: venue.name, slug: venue.slug, timezone: venue.timezone,
       capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
+      status: venue.status,
     };
   },
 });

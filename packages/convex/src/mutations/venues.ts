@@ -10,7 +10,6 @@ export const create = mutation({
     capacity: v.number(),
     dayStart: v.string(),
     dayEnd: v.string(),
-    status: v.optional(v.union(v.literal("active"), v.literal("archived"))),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -22,16 +21,7 @@ export const create = mutation({
     if (existing) {
       throw new Error(`Venue with slug "${args.slug}" already exists in this org`);
     }
-    return await ctx.db.insert("venues", {
-      orgId: args.orgId,
-      name: args.name,
-      slug: args.slug,
-      timezone: args.timezone,
-      capacity: args.capacity,
-      dayStart: args.dayStart,
-      dayEnd: args.dayEnd,
-      status: args.status ?? "active",
-    });
+    return await ctx.db.insert("venues", { ...args, status: "active" });
   },
 });
 
