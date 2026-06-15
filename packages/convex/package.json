@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./api": "./src/_generated/api.ts",
-    "./dataModel": "./src/_generated/dataModel.ts",
+    "./api": {
+      "types": "./src/_generated/api.d.ts",
+      "default": "./src/_generated/api.js"
+    },
+    "./dataModel": "./src/_generated/dataModel.d.ts",
     "./schema": "./src/schema.ts",
     "./types/*": "./src/types/*"
   },
