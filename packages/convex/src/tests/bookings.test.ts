@@ -10,6 +10,7 @@ describe("booking mutations", () => {
     const t = convexTest(schema, modules);
 
     const orgId = await t.mutation(api.mutations.organizations.create, {
+      authId: "test-org-auth",
       name: "Test Org",
       slug: "test-org",
     });
@@ -26,6 +27,7 @@ describe("booking mutations", () => {
     // Insert a user directly (better-auth would do this in production)
     const therapistId = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
         role: "therapist",
@@ -63,6 +65,7 @@ describe("booking mutations", () => {
     const t = convexTest(schema, modules);
 
     const orgId = await t.mutation(api.mutations.organizations.create, {
+      authId: "test-org-auth",
       name: "Test Org",
       slug: "test-org",
     });
@@ -78,6 +81,7 @@ describe("booking mutations", () => {
 
     const therapistId = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
         role: "therapist",
@@ -118,6 +122,7 @@ describe("booking mutations", () => {
     const t = convexTest(schema, modules);
 
     const orgId = await t.mutation(api.mutations.organizations.create, {
+      authId: "test-org-auth",
       name: "Test Org",
       slug: "test-org",
     });
@@ -133,6 +138,7 @@ describe("booking mutations", () => {
 
     const therapist1Id = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
+        authId: "test-therapist-auth-1",
         email: "t1@test.com",
         name: "Therapist 1",
         role: "therapist",
@@ -141,6 +147,7 @@ describe("booking mutations", () => {
     });
     const therapist2Id = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
+        authId: "test-therapist-auth-2",
         email: "t2@test.com",
         name: "Therapist 2",
         role: "therapist",
@@ -183,6 +190,7 @@ describe("booking mutations", () => {
     const t = convexTest(schema, modules);
 
     const orgId = await t.mutation(api.mutations.organizations.create, {
+      authId: "test-org-auth",
       name: "Test Org",
       slug: "test-org",
     });
@@ -198,6 +206,7 @@ describe("booking mutations", () => {
 
     const therapist1Id = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
+        authId: "test-therapist-auth-1",
         email: "t1@test.com",
         name: "Therapist 1",
         role: "therapist",
@@ -206,6 +215,7 @@ describe("booking mutations", () => {
     });
     const therapist2Id = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
+        authId: "test-therapist-auth-2",
         email: "t2@test.com",
         name: "Therapist 2",
         role: "therapist",
@@ -249,6 +259,7 @@ describe("booking mutations", () => {
     const t = convexTest(schema, modules);
 
     const orgId = await t.mutation(api.mutations.organizations.create, {
+      authId: "test-org-auth",
       name: "Test Org",
       slug: "test-org",
     });
@@ -264,6 +275,7 @@ describe("booking mutations", () => {
 
     const therapistId = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
         role: "therapist",
@@ -297,6 +309,7 @@ describe("booking mutations", () => {
     const t = convexTest(schema, modules);
 
     const orgId = await t.mutation(api.mutations.organizations.create, {
+      authId: "test-org-auth",
       name: "Test Org",
       slug: "test-org",
     });
@@ -312,6 +325,7 @@ describe("booking mutations", () => {
 
     const therapistId = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
         role: "therapist",

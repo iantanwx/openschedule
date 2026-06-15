@@ -3,6 +3,7 @@ import { mutation } from "../_generated/server";
 
 export const create = mutation({
   args: {
+    authId: v.string(),
     name: v.string(),
     slug: v.string(),
   },
@@ -15,6 +16,7 @@ export const create = mutation({
       throw new Error(`Organization with slug "${args.slug}" already exists`);
     }
     return await ctx.db.insert("organizations", {
+      authId: args.authId,
       name: args.name,
       slug: args.slug,
     });
