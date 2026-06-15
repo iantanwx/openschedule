@@ -10,7 +10,8 @@
     },
     "./dataModel": "./src/_generated/dataModel.d.ts",
     "./schema": "./src/schema.ts",
-    "./types/*": "./src/types/*"
+    "./types/*": "./src/types/*",
+    "./lib/auth": "./src/lib/auth.ts"
   },
   "scripts": {
     "dev": "convex dev",
