@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google"
+import { Toaster } from "sonner"
 
 import "@openschedule/ui/globals.css"
 import "./calendar.css"
@@ -33,6 +34,7 @@ export default function RootLayout({
         <ConvexClientProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </ConvexClientProvider>
+        <Toaster position="top-center" />
       </body>
     </html>
   )

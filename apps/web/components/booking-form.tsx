@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useMutation, useQuery } from "convex/react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import type { FunctionReference } from "convex/server"
 import { api } from "@openschedule/convex/api"
 import { Button } from "@openschedule/ui/components/button"
@@ -135,6 +136,11 @@ export function BookingForm({
       router.push(`/${orgSlug}/${venueSlug}/bookings/${bookingId}`)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong"
+      if (message.includes("conflict") || message.includes("already booked") || message.includes("overlaps")) {
+        toast.error("This time slot is no longer available")
+        router.push(`/${orgSlug}/${venueSlug}/book/${therapistId}`)
+        return
+      }
       setSubmitError(message)
       setIsSubmitting(false)
     }
