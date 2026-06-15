@@ -9,22 +9,27 @@ describe("booking mutations", () => {
   test("creates a pending booking", async () => {
     const t = convexTest(schema, modules);
 
-    const orgId = await t.mutation(api.mutations.organizations.create, {
-      authId: "test-org-auth",
-      name: "Test Org",
-      slug: "test-org",
+    // Insert org and venue directly (venues.create is now auth-guarded)
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
     });
-    const venueId = await t.mutation(api.mutations.venues.create, {
-      orgId,
-      name: "Test Venue",
-      slug: "test-venue",
-      timezone: "America/New_York",
-      capacity: 3,
-      dayStart: "09:00",
-      dayEnd: "17:00",
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
     });
 
-    // Insert a user directly (better-auth would do this in production)
     const therapistId = await t.run(async (ctx) => {
       return await ctx.db.insert("users", {
         authId: "test-therapist-auth",
@@ -64,19 +69,24 @@ describe("booking mutations", () => {
   test("prevents double-booking a therapist", async () => {
     const t = convexTest(schema, modules);
 
-    const orgId = await t.mutation(api.mutations.organizations.create, {
-      authId: "test-org-auth",
-      name: "Test Org",
-      slug: "test-org",
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
     });
-    const venueId = await t.mutation(api.mutations.venues.create, {
-      orgId,
-      name: "Test Venue",
-      slug: "test-venue",
-      timezone: "America/New_York",
-      capacity: 3,
-      dayStart: "09:00",
-      dayEnd: "17:00",
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
     });
 
     const therapistId = await t.run(async (ctx) => {
@@ -121,19 +131,24 @@ describe("booking mutations", () => {
   test("prevents booking when venue at capacity", async () => {
     const t = convexTest(schema, modules);
 
-    const orgId = await t.mutation(api.mutations.organizations.create, {
-      authId: "test-org-auth",
-      name: "Test Org",
-      slug: "test-org",
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
     });
-    const venueId = await t.mutation(api.mutations.venues.create, {
-      orgId,
-      name: "Test Venue",
-      slug: "test-venue",
-      timezone: "America/New_York",
-      capacity: 1, // Only 1 bed
-      dayStart: "09:00",
-      dayEnd: "17:00",
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 1,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
     });
 
     const therapist1Id = await t.run(async (ctx) => {
@@ -186,22 +201,38 @@ describe("booking mutations", () => {
     ).rejects.toThrow("Venue is at capacity for this time slot");
   });
 
-  test("allows over-capacity booking with flag", async () => {
+  test("allows over-capacity booking with owner auth", async () => {
     const t = convexTest(schema, modules);
 
-    const orgId = await t.mutation(api.mutations.organizations.create, {
-      authId: "test-org-auth",
-      name: "Test Org",
-      slug: "test-org",
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
     });
-    const venueId = await t.mutation(api.mutations.venues.create, {
-      orgId,
-      name: "Test Venue",
-      slug: "test-venue",
-      timezone: "America/New_York",
-      capacity: 1,
-      dayStart: "09:00",
-      dayEnd: "17:00",
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 1,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+
+    // Create an owner user for auth
+    await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-owner-auth",
+        email: "owner@test.com",
+        name: "Owner",
+        role: "owner",
+        orgId,
+      });
     });
 
     const therapist1Id = await t.run(async (ctx) => {
@@ -239,8 +270,14 @@ describe("booking mutations", () => {
       createdBy: "customer",
     });
 
-    // Owner forces over-capacity
-    const bookingId = await t.mutation(api.mutations.bookings.create, {
+    // Owner forces over-capacity (requires owner identity)
+    const asOwner = t.withIdentity({
+      subject: "test-owner-auth",
+      issuer: "https://test.com",
+      tokenIdentifier: "https://test.com|test-owner-auth",
+    });
+
+    const bookingId = await asOwner.mutation(api.mutations.bookings.create, {
       venueId,
       therapistId: therapist2Id,
       customerId,
@@ -255,22 +292,27 @@ describe("booking mutations", () => {
     expect(booking?.overCapacity).toBe(true);
   });
 
-  test("confirms a pending booking", async () => {
+  test("confirms a pending booking (requires auth)", async () => {
     const t = convexTest(schema, modules);
 
-    const orgId = await t.mutation(api.mutations.organizations.create, {
-      authId: "test-org-auth",
-      name: "Test Org",
-      slug: "test-org",
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
     });
-    const venueId = await t.mutation(api.mutations.venues.create, {
-      orgId,
-      name: "Test Venue",
-      slug: "test-venue",
-      timezone: "America/New_York",
-      capacity: 3,
-      dayStart: "09:00",
-      dayEnd: "17:00",
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
     });
 
     const therapistId = await t.run(async (ctx) => {
@@ -299,7 +341,14 @@ describe("booking mutations", () => {
       createdBy: "customer",
     });
 
-    await t.mutation(api.mutations.bookings.confirm, { id: bookingId });
+    // Confirm requires authenticated therapist/owner
+    const asTherapist = t.withIdentity({
+      subject: "test-therapist-auth",
+      issuer: "https://test.com",
+      tokenIdentifier: "https://test.com|test-therapist-auth",
+    });
+
+    await asTherapist.mutation(api.mutations.bookings.confirm, { id: bookingId });
 
     const booking = await t.query(api.queries.bookings.get, { id: bookingId });
     expect(booking?.status).toBe("confirmed");
@@ -308,19 +357,24 @@ describe("booking mutations", () => {
   test("cancels a booking", async () => {
     const t = convexTest(schema, modules);
 
-    const orgId = await t.mutation(api.mutations.organizations.create, {
-      authId: "test-org-auth",
-      name: "Test Org",
-      slug: "test-org",
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
     });
-    const venueId = await t.mutation(api.mutations.venues.create, {
-      orgId,
-      name: "Test Venue",
-      slug: "test-venue",
-      timezone: "America/New_York",
-      capacity: 3,
-      dayStart: "09:00",
-      dayEnd: "17:00",
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
     });
 
     const therapistId = await t.run(async (ctx) => {
@@ -349,6 +403,7 @@ describe("booking mutations", () => {
       createdBy: "customer",
     });
 
+    // Cancel is still public (customers can cancel)
     await t.mutation(api.mutations.bookings.cancel, { id: bookingId });
 
     const booking = await t.query(api.queries.bookings.get, { id: bookingId });
