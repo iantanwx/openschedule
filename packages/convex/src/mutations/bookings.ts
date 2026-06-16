@@ -134,3 +134,82 @@ export const cancel = mutation({
     await ctx.db.patch(args.id, { status: "cancelled" });
   },
 });
+
+export const reschedule = mutation({
+  args: {
+    id: v.id("bookings"),
+    newDate: v.string(),
+    newStartTime: v.string(),
+    newEndTime: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    assertRole(user, ["owner", "therapist"]);
+
+    const booking = await ctx.db.get(args.id);
+    if (!booking) {
+      throw new Error("Booking not found");
+    }
+
+    // Verify org access via venue
+    const venue = await ctx.db.get(booking.venueId);
+    if (!venue) {
+      throw new Error("Venue not found");
+    }
+    assertOrgAccess(user, venue.orgId);
+
+    // Therapists can only reschedule their own bookings
+    if (user.role === "therapist" && user._id.toString() !== booking.therapistId.toString()) {
+      throw new Error("Therapists can only reschedule their own bookings");
+    }
+
+    if (booking.status === "cancelled") {
+      throw new Error("Cannot reschedule a cancelled booking");
+    }
+
+    // Check therapist isn't double-booked at new time (exclude current booking)
+    const therapistBookings = await ctx.db
+      .query("bookings")
+      .withIndex("by_therapistId_and_date", (q) =>
+        q.eq("therapistId", booking.therapistId).eq("date", args.newDate),
+      )
+      .take(100);
+
+    const conflictingBooking = therapistBookings.find(
+      (b) =>
+        b._id.toString() !== args.id.toString() &&
+        b.status !== "cancelled" &&
+        timeRangesOverlap(b.startTime, b.endTime, args.newStartTime, args.newEndTime),
+    );
+    if (conflictingBooking) {
+      throw new Error("Therapist already has a booking at this time");
+    }
+
+    // Check venue capacity (unless original was over-capacity)
+    if (!booking.overCapacity) {
+      const venueBookings = await ctx.db
+        .query("bookings")
+        .withIndex("by_venueId_and_date", (q) =>
+          q.eq("venueId", booking.venueId).eq("date", args.newDate),
+        )
+        .take(200);
+
+      const overlappingCount = venueBookings.filter(
+        (b) =>
+          b._id.toString() !== args.id.toString() &&
+          b.status !== "cancelled" &&
+          timeRangesOverlap(b.startTime, b.endTime, args.newStartTime, args.newEndTime),
+      ).length;
+
+      if (overlappingCount >= venue.capacity) {
+        throw new Error("Venue is at capacity for this time slot");
+      }
+    }
+
+    await ctx.db.patch(args.id, {
+      date: args.newDate,
+      startTime: args.newStartTime,
+      endTime: args.newEndTime,
+    });
+  },
+});

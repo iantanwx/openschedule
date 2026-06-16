@@ -409,4 +409,219 @@ describe("booking mutations", () => {
     const booking = await t.query(api.queries.bookings.get, { id: bookingId });
     expect(booking?.status).toBe("cancelled");
   });
+
+  test("reschedules a booking to a new time slot", async () => {
+    const t = convexTest(schema, modules);
+
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
+    });
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+
+    const therapistId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
+        email: "therapist@test.com",
+        name: "Jane",
+        role: "therapist",
+        orgId,
+      });
+    });
+
+    const customerId = await t.mutation(api.mutations.customers.getOrCreate, {
+      orgId,
+      email: "customer@test.com",
+      name: "John",
+    });
+
+    const bookingId = await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-06-16",
+      startTime: "09:00",
+      endTime: "10:00",
+      createdBy: "customer",
+    });
+
+    // Reschedule requires owner/therapist auth
+    const asTherapist = t.withIdentity({
+      subject: "test-therapist-auth",
+      issuer: "https://test.com",
+      tokenIdentifier: "https://test.com|test-therapist-auth",
+    });
+
+    await asTherapist.mutation(api.mutations.bookings.reschedule, {
+      id: bookingId,
+      newDate: "2025-06-17",
+      newStartTime: "10:00",
+      newEndTime: "11:00",
+    });
+
+    const booking = await t.query(api.queries.bookings.get, { id: bookingId });
+    expect(booking?.date).toBe("2025-06-17");
+    expect(booking?.startTime).toBe("10:00");
+    expect(booking?.endTime).toBe("11:00");
+    expect(booking?.status).toBe("pending");
+  });
+
+  test("prevents rescheduling to a conflicting time slot", async () => {
+    const t = convexTest(schema, modules);
+
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
+    });
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+
+    const therapistId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
+        email: "therapist@test.com",
+        name: "Jane",
+        role: "therapist",
+        orgId,
+      });
+    });
+
+    const customerId = await t.mutation(api.mutations.customers.getOrCreate, {
+      orgId,
+      email: "customer@test.com",
+      name: "John",
+    });
+
+    // Booking A: 09:00-10:00
+    const bookingAId = await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-06-16",
+      startTime: "09:00",
+      endTime: "10:00",
+      createdBy: "customer",
+    });
+
+    // Booking B: 11:00-12:00
+    await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-06-16",
+      startTime: "11:00",
+      endTime: "12:00",
+      createdBy: "customer",
+    });
+
+    // Try to reschedule A to overlap B
+    const asTherapist = t.withIdentity({
+      subject: "test-therapist-auth",
+      issuer: "https://test.com",
+      tokenIdentifier: "https://test.com|test-therapist-auth",
+    });
+
+    await expect(
+      asTherapist.mutation(api.mutations.bookings.reschedule, {
+        id: bookingAId,
+        newDate: "2025-06-16",
+        newStartTime: "11:00",
+        newEndTime: "12:00",
+      }),
+    ).rejects.toThrow("Therapist already has a booking at this time");
+  });
+
+  test("prevents rescheduling a cancelled booking", async () => {
+    const t = convexTest(schema, modules);
+
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
+    });
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+
+    const therapistId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
+        email: "therapist@test.com",
+        name: "Jane",
+        role: "therapist",
+        orgId,
+      });
+    });
+
+    const customerId = await t.mutation(api.mutations.customers.getOrCreate, {
+      orgId,
+      email: "customer@test.com",
+      name: "John",
+    });
+
+    const bookingId = await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-06-16",
+      startTime: "09:00",
+      endTime: "10:00",
+      createdBy: "customer",
+    });
+
+    await t.mutation(api.mutations.bookings.cancel, { id: bookingId });
+
+    const asTherapist = t.withIdentity({
+      subject: "test-therapist-auth",
+      issuer: "https://test.com",
+      tokenIdentifier: "https://test.com|test-therapist-auth",
+    });
+
+    await expect(
+      asTherapist.mutation(api.mutations.bookings.reschedule, {
+        id: bookingId,
+        newDate: "2025-06-17",
+        newStartTime: "10:00",
+        newEndTime: "11:00",
+      }),
+    ).rejects.toThrow("Cannot reschedule a cancelled booking");
+  });
 });

@@ -28,8 +28,8 @@ export default function RootPage() {
     resolvingRef.current = true;
     authClient.organization.list().then((result: { data?: Array<{ id: string; slug: string }> }) => {
       const orgs = result.data;
-      if (orgs && orgs.length > 0) {
-        const firstOrg = orgs[0];
+      const firstOrg = orgs?.[0];
+      if (firstOrg) {
         // Set first org as active, then redirect
         authClient.organization.setActive({ organizationId: firstOrg.id }).then(() => {
           router.replace(`/${firstOrg.slug}`);

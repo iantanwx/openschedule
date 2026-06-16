@@ -1,0 +1,36 @@
+"use client";
+
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@openschedule/ui/components/button";
+import { NewBookingSheet } from "./new-booking-sheet";
+
+interface FabProps {
+  orgSlug: string;
+  venueId: string;
+}
+
+export function Fab({ orgSlug, venueId }: FabProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        size="icon"
+        className="fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full shadow-lg"
+        onClick={() => setOpen(true)}
+        aria-label="New booking"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
+
+      {open && (
+        <NewBookingSheet
+          orgSlug={orgSlug}
+          venueId={venueId}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
+  );
+}
