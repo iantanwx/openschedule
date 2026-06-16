@@ -1,0 +1,106 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { useQuery } from "convex/react";
+import { format, addDays } from "date-fns";
+import { convexApi } from "@/lib/convex-api";
+import { FilterBar } from "./filter-bar";
+import { BookingCard } from "./booking-card";
+import { BookingDetailModal } from "./booking-detail-modal";
+import { Fab } from "./fab";
+
+interface BookingsPageProps {
+  orgSlug: string;
+}
+
+type StatusFilter = "all" | "pending" | "confirmed" | "cancelled";
+
+export function BookingsPage({ orgSlug }: BookingsPageProps) {
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [therapistFilter, setTherapistFilter] = useState<string | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+
+  const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
+  const venues = useQuery(
+    convexApi.queries.venues.listByOrg,
+    org ? { orgId: org._id } : "skip",
+  );
+  const venue = venues?.[0] ?? null;
+
+  const therapists = useQuery(
+    convexApi.queries.users.listByVenue,
+    venue ? { venueId: venue._id } : "skip",
+  );
+
+  // Default range: today + 7 days
+  const today = format(new Date(), "yyyy-MM-dd");
+  const endDate = format(addDays(new Date(), 7), "yyyy-MM-dd");
+
+  const bookings = useQuery(
+    convexApi.queries.bookings.listByVenueDateRange,
+    venue ? { venueId: venue._id, startDate: today, endDate } : "skip",
+  );
+
+  // Client-side filtering
+  const filteredBookings = useMemo(() => {
+    if (!bookings) return [];
+    return bookings
+      .filter((b) => {
+        if (statusFilter !== "all" && b.status !== statusFilter) return false;
+        if (therapistFilter && b.therapistId !== therapistFilter) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        // Sort by date descending, then startTime descending
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return b.startTime.localeCompare(a.startTime);
+      });
+  }, [bookings, statusFilter, therapistFilter]);
+
+  if (!org || !venue) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      <FilterBar
+        status={statusFilter}
+        onStatusChange={setStatusFilter}
+        therapistId={therapistFilter}
+        onTherapistChange={setTherapistFilter}
+        therapists={therapists ?? []}
+        showTherapistFilter={true}
+      />
+
+      <div className="flex-1 space-y-2 overflow-y-auto px-4 pb-4">
+        {filteredBookings.length === 0 ? (
+          <p className="pt-8 text-center text-sm text-muted-foreground">
+            No bookings match your filters.
+          </p>
+        ) : (
+          filteredBookings.map((booking) => (
+            <BookingCard
+              key={booking._id}
+              booking={booking}
+              onTap={setSelectedBookingId}
+            />
+          ))
+        )}
+      </div>
+
+      <Fab orgSlug={orgSlug} venueId={venue._id} />
+
+      {selectedBookingId && (
+        <BookingDetailModal
+          bookingId={selectedBookingId}
+          venueId={venue._id}
+          onClose={() => setSelectedBookingId(null)}
+        />
+      )}
+    </div>
+  );
+}
