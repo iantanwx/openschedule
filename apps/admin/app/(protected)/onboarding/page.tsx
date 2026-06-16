@@ -80,7 +80,6 @@ export default function OnboardingPage() {
               onChange={(e) => setSlug(e.target.value)}
               required
               placeholder="my-clinic"
-              pattern="[a-z0-9-]+"
             />
             <p className="text-xs text-muted-foreground">
               admin.openschedule.com/{slug || "your-org"}

@@ -38,10 +38,29 @@ export function TodayPage({ orgSlug }: TodayPageProps) {
     setSelectedDate((d) => format(addDays(d, 1), "yyyy-MM-dd"));
   }, []);
 
-  if (!org || !venue) {
+  if (org === undefined || venues === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!org) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Organization not found.</p>
+      </div>
+    );
+  }
+
+  if (!venue) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center space-y-2">
+          <p className="text-muted-foreground">No venue configured yet.</p>
+          <p className="text-muted-foreground text-sm">Go to Settings to create your first venue.</p>
+        </div>
       </div>
     );
   }

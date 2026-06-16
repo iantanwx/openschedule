@@ -37,6 +37,133 @@ const TIMEZONES = [
   "Pacific/Auckland",
 ];
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function CreateVenueForm({ orgId }: { orgId: string }) {
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [timezone, setTimezone] = useState("America/New_York");
+  const [capacity, setCapacity] = useState(1);
+  const [dayStart, setDayStart] = useState("09:00");
+  const [dayEnd, setDayEnd] = useState("17:00");
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const createVenue = useMutation(convexApi.mutations.venues.create);
+
+  function handleNameChange(value: string) {
+    setName(value);
+    setSlug(slugify(value));
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setIsCreating(true);
+    try {
+      await createVenue({
+        orgId: orgId as any,
+        name,
+        slug,
+        timezone,
+        capacity,
+        dayStart,
+        dayEnd,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create venue");
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Create Your First Venue</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div className="space-y-1">
+            <Label htmlFor="new-venue-name">Venue Name</Label>
+            <Input
+              id="new-venue-name"
+              value={name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder="Main Location"
+              required
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="new-venue-slug">Slug</Label>
+            <Input
+              id="new-venue-slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="main-location"
+              required
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="new-venue-tz">Timezone</Label>
+            <Select value={timezone} onValueChange={setTimezone}>
+              <SelectTrigger id="new-venue-tz">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TIMEZONES.map((tz) => (
+                  <SelectItem key={tz} value={tz}>
+                    {tz}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="new-venue-capacity">Capacity (beds)</Label>
+            <Input
+              id="new-venue-capacity"
+              type="number"
+              min={1}
+              value={capacity}
+              onChange={(e) => setCapacity(Number(e.target.value))}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="new-venue-start">Day Start</Label>
+              <Input
+                id="new-venue-start"
+                type="time"
+                value={dayStart}
+                onChange={(e) => setDayStart(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="new-venue-end">Day End</Label>
+              <Input
+                id="new-venue-end"
+                type="time"
+                value={dayEnd}
+                onChange={(e) => setDayEnd(e.target.value)}
+              />
+            </div>
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button type="submit" disabled={isCreating}>
+            {isCreating ? "Creating..." : "Create Venue"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function SettingsPage({ orgSlug }: SettingsPageProps) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -70,10 +197,52 @@ export function SettingsPage({ orgSlug }: SettingsPageProps) {
     setIsInitialized(true);
   }
 
-  if (!org || !venue) {
+  if (org === undefined || venues === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!org) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Organization not found.</p>
+      </div>
+    );
+  }
+
+  async function handleSignOut() {
+    await signOut();
+    router.push("/login");
+  }
+
+  if (!venue) {
+    return (
+      <div className="space-y-6 p-4">
+        <CreateVenueForm orgId={org._id} />
+        <Separator />
+        <Card>
+          <CardHeader>
+            <CardTitle>Account</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-sm">
+              <p>
+                <span className="text-muted-foreground">Name:</span>{" "}
+                {session?.user?.name ?? "Unknown"}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Email:</span>{" "}
+                {session?.user?.email ?? "Unknown"}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

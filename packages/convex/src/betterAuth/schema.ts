@@ -77,4 +77,10 @@ export default defineSchema({
   })
     .index("by_email", ["email"])
     .index("by_organizationId", ["organizationId"]),
+
+  jwks: defineTable({
+    publicKey: v.string(),
+    privateKey: v.string(),
+    createdAt: v.number(),
+  }),
 });
