@@ -65,6 +65,7 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_organizationId", ["organizationId"])
+    .index("by_organizationId_and_userId", ["organizationId", "userId"])
     .index("by_userId_and_organizationId", ["userId", "organizationId"]),
 
   invitation: defineTable({
