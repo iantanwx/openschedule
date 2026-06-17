@@ -186,6 +186,56 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
       convex({ authConfig }),
       organization({
         allowUserToCreateOrganization: true,
+        async sendInvitationEmail(data) {
+          const apiKey = process.env.RESEND_API_KEY;
+          const from = process.env.FROM_EMAIL ?? "noreply@openschedule.com";
+          const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+          const acceptUrl = `${appUrl}/invite/${data.id}`;
+
+          const subject = `You've been invited to join ${data.organization.name}`;
+          const text = [
+            `Hi,`,
+            ``,
+            `${data.inviter.user.name} has invited you to join ${data.organization.name} on OpenSchedule.`,
+            ``,
+            `Click the link below to accept the invitation:`,
+            acceptUrl,
+            ``,
+            `If you don't have an account yet, you'll be prompted to create one.`,
+          ].join("\n");
+
+          if (!apiKey) {
+            console.log("[EMAIL DEV MODE] Invitation email:");
+            console.log(`  To: ${data.email}`);
+            console.log(`  Subject: ${subject}`);
+            console.log(`  Body: ${text}`);
+            console.log(`  Accept URL: ${acceptUrl}`);
+            return;
+          }
+
+          try {
+            const response = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from,
+                to: [data.email],
+                subject,
+                text,
+              }),
+            });
+
+            if (!response.ok) {
+              const errorBody = await response.text();
+              console.error(`[EMAIL ERROR] Invitation email failed: ${response.status}: ${errorBody}`);
+            }
+          } catch (error) {
+            console.error("[EMAIL ERROR] Failed to send invitation email:", error);
+          }
+        },
       }),
       magicLink({
         sendMagicLink: async ({ email, url }) => {

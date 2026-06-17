@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
+import { internal } from "../_generated/api";
 import { timeRangesOverlap } from "../lib/time";
 import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 
@@ -118,6 +119,10 @@ export const confirm = mutation({
       );
     }
     await ctx.db.patch(args.id, { status: "confirmed" });
+    await ctx.scheduler.runAfter(0, internal.actions.sendBookingNotification.send, {
+      bookingId: args.id,
+      event: "confirmed",
+    });
   },
 });
 
@@ -132,6 +137,10 @@ export const cancel = mutation({
       throw new Error("Booking is already cancelled");
     }
     await ctx.db.patch(args.id, { status: "cancelled" });
+    await ctx.scheduler.runAfter(0, internal.actions.sendBookingNotification.send, {
+      bookingId: args.id,
+      event: "cancelled",
+    });
   },
 });
 
@@ -210,6 +219,10 @@ export const reschedule = mutation({
       date: args.newDate,
       startTime: args.newStartTime,
       endTime: args.newEndTime,
+    });
+    await ctx.scheduler.runAfter(0, internal.actions.sendBookingNotification.send, {
+      bookingId: args.id,
+      event: "rescheduled",
     });
   },
 });
