@@ -120,6 +120,133 @@ After applying this fix, remove:
 - `patches/@convex-dev__better-auth@0.12.4.patch` (no longer needed)
 - The `patchedDependencies` entry in `pnpm-workspace.yaml`
 
+## Full ID Generation Architecture
+
+Three layers can produce an ID. Understanding how they interact explains both the bug and the fix.
+
+### Layer 1: Adapter Factory (`@better-auth/core/dist/db/adapter/factory.mjs`)
+
+The `create()` method has a `forceAllowId` guard:
+
+```js
+create: async ({ data, model, forceAllowId = false }) => {
+  if ("id" in data && typeof data.id !== "undefined" && !forceAllowId) {
+    logger.warn("You are trying to create a record with an id. This is not allowed...");
+    data.id = void 0;  // STRIPS the id
+  }
+  data = await transformInput(data, model, "create", forceAllowId);
+}
+```
+
+- `forceAllowId: false` (default) → factory strips any `id` field with a warning
+- `forceAllowId: true` → factory trusts the caller and keeps `id` intact
+
+`createWithHooks` (the internal adapter's write path) **always** passes `forceAllowId: true`:
+
+```js
+// with-hooks.mjs:25-28
+async function createWithHooks(data, model, customCreateFn) {
+  created = await adapter.create({
+    model,
+    data: actualData,
+    forceAllowId: true   // always trusted from internal adapter
+  });
+}
+```
+
+So anything going through the internal adapter is trusted to include its own ID.
+
+### Layer 2: Factory `defaultValue` for the ID field (`get-id-field.mjs`)
+
+The factory attaches a `defaultValue()` function to the `id` field. During `transformInput`, if `id` is `undefined`, it calls `defaultValue()` to fill it:
+
+```js
+const shouldGenerateId = (() => {
+  if (disableIdGeneration) return false;   // Convex sets this
+  else if (useNumberId && !forceAllowId) return false;
+  else if (useUUIDs) return !supportsUUIDs;
+  else return true;
+})();
+
+// Only attached when shouldGenerateId is true:
+...shouldGenerateId ? { defaultValue() {
+  if (disableIdGeneration) return void 0;
+  const generateId = options.advanced?.database?.generateId;
+  if (typeof generateId === "function") return generateId({ model });
+  if (generateId === "uuid") return crypto.randomUUID();
+  return generateId();  // fallback: random 32-char alphanumeric
+} } : {}
+```
+
+Convex disables this via `disableIdGeneration: true` → `shouldGenerateId = false` → no `defaultValue` attached → `id` stays `undefined` → Convex generates `_id` server-side. This is mechanism #1 from above.
+
+### Layer 3: `context.generateId()` — Plugin-Level
+
+Plugins call this explicitly when they want to pre-generate IDs. Controlled by `options.advanced.database.generateId`:
+
+| Value | Returns |
+|-------|---------|
+| `undefined` (default) | nanoid string |
+| `"uuid"` | `crypto.randomUUID()` |
+| `"serial"` | `false` |
+| `false` | `false` |
+| custom function | calls it |
+
+The org plugin:
+```js
+const invitationId = context.generateId({ model: "invitation" });
+data: { ...invitationId !== false ? { id: invitationId } : {}, ...rest }
+```
+
+When it returns a string, `{ id: "xxx" }` is spread in. When `false`, empty spread. This is mechanism #2.
+
+### Layer 4: The Database (Convex)
+
+When no `_id` is present in the data arriving at the Convex component's `create` mutation, Convex auto-generates one server-side. This is the intended path for the Convex adapter.
+
+### Complete Flow (Normal — No Pre-Generated ID)
+
+```
+Plugin/Route (e.g., sign-up)
+  → internalAdapter.createUser({ email, name, ... })  [no id field]
+    → createWithHooks(data, "user")
+      → adapter.create({ model, data, forceAllowId: true })
+        → transformInput(): disableIdGeneration=true → no defaultValue → id undefined
+        → mapKeysTransformInput: { id: "_id" } → _id also undefined, omitted
+        → adapterInstance.create({ model, data })  [no _id in data]
+          → ctx.runMutation(api.adapter.create, { input: { model, data } })
+            → Convex generates _id server-side
+            → returns doc with _id
+        → mapKeysTransformOutput: { _id: "id" } → renames back for better-auth
+```
+
+### Complete Flow (Bug — Plugin Pre-Generates ID)
+
+```
+Org plugin inviteMember
+  → context.generateId({ model: "invitation" })  → returns "bxTVEz..."
+  → adapter.create({ model: "invitation", data: { id: "bxTVEz...", ... }, forceAllowId: true })
+    → transformInput(): forceAllowId=true → keeps id
+    → mapKeysTransformInput: { id: "_id" } → _id = "bxTVEz..."
+    → adapterInstance.create({ model, data: { _id: "bxTVEz...", ... } })
+      → ctx.runMutation(api.adapter.create, { input: { model, data } })
+        → Convex validator REJECTS: _id not in schema fields
+        → 500 error
+```
+
+### Complete Flow (Fixed — `generateId: false`)
+
+```
+Org plugin inviteMember
+  → context.generateId({ model: "invitation" })  → returns false
+  → { ...false !== false ? { id: false } : {} }  → empty spread, no id field
+  → adapter.create({ model: "invitation", data: { status, email, ... }, forceAllowId: true })
+    → transformInput(): disableIdGeneration=true → no defaultValue → id undefined
+    → mapKeysTransformInput → _id undefined, omitted
+    → adapterInstance.create({ model, data })  [no _id]
+      → Convex generates _id server-side ✓
+```
+
 ## Key Takeaway
 
 The `@convex-dev/better-auth` adapter correctly disables ID generation at the factory level (`disableIdGeneration: true`) but doesn't address the context-level `generateId()` that plugins can call explicitly. Setting `advanced.database.generateId = false` tells the context-level function to return `false`, which plugins are expected to handle (the org plugin does via the `!== false` ternary).
