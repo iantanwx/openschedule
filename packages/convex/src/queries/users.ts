@@ -29,3 +29,26 @@ export const listByVenue = query({
     return users.filter((u) => u !== null);
   },
 });
+
+export const getSelf = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_authId", (q) => q.eq("authId", identity.subject))
+      .unique();
+
+    if (!user) return null;
+
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role ?? null,
+      orgId: user.orgId ?? null,
+    };
+  },
+});

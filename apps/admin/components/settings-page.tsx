@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@openschedule/ui/components/select";
 import { Separator } from "@openschedule/ui/components/separator";
+import { TeamSection } from "./team-section";
+import { OrgSettingsForm } from "./org-settings-form";
 
 interface SettingsPageProps {
   orgSlug: string;
@@ -167,6 +169,7 @@ function CreateVenueForm({ orgId }: { orgId: string }) {
 export function SettingsPage({ orgSlug }: SettingsPageProps) {
   const router = useRouter();
   const { data: session } = useSession();
+  const currentUser = useQuery(convexApi.queries.users.getSelf);
 
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
   const venues = useQuery(
@@ -186,6 +189,8 @@ export function SettingsPage({ orgSlug }: SettingsPageProps) {
   const updateVenue = useMutation(convexApi.mutations.venues.update);
   const archiveVenue = useMutation(convexApi.mutations.venues.archive);
   const unarchiveVenue = useMutation(convexApi.mutations.venues.unarchive);
+
+  const isOwner = currentUser?.role === "owner";
 
   // Initialize form values when venue data arrives
   if (venue && !isInitialized) {
@@ -218,7 +223,7 @@ export function SettingsPage({ orgSlug }: SettingsPageProps) {
     router.push("/login");
   }
 
-  if (!venue) {
+  if (!venue && isOwner) {
     return (
       <div className="space-y-6 p-4">
         <CreateVenueForm orgId={org._id} />
@@ -275,102 +280,117 @@ export function SettingsPage({ orgSlug }: SettingsPageProps) {
     await unarchiveVenue({ id: venue._id });
   }
 
-  async function handleSignOut() {
-    await signOut();
-    router.push("/login");
-  }
-
   return (
     <div className="space-y-6 p-4">
-      {/* Venue settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Venue Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1">
-            <Label htmlFor="venue-name">Name</Label>
-            <Input
-              id="venue-name"
-              value={venueName}
-              onChange={(e) => setVenueName(e.target.value)}
-            />
-          </div>
+      {/* Venue settings — owner only */}
+      {isOwner && venue && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Venue Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1">
+                <Label htmlFor="venue-name">Name</Label>
+                <Input
+                  id="venue-name"
+                  value={venueName}
+                  onChange={(e) => setVenueName(e.target.value)}
+                />
+              </div>
 
-          <div className="space-y-1">
-            <Label>Slug</Label>
-            <Input value={venue.slug} disabled />
-          </div>
+              <div className="space-y-1">
+                <Label>Slug</Label>
+                <Input value={venue.slug} disabled />
+              </div>
 
-          <div className="space-y-1">
-            <Label htmlFor="venue-tz">Timezone</Label>
-            <Select value={timezone} onValueChange={setTimezone}>
-              <SelectTrigger id="venue-tz">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TIMEZONES.map((tz) => (
-                  <SelectItem key={tz} value={tz}>
-                    {tz}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="space-y-1">
+                <Label htmlFor="venue-tz">Timezone</Label>
+                <Select value={timezone} onValueChange={setTimezone}>
+                  <SelectTrigger id="venue-tz">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIMEZONES.map((tz) => (
+                      <SelectItem key={tz} value={tz}>
+                        {tz}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-1">
-            <Label htmlFor="venue-capacity">Capacity</Label>
-            <Input
-              id="venue-capacity"
-              type="number"
-              min={1}
-              value={capacity}
-              onChange={(e) => setCapacity(Number(e.target.value))}
-            />
-          </div>
+              <div className="space-y-1">
+                <Label htmlFor="venue-capacity">Capacity</Label>
+                <Input
+                  id="venue-capacity"
+                  type="number"
+                  min={1}
+                  value={capacity}
+                  onChange={(e) => setCapacity(Number(e.target.value))}
+                />
+              </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="venue-start">Day Start</Label>
-              <Input
-                id="venue-start"
-                type="time"
-                value={dayStart}
-                onChange={(e) => setDayStart(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="venue-end">Day End</Label>
-              <Input
-                id="venue-end"
-                type="time"
-                value={dayEnd}
-                onChange={(e) => setDayEnd(e.target.value)}
-              />
-            </div>
-          </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="venue-start">Day Start</Label>
+                  <Input
+                    id="venue-start"
+                    type="time"
+                    value={dayStart}
+                    onChange={(e) => setDayStart(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="venue-end">Day End</Label>
+                  <Input
+                    id="venue-end"
+                    type="time"
+                    value={dayEnd}
+                    onChange={(e) => setDayEnd(e.target.value)}
+                  />
+                </div>
+              </div>
 
-          <div className="flex items-center gap-2 pt-2">
-            <Button size="sm" disabled={isSaving} onClick={handleSaveVenue}>
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
+              <div className="flex items-center gap-2 pt-2">
+                <Button size="sm" disabled={isSaving} onClick={handleSaveVenue}>
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
 
-            {venue.status === "active" ? (
-              <Button variant="destructive" size="sm" className="ml-auto" onClick={handleArchive}>
-                Archive Venue
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" className="ml-auto" onClick={handleUnarchive}>
-                Unarchive Venue
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                {venue.status === "active" ? (
+                  <Button variant="destructive" size="sm" className="ml-auto" onClick={handleArchive}>
+                    Archive Venue
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" className="ml-auto" onClick={handleUnarchive}>
+                    Unarchive Venue
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-      <Separator />
+          <Separator />
+        </>
+      )}
 
-      {/* Account */}
+      {/* Team section — owner only */}
+      {isOwner && (
+        <>
+          <TeamSection />
+          <Separator />
+        </>
+      )}
+
+      {/* Org Settings — owner only */}
+      {isOwner && org && (
+        <>
+          <OrgSettingsForm orgId={org._id} />
+          <Separator />
+        </>
+      )}
+
+      {/* Account — visible to all roles */}
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>

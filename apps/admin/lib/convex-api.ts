@@ -116,9 +116,38 @@ export const convexApi = api as unknown as {
         availabilityHorizonDays: number;
       }>>;
     };
+    blockouts: {
+      listByTherapist: FunctionReference<"query", "public", { therapistId: string }, Array<{
+        _id: string;
+        _creationTime: number;
+        therapistId: string;
+        date: string;
+        startTime: string;
+        endTime: string;
+        reason?: string;
+        status: "active" | "inactive";
+      }>>;
+      listByTherapistAndDateRange: FunctionReference<"query", "public", { therapistId: string; startDate: string; endDate: string }, Array<{
+        _id: string;
+        _creationTime: number;
+        therapistId: string;
+        date: string;
+        startTime: string;
+        endTime: string;
+        reason?: string;
+        status: "active" | "inactive";
+      }>>;
+    };
     users: {
       getPublic: FunctionReference<"query", "public", { id: string }, { _id: string; name: string } | null>;
       listByVenue: FunctionReference<"query", "public", { venueId: string }, Array<{ _id: string; name: string }>>;
+      getSelf: FunctionReference<"query", "public", Record<string, never>, {
+        _id: string;
+        name: string;
+        email: string;
+        role: "owner" | "therapist" | null;
+        orgId: string | null;
+      } | null>;
     };
     customers: {
       get: FunctionReference<"query", "public", { id: string }, {
@@ -132,6 +161,15 @@ export const convexApi = api as unknown as {
     };
     availability: {
       getSlots: FunctionReference<"query", "public", { venueId: string; therapistId: string }, Record<string, Array<{ startTime: string; endTime: string }>>>;
+    };
+    settings: {
+      getByOrg: FunctionReference<"query", "public", { orgId: string }, {
+        businessName: string;
+        contactEmail: string | null;
+        contactPhone: string | null;
+        logoStorageId: string | null;
+        emailNotificationsEnabled: boolean;
+      } | null>;
     };
   };
   mutations: {
@@ -164,6 +202,15 @@ export const convexApi = api as unknown as {
       }, string>;
     };
     venues: {
+      create: FunctionReference<"mutation", "public", {
+        orgId: string;
+        name: string;
+        slug: string;
+        timezone: string;
+        capacity: number;
+        dayStart: string;
+        dayEnd: string;
+      }, string>;
       update: FunctionReference<"mutation", "public", {
         id: string;
         name?: string;
@@ -187,6 +234,39 @@ export const convexApi = api as unknown as {
         availabilityHorizonDays: number;
       }, string>;
       remove: FunctionReference<"mutation", "public", { id: string }, void>;
+    };
+    blockouts: {
+      create: FunctionReference<"mutation", "public", {
+        therapistId: string;
+        date: string;
+        startTime: string;
+        endTime: string;
+        reason?: string;
+      }, string>;
+      update: FunctionReference<"mutation", "public", {
+        id: string;
+        date?: string;
+        startTime?: string;
+        endTime?: string;
+        reason?: string;
+      }, void>;
+      remove: FunctionReference<"mutation", "public", { id: string }, void>;
+      activate: FunctionReference<"mutation", "public", { id: string }, void>;
+    };
+    settings: {
+      upsert: FunctionReference<"mutation", "public", {
+        orgId: string;
+        data: {
+          businessName: string;
+          contactEmail: string | null;
+          contactPhone: string | null;
+          logoStorageId: string | null;
+          emailNotificationsEnabled: boolean;
+        };
+      }, void>;
+    };
+    generateUploadUrl: {
+      generateUploadUrl: FunctionReference<"mutation", "public", Record<string, never>, string>;
     };
   };
 };
