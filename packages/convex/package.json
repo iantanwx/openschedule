@@ -21,7 +21,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@convex-dev/better-auth": "^0.12.3",
+    "@convex-dev/better-auth": "^0.12.4",
     "better-auth": "^1.6.18",
     "convex": "^1.21.0",
     "date-fns": "^4.1.0",
