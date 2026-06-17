@@ -265,10 +265,8 @@ export const convexApi = api as unknown as {
         };
       }, void>;
     };
-    actions: {
-      generateUploadUrl: {
-        generateUploadUrl: FunctionReference<"mutation", "public", Record<string, never>, string>;
-      };
+    generateUploadUrl: {
+      generateUploadUrl: FunctionReference<"mutation", "public", Record<string, never>, string>;
     };
   };
 };

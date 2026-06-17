@@ -16,7 +16,7 @@ interface OrgSettingsFormProps {
 export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
   const settings = useQuery(convexApi.queries.settings.getByOrg, { orgId });
   const upsertSettings = useMutation(convexApi.mutations.settings.upsert);
-  const generateUploadUrl = useMutation(convexApi.mutations.actions.generateUploadUrl.generateUploadUrl);
+  const generateUploadUrl = useMutation(convexApi.mutations.generateUploadUrl.generateUploadUrl);
 
   const [businessName, setBusinessName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
