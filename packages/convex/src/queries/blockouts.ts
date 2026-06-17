@@ -9,9 +9,11 @@ export const listByTherapist = query({
       .query("blockouts")
       .withIndex("by_therapistId", (q) => q.eq("therapistId", args.therapistId))
       .take(200);
-    return blockouts.map(({ _id, _creationTime, therapistId, date, startTime, endTime, reason }) => ({
-      _id, _creationTime, therapistId, date, startTime, endTime, reason,
-    }));
+    return blockouts
+      .filter((b) => b.status === "active")
+      .map(({ _id, _creationTime, therapistId, date, startTime, endTime, reason, status }) => ({
+        _id, _creationTime, therapistId, date, startTime, endTime, reason, status,
+      }));
   },
 });
 
@@ -31,8 +33,10 @@ export const listByTherapistAndDateRange = query({
           .lte("date", args.endDate),
       )
       .take(200);
-    return blockouts.map(({ _id, _creationTime, therapistId, date, startTime, endTime, reason }) => ({
-      _id, _creationTime, therapistId, date, startTime, endTime, reason,
-    }));
+    return blockouts
+      .filter((b) => b.status === "active")
+      .map(({ _id, _creationTime, therapistId, date, startTime, endTime, reason, status }) => ({
+        _id, _creationTime, therapistId, date, startTime, endTime, reason, status,
+      }));
   },
 });
