@@ -1,8 +1,11 @@
-import { action } from "../_generated/server";
+import { mutation } from "../_generated/server";
+import { getAuthenticatedUser, assertRole } from "../lib/auth";
 
-export const generate = action({
+export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
+    const user = await getAuthenticatedUser(ctx);
+    assertRole(user, ["owner"]);
     return await ctx.storage.generateUploadUrl();
   },
 });
