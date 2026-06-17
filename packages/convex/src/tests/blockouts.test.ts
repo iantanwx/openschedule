@@ -47,8 +47,10 @@ describe("blockout mutations", () => {
     const doc = await t.run(async (ctx) => {
       return await ctx.db.get(blockoutId);
     });
-    expect(doc).not.toBeNull();
-    expect(doc?.status).toBe("inactive");
+    if (!doc || !("status" in doc)) {
+      throw new Error("Expected blockout document with status field");
+    }
+    expect(doc.status).toBe("inactive");
   });
 
   test("activate restores an inactive blockout to active", async () => {
@@ -74,7 +76,10 @@ describe("blockout mutations", () => {
     const doc = await t.run(async (ctx) => {
       return await ctx.db.get(blockoutId);
     });
-    expect(doc?.status).toBe("active");
+    if (!doc || !("status" in doc)) {
+      throw new Error("Expected blockout document with status field");
+    }
+    expect(doc.status).toBe("active");
   });
 
   test("listByTherapist returns only active blockouts", async () => {
