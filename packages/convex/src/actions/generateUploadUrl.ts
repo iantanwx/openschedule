@@ -1,3 +1,5 @@
+"use node";
+
 import { mutation } from "../_generated/server";
 import { getAuthenticatedUser, assertRole } from "../lib/auth";
 
