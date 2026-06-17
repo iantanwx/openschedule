@@ -16,6 +16,7 @@ import {
 interface BookingDetailModalProps {
   bookingId: string;
   venueId: string;
+  readOnly?: boolean;
   onClose: () => void;
 }
 
@@ -25,7 +26,7 @@ const STATUS_BADGE_VARIANT = {
   cancelled: "outline" as const,
 };
 
-export function BookingDetailModal({ bookingId, venueId, onClose }: BookingDetailModalProps) {
+export function BookingDetailModal({ bookingId, venueId, readOnly = false, onClose }: BookingDetailModalProps) {
   const [showReschedule, setShowReschedule] = useState(false);
 
   const booking = useQuery(convexApi.queries.bookings.get, { id: bookingId });
@@ -116,8 +117,8 @@ export function BookingDetailModal({ bookingId, venueId, onClose }: BookingDetai
             {customer?.phone && <p className="text-muted-foreground">{customer.phone}</p>}
           </div>
 
-          {/* Actions */}
-          {booking.status !== "cancelled" && (
+          {/* Actions — hidden in read-only mode */}
+          {!readOnly && booking.status !== "cancelled" && (
             <div className="flex flex-wrap gap-2 pt-2">
               {booking.status === "pending" && (
                 <Button size="sm" onClick={handleConfirm}>

@@ -8,6 +8,7 @@ import { FilterBar } from "./filter-bar";
 import { BookingCard } from "./booking-card";
 import { BookingDetailModal } from "./booking-detail-modal";
 import { Fab } from "./fab";
+import { ViewToggle } from "./view-toggle";
 
 interface BookingsPageProps {
   orgSlug: string;
@@ -19,7 +20,9 @@ export function BookingsPage({ orgSlug }: BookingsPageProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [therapistFilter, setTherapistFilter] = useState<string | null>(null);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [viewScope, setViewScope] = useState<"my" | "all">("my");
 
+  const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
   const venues = useQuery(
     convexApi.queries.venues.listByOrg,
@@ -41,10 +44,22 @@ export function BookingsPage({ orgSlug }: BookingsPageProps) {
     venue ? { venueId: venue._id, startDate: today, endDate } : "skip",
   );
 
+  const isTherapist = currentUser?.role === "therapist";
+  const isOwner = currentUser?.role === "owner";
+  const isReadOnly = isTherapist && viewScope === "all";
+
   // Client-side filtering
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
-    return bookings
+
+    let filtered = bookings;
+
+    // Scope by role
+    if (isTherapist && viewScope === "my" && currentUser) {
+      filtered = filtered.filter((b) => b.therapistId === currentUser._id);
+    }
+
+    return filtered
       .filter((b) => {
         if (statusFilter !== "all" && b.status !== statusFilter) return false;
         if (therapistFilter && b.therapistId !== therapistFilter) return false;
@@ -55,7 +70,7 @@ export function BookingsPage({ orgSlug }: BookingsPageProps) {
         if (a.date !== b.date) return b.date.localeCompare(a.date);
         return b.startTime.localeCompare(a.startTime);
       });
-  }, [bookings, statusFilter, therapistFilter]);
+  }, [bookings, statusFilter, therapistFilter, isTherapist, viewScope, currentUser]);
 
   if (!org || !venue) {
     return (
@@ -67,13 +82,19 @@ export function BookingsPage({ orgSlug }: BookingsPageProps) {
 
   return (
     <div className="flex h-full flex-col">
+      <div className="flex items-center gap-2 px-4 pt-2">
+        {isTherapist && (
+          <ViewToggle value={viewScope} onChange={setViewScope} />
+        )}
+      </div>
+
       <FilterBar
         status={statusFilter}
         onStatusChange={setStatusFilter}
         therapistId={therapistFilter}
         onTherapistChange={setTherapistFilter}
         therapists={therapists ?? []}
-        showTherapistFilter={true}
+        showTherapistFilter={isOwner || (isTherapist && viewScope === "all")}
       />
 
       <div className="flex-1 space-y-2 overflow-y-auto px-4 pb-4">
@@ -92,12 +113,13 @@ export function BookingsPage({ orgSlug }: BookingsPageProps) {
         )}
       </div>
 
-      <Fab orgSlug={orgSlug} venueId={venue._id} />
+      {!isReadOnly && <Fab orgSlug={orgSlug} venueId={venue._id} />}
 
       {selectedBookingId && (
         <BookingDetailModal
           bookingId={selectedBookingId}
           venueId={venue._id}
+          readOnly={isReadOnly}
           onClose={() => setSelectedBookingId(null)}
         />
       )}
