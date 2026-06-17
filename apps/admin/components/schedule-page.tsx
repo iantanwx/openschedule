@@ -5,6 +5,17 @@ import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { ScheduleCard } from "./schedule-card";
 import { ScheduleEditForm } from "./schedule-edit-form";
+import { BlockoutList } from "./blockout-list";
+import { BlockoutForm } from "./blockout-form";
+import { Button } from "@openschedule/ui/components/button";
+import { Separator } from "@openschedule/ui/components/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@openschedule/ui/components/select";
 
 interface SchedulePageProps {
   orgSlug: string;
@@ -12,7 +23,11 @@ interface SchedulePageProps {
 
 export function SchedulePage({ orgSlug }: SchedulePageProps) {
   const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
+  const [showBlockoutForm, setShowBlockoutForm] = useState(false);
+  const [editingBlockoutId, setEditingBlockoutId] = useState<string | null>(null);
+  const [blockoutTherapistFilter, setBlockoutTherapistFilter] = useState<string | null>(null);
 
+  const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
   const venues = useQuery(
     convexApi.queries.venues.listByOrg,
@@ -30,6 +45,9 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
     venue ? { venueId: venue._id } : "skip",
   );
 
+  const isOwner = currentUser?.role === "owner";
+  const isTherapist = currentUser?.role === "therapist";
+
   if (!org || !venue) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -37,6 +55,16 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
       </div>
     );
   }
+
+  // Therapists only see their own schedules
+  const displayedSchedules = isTherapist && currentUser
+    ? (schedules ?? []).filter((s) => s.therapistId === currentUser._id)
+    : schedules ?? [];
+
+  // Determine which therapist's blockouts to show
+  const blockoutTherapistId = isTherapist
+    ? currentUser?._id ?? null
+    : blockoutTherapistFilter ?? (therapists?.[0]?._id ?? null);
 
   const editingSchedule = editingScheduleId
     ? schedules?.find((s) => s._id === editingScheduleId) ?? null
@@ -50,13 +78,13 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
     <div className="space-y-4 p-4">
       <h2 className="text-lg font-semibold">Therapist Schedules</h2>
 
-      {(!schedules || schedules.length === 0) ? (
+      {displayedSchedules.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No schedules configured. Add a schedule to start accepting bookings.
         </p>
       ) : (
         <div className="space-y-3">
-          {schedules.map((schedule) => (
+          {displayedSchedules.map((schedule) => (
             <ScheduleCard
               key={schedule._id}
               schedule={schedule}
@@ -71,7 +99,62 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
           schedule={{ ...editingSchedule, venueId: venue._id }}
           therapistName={editingTherapistName}
           onClose={() => setEditingScheduleId(null)}
-          isOwner={true}
+          isOwner={isOwner}
+        />
+      )}
+
+      <Separator />
+
+      {/* Blockouts section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Blockouts</h2>
+          <Button size="sm" onClick={() => setShowBlockoutForm(true)}>
+            Add Blockout
+          </Button>
+        </div>
+
+        {/* Therapist filter (owner only, when multiple therapists) */}
+        {isOwner && therapists && therapists.length > 1 && (
+          <Select
+            value={blockoutTherapistFilter ?? therapists[0]?._id ?? ""}
+            onValueChange={setBlockoutTherapistFilter}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Select therapist" />
+            </SelectTrigger>
+            <SelectContent>
+              {therapists.map((t) => (
+                <SelectItem key={t._id} value={t._id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {blockoutTherapistId && (
+          <BlockoutList
+            therapistId={blockoutTherapistId}
+            onEdit={(id) => {
+              setEditingBlockoutId(id);
+              setShowBlockoutForm(true);
+            }}
+          />
+        )}
+      </div>
+
+      {/* Blockout form dialog */}
+      {showBlockoutForm && blockoutTherapistId && (
+        <BlockoutForm
+          therapistId={blockoutTherapistId}
+          editingId={editingBlockoutId}
+          therapists={therapists ?? []}
+          isOwner={isOwner}
+          onClose={() => {
+            setShowBlockoutForm(false);
+            setEditingBlockoutId(null);
+          }}
         />
       )}
     </div>
