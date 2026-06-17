@@ -16,6 +16,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This project uses **pnpm**. Always use `pnpm dlx` (not `npx`) when running one-off package binaries (e.g. `pnpm dlx skills add ...`, `pnpm dlx shadcn add ...`).
 
+## Dev Servers
+
+Never start dev servers (`pnpm dev`, `npx convex dev`, `next dev`, etc.). The user manages these processes. If you need access to the running app or Convex backend, ask the user to confirm they're running.
+
 ## Git
 
 Use semantic commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`, `ci:`, `perf:`, `style:`.
