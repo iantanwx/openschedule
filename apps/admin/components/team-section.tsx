@@ -56,11 +56,15 @@ export function TeamSection() {
         authClient.organization.listInvitations(),
       ]);
       if (membersRes.data) {
-        setMembers(membersRes.data as Member[]);
+        const raw = membersRes.data;
+        const memberList = Array.isArray(raw) ? raw : (raw as any).members ?? [];
+        setMembers(memberList as Member[]);
       }
       if (invitationsRes.data) {
+        const raw = invitationsRes.data;
+        const invList = Array.isArray(raw) ? raw : (raw as any).invitations ?? [];
         setInvitations(
-          (invitationsRes.data as Invitation[]).filter((i) => i.status === "pending"),
+          (invList as Invitation[]).filter((i) => i.status === "pending"),
         );
       }
     } catch (err) {
