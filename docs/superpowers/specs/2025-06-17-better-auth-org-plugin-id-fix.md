@@ -125,3 +125,7 @@ After applying this fix, remove:
 The `@convex-dev/better-auth` adapter correctly disables ID generation at the factory level (`disableIdGeneration: true`) but doesn't address the context-level `generateId()` that plugins can call explicitly. Setting `advanced.database.generateId = false` tells the context-level function to return `false`, which plugins are expected to handle (the org plugin does via the `!== false` ternary).
 
 This is likely why the organization plugin isn't on the Convex adapter's supported plugins list — but the fix is trivial.
+
+## References
+
+- Open bug: https://github.com/better-auth/better-auth/issues/10024
