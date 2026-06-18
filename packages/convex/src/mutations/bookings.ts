@@ -146,6 +146,20 @@ export const cancel = mutation({
   },
 });
 
+export const cancelWithToken = mutation({
+  args: { id: v.id("bookings"), cancelToken: v.string() },
+  handler: async (ctx, args) => {
+    const booking = await ctx.db.get(args.id);
+    if (!booking) {
+      throw new Error("Booking not found");
+    }
+    if (!booking.cancelToken || booking.cancelToken !== args.cancelToken) {
+      throw new Error("Invalid or missing cancel token");
+    }
+    await performCancel(ctx, args.id);
+  },
+});
+
 export const reschedule = mutation({
   args: {
     id: v.id("bookings"),

@@ -713,4 +713,251 @@ describe("booking mutations", () => {
       }),
     ).rejects.toThrow("Cannot reschedule a cancelled booking");
   });
+
+  test("cancelWithToken cancels a booking with a valid token", async () => {
+    const t = convexTest(schema, modules);
+
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
+    });
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+    const therapistId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
+        email: "therapist@test.com",
+        name: "Jane",
+        role: "therapist",
+        orgId,
+      });
+    });
+    const customerId = await t.mutation(api.mutations.customers.getOrCreate, {
+      orgId,
+      email: "customer@test.com",
+      name: "John",
+    });
+
+    const bookingId = await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-06-16",
+      startTime: "09:00",
+      endTime: "10:00",
+      createdBy: "customer",
+    });
+
+    // Seed a known token directly so this test is independent of the create-time
+    // token wiring (which lands in Task 5). Task 5 adds its own create-token test.
+    await t.run(async (ctx) => {
+      await ctx.db.patch(bookingId, { cancelToken: "test-cancel-token" });
+    });
+
+    await t.mutation(api.mutations.bookings.cancelWithToken, {
+      id: bookingId,
+      cancelToken: "test-cancel-token",
+    });
+
+    const booking = await t.query(api.queries.bookings.get, { id: bookingId });
+    expect(booking?.status).toBe("cancelled");
+  });
+
+  test("cancelWithToken rejects a wrong token and leaves status unchanged", async () => {
+    const t = convexTest(schema, modules);
+
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
+    });
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+    const therapistId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
+        email: "therapist@test.com",
+        name: "Jane",
+        role: "therapist",
+        orgId,
+      });
+    });
+    const customerId = await t.mutation(api.mutations.customers.getOrCreate, {
+      orgId,
+      email: "customer@test.com",
+      name: "John",
+    });
+
+    const bookingId = await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-06-16",
+      startTime: "09:00",
+      endTime: "10:00",
+      createdBy: "customer",
+    });
+
+    await t.run(async (ctx) => {
+      await ctx.db.patch(bookingId, { cancelToken: "real-token" });
+    });
+
+    await expect(
+      t.mutation(api.mutations.bookings.cancelWithToken, {
+        id: bookingId,
+        cancelToken: "definitely-not-the-token",
+      }),
+    ).rejects.toThrow("Invalid or missing cancel token");
+
+    const booking = await t.query(api.queries.bookings.get, { id: bookingId });
+    expect(booking?.status).toBe("pending");
+  });
+
+  test("cancelWithToken on an already-cancelled booking throws", async () => {
+    const t = convexTest(schema, modules);
+
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
+    });
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+    const therapistId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
+        email: "therapist@test.com",
+        name: "Jane",
+        role: "therapist",
+        orgId,
+      });
+    });
+    const customerId = await t.mutation(api.mutations.customers.getOrCreate, {
+      orgId,
+      email: "customer@test.com",
+      name: "John",
+    });
+
+    const bookingId = await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-06-16",
+      startTime: "09:00",
+      endTime: "10:00",
+      createdBy: "customer",
+    });
+
+    await t.run(async (ctx) => {
+      await ctx.db.patch(bookingId, { cancelToken: "test-cancel-token" });
+    });
+    await t.mutation(api.mutations.bookings.cancelWithToken, {
+      id: bookingId,
+      cancelToken: "test-cancel-token",
+    });
+
+    await expect(
+      t.mutation(api.mutations.bookings.cancelWithToken, {
+        id: bookingId,
+        cancelToken: "test-cancel-token",
+      }),
+    ).rejects.toThrow("Booking is already cancelled");
+  });
+
+  test("cancelWithToken throws when the booking does not exist", async () => {
+    const t = convexTest(schema, modules);
+
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
+    });
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+    const therapistId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
+        email: "therapist@test.com",
+        name: "Jane",
+        role: "therapist",
+        orgId,
+      });
+    });
+    const customerId = await t.mutation(api.mutations.customers.getOrCreate, {
+      orgId,
+      email: "customer@test.com",
+      name: "John",
+    });
+
+    const bookingId = await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-06-16",
+      startTime: "09:00",
+      endTime: "10:00",
+      createdBy: "customer",
+    });
+
+    // Remove it, then try to cancel the now-missing id
+    await t.run(async (ctx) => {
+      await ctx.db.delete(bookingId);
+    });
+
+    await expect(
+      t.mutation(api.mutations.bookings.cancelWithToken, {
+        id: bookingId,
+        cancelToken: "any",
+      }),
+    ).rejects.toThrow("Booking not found");
+  });
 });
