@@ -83,7 +83,8 @@ export const create = mutation({
       }
     }
 
-    return await ctx.db.insert("bookings", {
+    const cancelToken = crypto.randomUUID();
+    const bookingId = await ctx.db.insert("bookings", {
       venueId: args.venueId,
       therapistId: args.therapistId,
       customerId: args.customerId,
@@ -93,7 +94,14 @@ export const create = mutation({
       status: "pending",
       createdBy: args.createdBy,
       overCapacity: args.overCapacity ?? false,
+      cancelToken,
     });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.actions.sendBookingCreatedEmail.send,
+      { bookingId },
+    );
+    return bookingId;
   },
 });
 
