@@ -13,6 +13,7 @@ import { Badge } from "@openschedule/ui/components/badge";
 
 interface TodayPageProps {
   orgSlug: string;
+  venueSlug?: string;
 }
 
 export function TodayPage({ orgSlug }: TodayPageProps) {

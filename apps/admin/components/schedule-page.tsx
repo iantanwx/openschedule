@@ -19,6 +19,7 @@ import {
 
 interface SchedulePageProps {
   orgSlug: string;
+  venueSlug?: string;
 }
 
 export function SchedulePage({ orgSlug }: SchedulePageProps) {

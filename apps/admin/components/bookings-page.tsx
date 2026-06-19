@@ -12,6 +12,7 @@ import { ViewToggle } from "./view-toggle";
 
 interface BookingsPageProps {
   orgSlug: string;
+  venueSlug?: string;
 }
 
 type StatusFilter = "all" | "pending" | "confirmed" | "cancelled";
