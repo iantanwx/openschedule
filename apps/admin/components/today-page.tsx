@@ -33,8 +33,8 @@ export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
     venue ? { venueId: venue._id, date: selectedDate } : "skip",
   );
 
-  const isTherapist = currentUser?.role === "therapist";
-  const isOwner = currentUser?.role === "owner";
+  const isTherapist = currentUser?.roles.includes("therapist") ?? false;
+  const isOwner = currentUser?.roles.includes("owner") ?? false;
 
   // For therapists in "my" view, filter to only their bookings
   const displayedBookings = useMemo(() => {

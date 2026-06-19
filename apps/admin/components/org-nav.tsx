@@ -12,7 +12,7 @@ export function OrgNav() {
   const orgSlug = params.orgSlug;
   const currentUser = useQuery(convexApi.queries.users.getSelf);
 
-  const isOwner = currentUser?.role === "owner";
+  const isOwner = currentUser?.roles.includes("owner") ?? false;
 
   if (!isOwner) return null;
 

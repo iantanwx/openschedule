@@ -44,8 +44,8 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
     venue ? { venueId: venue._id, startDate: today, endDate } : "skip",
   );
 
-  const isTherapist = currentUser?.role === "therapist";
-  const isOwner = currentUser?.role === "owner";
+  const isTherapist = currentUser?.roles.includes("therapist") ?? false;
+  const isOwner = currentUser?.roles.includes("owner") ?? false;
   const isReadOnly = isTherapist && viewScope === "all";
 
   // Client-side filtering

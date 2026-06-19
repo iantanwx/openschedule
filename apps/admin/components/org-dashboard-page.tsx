@@ -62,7 +62,7 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
     return combined.filter((b) => b.venueId === venueFilter);
   }, [bookingsFirst, bookingsSecond, bookingsThird, venueFilter]);
 
-  const isOwner = currentUser?.role === "owner";
+  const isOwner = currentUser?.roles.includes("owner") ?? false;
 
   if (!org || venues === undefined) {
     return (

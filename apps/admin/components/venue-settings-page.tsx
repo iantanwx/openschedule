@@ -54,7 +54,7 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
   const updateVenue = useMutation(convexApi.mutations.venues.update);
   const archiveVenue = useMutation(convexApi.mutations.venues.archive);
 
-  const isOwner = currentUser?.role === "owner";
+  const isOwner = currentUser?.roles.includes("owner") ?? false;
 
   // Initialize form values when venue data arrives
   if (venue && !isInitialized) {
