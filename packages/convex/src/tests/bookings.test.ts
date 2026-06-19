@@ -35,7 +35,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -94,7 +94,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -156,7 +156,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth-1",
         email: "t1@test.com",
         name: "Therapist 1",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -165,7 +165,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth-2",
         email: "t2@test.com",
         name: "Therapist 2",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -230,7 +230,7 @@ describe("booking mutations", () => {
         authId: "test-owner-auth",
         email: "owner@test.com",
         name: "Owner",
-        role: "owner",
+        roles: ["owner"],
         orgId,
       });
     });
@@ -240,7 +240,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth-1",
         email: "t1@test.com",
         name: "Therapist 1",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -249,7 +249,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth-2",
         email: "t2@test.com",
         name: "Therapist 2",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -320,7 +320,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -382,7 +382,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -441,7 +441,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -468,7 +468,7 @@ describe("booking mutations", () => {
         authId: "test-owner-auth",
         email: "owner@test.com",
         name: "Owner",
-        role: "owner",
+        roles: ["owner"],
         orgId,
       });
     });
@@ -512,7 +512,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -582,7 +582,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -660,7 +660,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -686,7 +686,7 @@ describe("booking mutations", () => {
         authId: "test-owner-auth",
         email: "owner@test.com",
         name: "Owner",
-        role: "owner",
+        roles: ["owner"],
         orgId,
       });
     });
@@ -741,7 +741,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -799,7 +799,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -861,7 +861,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -923,7 +923,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
@@ -986,7 +986,7 @@ describe("booking mutations", () => {
         authId: "test-therapist-auth",
         email: "therapist@test.com",
         name: "Jane",
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });
