@@ -42,9 +42,10 @@ function buildTabs(base: string): Tab[] {
 
 export function TabBar() {
   const pathname = usePathname();
-  const params = useParams<{ orgSlug: string }>();
+  const params = useParams<{ orgSlug: string; venueSlug: string }>();
   const orgSlug = params.orgSlug;
-  const base = `/${orgSlug}`;
+  const venueSlug = params.venueSlug;
+  const base = `/${orgSlug}/venues/${venueSlug}`;
   const tabs = buildTabs(base);
 
   return (

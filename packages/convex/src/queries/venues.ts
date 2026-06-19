@@ -42,6 +42,25 @@ export const getBySlug = query({
   },
 });
 
+export const getBySlugFull = query({
+  args: { orgId: v.id("organizations"), slug: v.string() },
+  handler: async (ctx, args): Promise<Venue | null> => {
+    const venue = await ctx.db
+      .query("venues")
+      .withIndex("by_orgId_and_slug", (q) =>
+        q.eq("orgId", args.orgId).eq("slug", args.slug),
+      )
+      .unique();
+    if (!venue || venue.status !== "active") return null;
+    return {
+      _id: venue._id, _creationTime: venue._creationTime, orgId: venue.orgId,
+      name: venue.name, slug: venue.slug, timezone: venue.timezone,
+      capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
+      status: venue.status,
+    };
+  },
+});
+
 export const get = query({
   args: { id: v.id("venues") },
   handler: async (ctx, args): Promise<Venue | null> => {

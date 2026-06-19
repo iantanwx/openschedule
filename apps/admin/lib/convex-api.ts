@@ -48,6 +48,18 @@ export const convexApi = api as unknown as {
         dayEnd: string;
         status: "active" | "archived";
       } | null>;
+      getBySlugFull: FunctionReference<"query", "public", { orgId: string; slug: string }, {
+        _id: string;
+        _creationTime: number;
+        orgId: string;
+        name: string;
+        slug: string;
+        timezone: string;
+        capacity: number;
+        dayStart: string;
+        dayEnd: string;
+        status: "active" | "archived";
+      } | null>;
     };
     bookings: {
       get: FunctionReference<"query", "public", { id: string }, {

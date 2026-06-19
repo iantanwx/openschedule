@@ -19,9 +19,10 @@ import {
 
 interface SchedulePageProps {
   orgSlug: string;
+  venueSlug: string;
 }
 
-export function SchedulePage({ orgSlug }: SchedulePageProps) {
+export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
   const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showBlockoutForm, setShowBlockoutForm] = useState(false);
@@ -30,11 +31,10 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
 
   const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
-  const venues = useQuery(
-    convexApi.queries.venues.listByOrg,
-    org ? { orgId: org._id } : "skip",
+  const venue = useQuery(
+    convexApi.queries.venues.getBySlugFull,
+    org ? { orgId: org._id, slug: venueSlug } : "skip",
   );
-  const venue = venues?.[0] ?? null;
 
   const schedules = useQuery(
     convexApi.queries.schedules.listByVenue,
