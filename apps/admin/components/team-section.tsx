@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { convexApi } from "@/lib/convex-api";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@openschedule/ui/components/button";
 import { Input } from "@openschedule/ui/components/input";
@@ -43,6 +45,10 @@ export function TeamSection() {
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const setActiveMutation = useMutation(convexApi.mutations.users.setActive);
+  const toggleTherapistMutation = useMutation(convexApi.mutations.users.toggleTherapistRole);
+  const currentUser = useQuery(convexApi.queries.users.getSelf);
+  const isOwner = currentUser?.roles?.includes("owner") ?? false;
 
   useEffect(() => {
     loadData();
@@ -128,6 +134,23 @@ export function TeamSection() {
     }
   }
 
+  async function handleToggleActive(userId: string, currentlyActive: boolean) {
+    try {
+      await setActiveMutation({ userId: userId as any, active: !currentlyActive });
+      await loadData();
+    } catch (err) {
+      console.error("Failed to toggle active status:", err);
+    }
+  }
+
+  async function handleToggleOwnTherapist() {
+    try {
+      await toggleTherapistMutation({});
+    } catch (err) {
+      console.error("Failed to toggle therapist role:", err);
+    }
+  }
+
   if (isLoading) {
     return (
       <Card>
@@ -161,7 +184,18 @@ export function TeamSection() {
                     <p className="text-xs text-muted-foreground">{member.user.email}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{member.role === "owner" ? "Owner" : "Therapist"}</Badge>
+                    <Badge variant="secondary">
+                      {member.role === "owner" ? "Owner" : "Therapist"}
+                    </Badge>
+                    {member.role !== "owner" && isOwner && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleActive(member.userId, true)}
+                      >
+                        Deactivate
+                      </Button>
+                    )}
                     {member.role !== "owner" && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -249,6 +283,23 @@ export function TeamSection() {
           </form>
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
+
+        {/* Owner self-toggle */}
+        {isOwner && currentUser && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Your Role</h4>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Also take bookings as a therapist</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleOwnTherapist}
+              >
+                {currentUser.roles?.includes("therapist") ? "Remove Therapist Role" : "Add Therapist Role"}
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
