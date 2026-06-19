@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import { hasRole, Role, type RoleType } from "../lib/roles";
 
 export const getPublic = query({
   args: { id: v.id("users") },
@@ -23,6 +24,8 @@ export const listByVenue = query({
       therapistIds.map(async (id) => {
         const user = await ctx.db.get(id);
         if (!user) return null;
+        // Exclude inactive users
+        if (user.active === false) return null;
         return { _id: user._id, name: user.name };
       }),
     );
@@ -33,12 +36,15 @@ export const listByVenue = query({
 export const listTherapistsByOrg = query({
   args: { orgId: v.id("organizations") },
   handler: async (ctx, args) => {
-    const therapists = await ctx.db
+    const allUsers = await ctx.db
       .query("users")
-      .withIndex("by_orgId_and_role", (q) =>
-        q.eq("orgId", args.orgId).eq("role", "therapist"),
-      )
+      .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
+    // Include any user with "therapist" in their roles who is active
+    const therapists = allUsers.filter((u) => {
+      const roles: RoleType[] = u.roles ?? [];
+      return hasRole(roles, Role.Therapist) && u.active !== false;
+    });
     return therapists.map((t) => ({ _id: t._id, name: t.name }));
   },
 });
@@ -56,11 +62,14 @@ export const getSelf = query({
 
     if (!user) return null;
 
+    const roles: RoleType[] = user.roles ?? [];
+
     return {
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role ?? null,
+      roles,
+      active: user.active ?? true,
       orgId: user.orgId ?? null,
     };
   },

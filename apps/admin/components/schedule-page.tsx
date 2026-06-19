@@ -48,8 +48,8 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
     org ? { orgId: org._id } : "skip",
   );
 
-  const isOwner = currentUser?.role === "owner";
-  const isTherapist = currentUser?.role === "therapist";
+  const isOwner = currentUser?.roles.includes("owner") ?? false;
+  const isTherapist = currentUser?.roles.includes("therapist") ?? false;
 
   if (!org || !venue) {
     return (

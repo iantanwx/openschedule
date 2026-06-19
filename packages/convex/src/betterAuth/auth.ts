@@ -109,9 +109,19 @@ export const authComponent = createClient<DataModel, typeof schema>(
             .unique();
           if (!org) return;
 
+          // Determine the role to assign
+          const newRole = doc.role === "owner" ? "owner" : "therapist";
+
+          // Merge with existing roles (e.g., an owner accepting an invite keeps "owner")
+          const existingRoles: string[] = user.roles ?? [];
+          const mergedRoles = existingRoles.includes(newRole)
+            ? existingRoles
+            : [...existingRoles, newRole];
+
           await ctx.db.patch(user._id, {
             orgId: org._id,
-            role: doc.role === "owner" ? "owner" : "therapist",
+            roles: mergedRoles as ("owner" | "therapist")[],
+            active: user.active ?? true,
           });
         },
         onUpdate: async (ctx, doc) => {
@@ -121,8 +131,14 @@ export const authComponent = createClient<DataModel, typeof schema>(
             .unique();
           if (!user) return;
 
+          const newRole = doc.role === "owner" ? "owner" : "therapist";
+          const existingRoles: string[] = user.roles ?? [];
+          const mergedRoles = existingRoles.includes(newRole)
+            ? existingRoles
+            : [...existingRoles, newRole];
+
           await ctx.db.patch(user._id, {
-            role: doc.role === "owner" ? "owner" : "therapist",
+            roles: mergedRoles as ("owner" | "therapist")[],
           });
         },
         onDelete: async (ctx, doc) => {
@@ -134,7 +150,7 @@ export const authComponent = createClient<DataModel, typeof schema>(
 
           await ctx.db.patch(user._id, {
             orgId: undefined,
-            role: undefined,
+            roles: undefined,
           });
 
           const schedules = await ctx.db

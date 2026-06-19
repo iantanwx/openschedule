@@ -158,7 +158,8 @@ export const convexApi = api as unknown as {
         _id: string;
         name: string;
         email: string;
-        role: "owner" | "therapist" | null;
+        roles: Array<"owner" | "therapist">;
+        active: boolean;
         orgId: string | null;
       } | null>;
     };
@@ -247,6 +248,10 @@ export const convexApi = api as unknown as {
         availabilityHorizonDays: number;
       }, string>;
       remove: FunctionReference<"mutation", "public", { id: string }, void>;
+    };
+    users: {
+      setActive: FunctionReference<"mutation", "public", { userId: string; active: boolean }, null>;
+      toggleTherapistRole: FunctionReference<"mutation", "public", Record<string, never>, null>;
     };
     blockouts: {
       create: FunctionReference<"mutation", "public", {
