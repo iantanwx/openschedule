@@ -16,14 +16,14 @@ function setupOrgWithOwner(t: ReturnType<typeof convexTest>) {
       authId: "test-owner-auth",
       email: "owner@test.com",
       name: "Owner",
-      role: "owner",
+      roles: ["owner"],
       orgId,
     });
     const therapistId = await ctx.db.insert("users", {
       authId: "test-therapist-auth",
       email: "therapist@test.com",
       name: "Jane",
-      role: "therapist",
+      roles: ["therapist"],
       orgId,
     });
     return { orgId, ownerId, therapistId };

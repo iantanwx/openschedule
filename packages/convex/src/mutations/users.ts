@@ -29,14 +29,14 @@ export const setActive = mutation({
 
     // Cannot deactivate the only owner
     if (!args.active) {
-      const targetRoles: RoleType[] = targetUser.roles ?? (targetUser.role ? [targetUser.role as RoleType] : []);
+      const targetRoles: RoleType[] = targetUser.roles ?? [];
       if (hasRole(targetRoles, Role.Owner)) {
         const orgUsers = await ctx.db
           .query("users")
           .withIndex("by_orgId", (q) => q.eq("orgId", user.orgId))
           .take(100);
         const activeOwners = orgUsers.filter((u) => {
-          const r: RoleType[] = u.roles ?? (u.role ? [u.role as RoleType] : []);
+          const r: RoleType[] = u.roles ?? [];
           return hasRole(r, Role.Owner) && u.active !== false;
         });
         if (activeOwners.length <= 1) {

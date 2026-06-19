@@ -32,8 +32,7 @@ export async function getAuthenticatedUser(
     throw new Error("User has no organization membership");
   }
 
-  // Derive roles: prefer new `roles` field, fall back to legacy `role`
-  const roles: RoleType[] = user.roles ?? (user.role ? [user.role] : []);
+  const roles: RoleType[] = user.roles ?? [];
 
   if (roles.length === 0) {
     throw new Error("User has no organization membership");

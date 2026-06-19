@@ -113,7 +113,7 @@ export const authComponent = createClient<DataModel, typeof schema>(
           const newRole = doc.role === "owner" ? "owner" : "therapist";
 
           // Merge with existing roles (e.g., an owner accepting an invite keeps "owner")
-          const existingRoles: string[] = user.roles ?? (user.role ? [user.role] : []);
+          const existingRoles: string[] = user.roles ?? [];
           const mergedRoles = existingRoles.includes(newRole)
             ? existingRoles
             : [...existingRoles, newRole];
@@ -132,7 +132,7 @@ export const authComponent = createClient<DataModel, typeof schema>(
           if (!user) return;
 
           const newRole = doc.role === "owner" ? "owner" : "therapist";
-          const existingRoles: string[] = user.roles ?? (user.role ? [user.role] : []);
+          const existingRoles: string[] = user.roles ?? [];
           const mergedRoles = existingRoles.includes(newRole)
             ? existingRoles
             : [...existingRoles, newRole];
@@ -150,7 +150,7 @@ export const authComponent = createClient<DataModel, typeof schema>(
 
           await ctx.db.patch(user._id, {
             orgId: undefined,
-            role: undefined,
+            roles: undefined,
           });
 
           const schedules = await ctx.db

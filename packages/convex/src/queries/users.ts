@@ -42,7 +42,7 @@ export const listTherapistsByOrg = query({
       .take(100);
     // Include any user with "therapist" in their roles who is active
     const therapists = allUsers.filter((u) => {
-      const roles: RoleType[] = u.roles ?? (u.role ? [u.role as RoleType] : []);
+      const roles: RoleType[] = u.roles ?? [];
       return hasRole(roles, Role.Therapist) && u.active !== false;
     });
     return therapists.map((t) => ({ _id: t._id, name: t.name }));
@@ -62,8 +62,7 @@ export const getSelf = query({
 
     if (!user) return null;
 
-    // Derive roles: prefer new field, fall back to legacy
-    const roles: RoleType[] = user.roles ?? (user.role ? [user.role as RoleType] : []);
+    const roles: RoleType[] = user.roles ?? [];
 
     return {
       _id: user._id,

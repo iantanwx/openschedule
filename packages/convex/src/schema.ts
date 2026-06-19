@@ -109,13 +109,11 @@ export default defineSchema({
     authId: v.string(),
     email: v.string(),
     name: v.string(),
-    role: v.optional(v.union(v.literal("owner"), v.literal("therapist"))),
     roles: v.optional(v.array(v.union(v.literal("owner"), v.literal("therapist")))),
     active: v.optional(v.boolean()),
     orgId: v.optional(v.id("organizations")),
   })
     .index("by_authId", ["authId"])
     .index("by_email", ["email"])
-    .index("by_orgId", ["orgId"])
-    .index("by_orgId_and_role", ["orgId", "role"]),
+    .index("by_orgId", ["orgId"]),
 });

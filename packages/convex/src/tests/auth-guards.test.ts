@@ -27,7 +27,7 @@ describe("auth guards", () => {
         authId: "test-owner-auth",
         email: "owner@test.com",
         name: "Owner",
-        role: "owner",
+        roles: ["owner"],
         orgId,
       });
     });
@@ -44,7 +44,7 @@ describe("auth guards", () => {
         authId: `test-therapist-auth${suffix}`,
         email: `therapist${suffix}@test.com`,
         name: `Therapist${suffix}`,
-        role: "therapist",
+        roles: ["therapist"],
         orgId,
       });
     });

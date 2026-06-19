@@ -16,7 +16,7 @@ function setupOrg(t: ReturnType<typeof convexTest>) {
       authId: "test-therapist-auth",
       email: "therapist@test.com",
       name: "Jane",
-      role: "therapist",
+      roles: ["therapist"],
       orgId,
     });
     return { orgId, therapistId };

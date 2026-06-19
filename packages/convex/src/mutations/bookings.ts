@@ -43,7 +43,7 @@ export const create = mutation({
         .query("users")
         .withIndex("by_authId", (q) => q.eq("authId", identity.subject))
         .unique();
-      if (!authUser || !hasRole(authUser.roles ?? (authUser.role ? [authUser.role] : []), Role.Owner)) {
+      if (!authUser || !hasRole(authUser.roles ?? [], Role.Owner)) {
         throw new Error("Only owners can override venue capacity");
       }
     }
