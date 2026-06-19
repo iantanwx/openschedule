@@ -3,6 +3,7 @@ import { mutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { timeRangesOverlap } from "../lib/time";
 import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
+import { performCancel } from "../lib/bookings";
 
 export const create = mutation({
   args: {
@@ -82,7 +83,8 @@ export const create = mutation({
       }
     }
 
-    return await ctx.db.insert("bookings", {
+    const cancelToken = crypto.randomUUID();
+    const bookingId = await ctx.db.insert("bookings", {
       venueId: args.venueId,
       therapistId: args.therapistId,
       customerId: args.customerId,
@@ -92,7 +94,14 @@ export const create = mutation({
       status: "pending",
       createdBy: args.createdBy,
       overCapacity: args.overCapacity ?? false,
+      cancelToken,
     });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.actions.sendBookingCreatedEmail.send,
+      { bookingId },
+    );
+    return bookingId;
   },
 });
 
@@ -129,18 +138,33 @@ export const confirm = mutation({
 export const cancel = mutation({
   args: { id: v.id("bookings") },
   handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    assertRole(user, ["owner", "therapist"]);
+
     const booking = await ctx.db.get(args.id);
     if (!booking) {
       throw new Error("Booking not found");
     }
-    if (booking.status === "cancelled") {
-      throw new Error("Booking is already cancelled");
+    const venue = await ctx.db.get(booking.venueId);
+    if (venue) {
+      assertOrgAccess(user, venue.orgId);
     }
-    await ctx.db.patch(args.id, { status: "cancelled" });
-    await ctx.scheduler.runAfter(0, internal.actions.sendBookingNotification.send, {
-      bookingId: args.id,
-      event: "cancelled",
-    });
+
+    await performCancel(ctx, args.id);
+  },
+});
+
+export const cancelWithToken = mutation({
+  args: { id: v.id("bookings"), cancelToken: v.string() },
+  handler: async (ctx, args) => {
+    const booking = await ctx.db.get(args.id);
+    if (!booking) {
+      throw new Error("Booking not found");
+    }
+    if (!booking.cancelToken || booking.cancelToken !== args.cancelToken) {
+      throw new Error("Invalid or missing cancel token");
+    }
+    await performCancel(ctx, args.id);
   },
 });
 

@@ -75,6 +75,7 @@ export default defineSchema({
       v.literal("owner"),
     ),
     overCapacity: v.boolean(),
+    cancelToken: v.optional(v.string()),
   })
     .index("by_venueId", ["venueId"])
     .index("by_therapistId", ["therapistId"])

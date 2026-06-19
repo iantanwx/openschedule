@@ -1,10 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { useMutation, useQuery } from "convex/react"
+import { useQuery } from "convex/react"
 import type { FunctionReference } from "convex/server"
 import { api } from "@openschedule/convex/api"
-import { Button } from "@openschedule/ui/components/button"
 import { Badge } from "@openschedule/ui/components/badge"
 import { Card } from "@openschedule/ui/components/card"
 
@@ -14,14 +12,10 @@ const convexApi = api as unknown as {
     bookings: { get: FunctionReference<"query"> }
     users: { getPublic: FunctionReference<"query"> }
   }
-  mutations: {
-    bookings: { cancel: FunctionReference<"mutation"> }
-  }
 }
 
 const bookingsGet = convexApi.queries.bookings.get
 const usersGetPublic = convexApi.queries.users.getPublic
-const bookingsCancel = convexApi.mutations.bookings.cancel
 
 interface BookingConfirmationProps {
   bookingId: string
@@ -29,8 +23,6 @@ interface BookingConfirmationProps {
 
 export function BookingConfirmation({ bookingId }: BookingConfirmationProps) {
   const booking = useQuery(bookingsGet, { id: bookingId })
-  const cancelBooking = useMutation(bookingsCancel)
-  const [isCancelling, setIsCancelling] = useState(false)
 
   if (booking === undefined) {
     return (
@@ -51,15 +43,6 @@ export function BookingConfirmation({ bookingId }: BookingConfirmationProps) {
         </p>
       </div>
     )
-  }
-
-  async function handleCancel() {
-    setIsCancelling(true)
-    try {
-      await cancelBooking({ id: bookingId })
-    } catch {
-      setIsCancelling(false)
-    }
   }
 
   return (
@@ -110,14 +93,9 @@ export function BookingConfirmation({ bookingId }: BookingConfirmationProps) {
       </Card>
 
       {booking.status !== "cancelled" && (
-        <Button
-          variant="destructive"
-          className="w-full"
-          onClick={handleCancel}
-          disabled={isCancelling}
-        >
-          {isCancelling ? "Cancelling..." : "Cancel Booking"}
-        </Button>
+        <p className="text-center text-sm text-muted-foreground">
+          Need to cancel? Use the link in your booking confirmation email.
+        </p>
       )}
     </div>
   )
