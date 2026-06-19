@@ -1,8 +1,9 @@
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import type { Doc } from "../_generated/dataModel";
+import { hasAnyRole, type RoleType } from "./roles";
 
 export type AuthenticatedUser = Doc<"users"> & {
-  role: "owner" | "therapist";
+  roles: RoleType[];
   orgId: NonNullable<Doc<"users">["orgId"]>;
 };
 
@@ -27,11 +28,18 @@ export async function getAuthenticatedUser(
     throw new Error("User record not found");
   }
 
-  if (!user.orgId || !user.role) {
+  if (!user.orgId) {
     throw new Error("User has no organization membership");
   }
 
-  return user as AuthenticatedUser;
+  // Derive roles: prefer new `roles` field, fall back to legacy `role`
+  const roles: RoleType[] = user.roles ?? (user.role ? [user.role] : []);
+
+  if (roles.length === 0) {
+    throw new Error("User has no organization membership");
+  }
+
+  return { ...user, roles, orgId: user.orgId } as AuthenticatedUser;
 }
 
 /**
@@ -39,9 +47,9 @@ export async function getAuthenticatedUser(
  */
 export function assertRole(
   user: AuthenticatedUser,
-  allowedRoles: Array<"owner" | "therapist">,
+  allowedRoles: RoleType[],
 ): void {
-  if (!allowedRoles.includes(user.role)) {
+  if (!hasAnyRole(user.roles, allowedRoles)) {
     throw new Error(
       `Insufficient permissions. Required: ${allowedRoles.join(" or ")}`,
     );
