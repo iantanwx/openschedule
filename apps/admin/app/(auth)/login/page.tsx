@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
+import { safeRedirect } from "@/lib/safe-redirect";
 import { Button } from "@openschedule/ui/components/button";
 import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
@@ -10,6 +11,8 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = safeRedirect(searchParams.get("next"), "/");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +29,7 @@ export default function LoginPage() {
     if (result.error) {
       setError(result.error.message ?? "Login failed");
     } else {
-      router.push("/");
+      router.push(nextPath);
     }
   }
 
@@ -79,7 +82,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="underline">
+          <Link
+            href={nextPath !== "/" ? `/signup?next=${encodeURIComponent(nextPath)}` : "/signup"}
+            className="underline"
+          >
             Sign up
           </Link>
         </p>

@@ -111,7 +111,7 @@ export const authComponent = createClient<DataModel, typeof schema>(
 
           await ctx.db.patch(user._id, {
             orgId: org._id,
-            role: doc.role as "owner" | "therapist",
+            role: doc.role === "owner" ? "owner" : "therapist",
           });
         },
         onUpdate: async (ctx, doc) => {
@@ -122,7 +122,7 @@ export const authComponent = createClient<DataModel, typeof schema>(
           if (!user) return;
 
           await ctx.db.patch(user._id, {
-            role: doc.role as "owner" | "therapist",
+            role: doc.role === "owner" ? "owner" : "therapist",
           });
         },
         onDelete: async (ctx, doc) => {
@@ -191,6 +191,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
       convex({ authConfig }),
       organization({
         allowUserToCreateOrganization: true,
+        requireEmailVerificationOnInvitation: false, // invitation IDs are unguessable Convex _ids (generateId: false)
         async sendInvitationEmail(data) {
           try {
             const apiKey = process.env.RESEND_API_KEY;
