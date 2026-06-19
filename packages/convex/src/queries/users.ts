@@ -30,6 +30,19 @@ export const listByVenue = query({
   },
 });
 
+export const listTherapistsByOrg = query({
+  args: { orgId: v.id("organizations") },
+  handler: async (ctx, args) => {
+    const therapists = await ctx.db
+      .query("users")
+      .withIndex("by_orgId_and_role", (q) =>
+        q.eq("orgId", args.orgId).eq("role", "therapist"),
+      )
+      .take(100);
+    return therapists.map((t) => ({ _id: t._id, name: t.name }));
+  },
+});
+
 export const getSelf = query({
   args: {},
   handler: async (ctx) => {
