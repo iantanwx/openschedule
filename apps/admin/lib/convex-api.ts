@@ -141,6 +141,7 @@ export const convexApi = api as unknown as {
     users: {
       getPublic: FunctionReference<"query", "public", { id: string }, { _id: string; name: string } | null>;
       listByVenue: FunctionReference<"query", "public", { venueId: string }, Array<{ _id: string; name: string }>>;
+      listTherapistsByOrg: FunctionReference<"query", "public", { orgId: string }, Array<{ _id: string; name: string }>>;
       getSelf: FunctionReference<"query", "public", Record<string, never>, {
         _id: string;
         name: string;

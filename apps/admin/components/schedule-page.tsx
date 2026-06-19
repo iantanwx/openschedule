@@ -23,6 +23,7 @@ interface SchedulePageProps {
 
 export function SchedulePage({ orgSlug }: SchedulePageProps) {
   const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [showBlockoutForm, setShowBlockoutForm] = useState(false);
   const [editingBlockoutId, setEditingBlockoutId] = useState<string | null>(null);
   const [blockoutTherapistFilter, setBlockoutTherapistFilter] = useState<string | null>(null);
@@ -40,9 +41,11 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
     venue ? { venueId: venue._id } : "skip",
   );
 
+  // Org-member therapists (NOT schedule-driven) so the create picker and
+  // blockout filter work before any schedule exists.
   const therapists = useQuery(
-    convexApi.queries.users.listByVenue,
-    venue ? { venueId: venue._id } : "skip",
+    convexApi.queries.users.listTherapistsByOrg,
+    org ? { orgId: org._id } : "skip",
   );
 
   const isOwner = currentUser?.role === "owner";
@@ -61,6 +64,12 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
     ? (schedules ?? []).filter((s) => s.therapistId === currentUser._id)
     : schedules ?? [];
 
+  // Owner can add a schedule once the org has therapists; a therapist can add
+  // their own when they don't yet have one at this venue.
+  const canAddSchedule =
+    !!currentUser &&
+    (isOwner ? (therapists?.length ?? 0) > 0 : isTherapist && displayedSchedules.length === 0);
+
   // Determine which therapist's blockouts to show
   const blockoutTherapistId = isTherapist
     ? currentUser?._id ?? null
@@ -76,7 +85,14 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
 
   return (
     <div className="space-y-4 p-4">
-      <h2 className="text-lg font-semibold">Therapist Schedules</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Therapist Schedules</h2>
+        {canAddSchedule && (
+          <Button size="sm" onClick={() => setShowCreateForm(true)}>
+            Add Schedule
+          </Button>
+        )}
+      </div>
 
       {displayedSchedules.length === 0 ? (
         <p className="text-sm text-muted-foreground">
@@ -96,10 +112,24 @@ export function SchedulePage({ orgSlug }: SchedulePageProps) {
 
       {editingSchedule && (
         <ScheduleEditForm
-          schedule={{ ...editingSchedule, venueId: venue._id }}
+          schedule={editingSchedule}
+          venue={{ _id: venue._id, dayStart: venue.dayStart, dayEnd: venue.dayEnd }}
+          therapists={therapists ?? []}
+          currentUserId={currentUser?._id ?? ""}
+          isOwner={isOwner}
           therapistName={editingTherapistName}
           onClose={() => setEditingScheduleId(null)}
+        />
+      )}
+
+      {showCreateForm && currentUser && (
+        <ScheduleEditForm
+          schedule={null}
+          venue={{ _id: venue._id, dayStart: venue.dayStart, dayEnd: venue.dayEnd }}
+          therapists={therapists ?? []}
+          currentUserId={currentUser._id}
           isOwner={isOwner}
+          onClose={() => setShowCreateForm(false)}
         />
       )}
 

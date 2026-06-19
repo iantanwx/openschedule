@@ -20,20 +20,25 @@ import {
   DialogTitle,
 } from "@openschedule/ui/components/dialog";
 
+interface ScheduleFormData {
+  _id: string;
+  therapistId: string;
+  workingDays: number[];
+  startTime: string;
+  endTime: string;
+  slotDuration: number;
+  availabilityHorizonDays: number;
+}
+
 interface ScheduleEditFormProps {
-  schedule: {
-    _id: string;
-    therapistId: string;
-    venueId: string;
-    workingDays: number[];
-    startTime: string;
-    endTime: string;
-    slotDuration: number;
-    availabilityHorizonDays: number;
-  };
-  therapistName: string;
-  onClose: () => void;
+  /** Existing schedule (edit mode) or null (create mode). */
+  schedule: ScheduleFormData | null;
+  venue: { _id: string; dayStart: string; dayEnd: string };
+  therapists: { _id: string; name: string }[];
+  currentUserId: string;
   isOwner: boolean;
+  therapistName?: string;
+  onClose: () => void;
 }
 
 const DAY_OPTIONS = [
@@ -48,12 +53,31 @@ const DAY_OPTIONS = [
 
 const SLOT_DURATIONS = [30, 45, 60, 90, 120];
 
-export function ScheduleEditForm({ schedule, therapistName, onClose, isOwner }: ScheduleEditFormProps) {
-  const [workingDays, setWorkingDays] = useState<number[]>(schedule.workingDays);
-  const [startTime, setStartTime] = useState(schedule.startTime);
-  const [endTime, setEndTime] = useState(schedule.endTime);
-  const [slotDuration, setSlotDuration] = useState(schedule.slotDuration);
-  const [horizon, setHorizon] = useState(schedule.availabilityHorizonDays);
+export function ScheduleEditForm({
+  schedule,
+  venue,
+  therapists,
+  currentUserId,
+  isOwner,
+  therapistName,
+  onClose,
+}: ScheduleEditFormProps) {
+  const isCreate = schedule === null;
+
+  const [therapistId, setTherapistId] = useState<string>(
+    schedule?.therapistId ?? (isOwner ? "" : currentUserId),
+  );
+  const [workingDays, setWorkingDays] = useState<number[]>(
+    schedule?.workingDays ?? [1, 2, 3, 4, 5],
+  );
+  const [startTime, setStartTime] = useState(
+    schedule?.startTime || venue.dayStart || "09:00",
+  );
+  const [endTime, setEndTime] = useState(
+    schedule?.endTime || venue.dayEnd || "17:00",
+  );
+  const [slotDuration, setSlotDuration] = useState(schedule?.slotDuration ?? 60);
+  const [horizon, setHorizon] = useState(schedule?.availabilityHorizonDays ?? 30);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const upsertSchedule = useMutation(convexApi.mutations.schedules.upsert);
@@ -65,12 +89,15 @@ export function ScheduleEditForm({ schedule, therapistName, onClose, isOwner }: 
     );
   }
 
+  const therapistSelected = !isCreate || !isOwner || therapistId !== "";
+
   async function handleSave() {
+    if (!therapistSelected) return;
     setIsSubmitting(true);
     try {
       await upsertSchedule({
-        therapistId: schedule.therapistId,
-        venueId: schedule.venueId,
+        therapistId,
+        venueId: venue._id,
         workingDays,
         startTime,
         endTime,
@@ -84,6 +111,7 @@ export function ScheduleEditForm({ schedule, therapistName, onClose, isOwner }: 
   }
 
   async function handleDelete() {
+    if (isCreate || !schedule) return;
     setIsSubmitting(true);
     try {
       await removeSchedule({ id: schedule._id });
@@ -93,14 +121,37 @@ export function ScheduleEditForm({ schedule, therapistName, onClose, isOwner }: 
     }
   }
 
+  const title = isCreate
+    ? "Add schedule"
+    : `Edit schedule — ${therapistName ?? "Unknown"}`;
+
   return (
     <Dialog open onOpenChange={() => onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Schedule — {therapistName}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Therapist picker (owner, create mode only) */}
+          {isCreate && isOwner && (
+            <div className="space-y-1">
+              <Label>Therapist</Label>
+              <Select value={therapistId} onValueChange={setTherapistId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select therapist" />
+                </SelectTrigger>
+                <SelectContent>
+                  {therapists.map((t) => (
+                    <SelectItem key={t._id} value={t._id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* Working days */}
           <div className="space-y-2">
             <Label>Working Days</Label>
@@ -176,13 +227,17 @@ export function ScheduleEditForm({ schedule, therapistName, onClose, isOwner }: 
 
           {/* Actions */}
           <div className="flex items-center gap-2 pt-2">
-            <Button size="sm" disabled={isSubmitting || workingDays.length === 0} onClick={handleSave}>
-              {isSubmitting ? "Saving..." : "Save"}
+            <Button
+              size="sm"
+              disabled={isSubmitting || workingDays.length === 0 || !therapistSelected}
+              onClick={handleSave}
+            >
+              {isSubmitting ? "Saving..." : isCreate ? "Create" : "Save"}
             </Button>
             <Button variant="outline" size="sm" onClick={onClose}>
               Cancel
             </Button>
-            {isOwner && (
+            {!isCreate && isOwner && (
               <Button
                 variant="destructive"
                 size="sm"
