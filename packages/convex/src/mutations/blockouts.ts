@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { getAuthenticatedUser, assertRole } from "../lib/auth";
+import { hasRole, Role } from "../lib/roles";
 
 export const create = mutation({
   args: {
@@ -14,8 +15,13 @@ export const create = mutation({
     const user = await getAuthenticatedUser(ctx);
     assertRole(user, ["owner", "therapist"]);
 
-    if (user.role === "therapist" && user._id.toString() !== args.therapistId.toString()) {
+    if (!hasRole(user.roles, Role.Owner) && user._id.toString() !== args.therapistId.toString()) {
       throw new Error("Therapists can only manage their own blockouts");
+    }
+
+    // Check the acting user is active
+    if (user.active === false) {
+      throw new Error("Inactive users cannot create blockouts");
     }
 
     // Validate: startTime must be before endTime
@@ -51,7 +57,7 @@ export const update = mutation({
       throw new Error("Blockout not found");
     }
 
-    if (user.role === "therapist" && user._id.toString() !== blockout.therapistId.toString()) {
+    if (!hasRole(user.roles, Role.Owner) && user._id.toString() !== blockout.therapistId.toString()) {
       throw new Error("Therapists can only manage their own blockouts");
     }
 
@@ -85,7 +91,7 @@ export const remove = mutation({
       throw new Error("Blockout not found");
     }
 
-    if (user.role === "therapist" && user._id.toString() !== blockout.therapistId.toString()) {
+    if (!hasRole(user.roles, Role.Owner) && user._id.toString() !== blockout.therapistId.toString()) {
       throw new Error("Therapists can only manage their own blockouts");
     }
 
@@ -104,7 +110,7 @@ export const activate = mutation({
       throw new Error("Blockout not found");
     }
 
-    if (user.role === "therapist" && user._id.toString() !== blockout.therapistId.toString()) {
+    if (!hasRole(user.roles, Role.Owner) && user._id.toString() !== blockout.therapistId.toString()) {
       throw new Error("Therapists can only manage their own blockouts");
     }
 

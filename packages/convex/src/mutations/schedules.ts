@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { getAuthenticatedUser, assertRole } from "../lib/auth";
+import { hasRole, Role } from "../lib/roles";
 
 export const upsert = mutation({
   args: {
@@ -17,8 +18,14 @@ export const upsert = mutation({
     assertRole(user, ["owner", "therapist"]);
 
     // Therapist can only manage their own schedule
-    if (user.role === "therapist" && user._id.toString() !== args.therapistId.toString()) {
+    if (!hasRole(user.roles, Role.Owner) && user._id.toString() !== args.therapistId.toString()) {
       throw new Error("Therapists can only manage their own schedule");
+    }
+
+    // Check target therapist is active
+    const targetUser = await ctx.db.get(args.therapistId);
+    if (!targetUser || targetUser.active === false) {
+      throw new Error("Cannot create schedule for an inactive user");
     }
 
     const existing = await ctx.db
@@ -54,7 +61,7 @@ export const remove = mutation({
       throw new Error("Schedule not found");
     }
 
-    if (user.role === "therapist" && user._id.toString() !== schedule.therapistId.toString()) {
+    if (!hasRole(user.roles, Role.Owner) && user._id.toString() !== schedule.therapistId.toString()) {
       throw new Error("Therapists can only manage their own schedule");
     }
 

@@ -4,6 +4,7 @@ import { internal } from "../_generated/api";
 import { timeRangesOverlap } from "../lib/time";
 import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 import { performCancel } from "../lib/bookings";
+import { hasRole, Role } from "../lib/roles";
 
 export const create = mutation({
   args: {
@@ -26,6 +27,12 @@ export const create = mutation({
       throw new Error("Venue not found");
     }
 
+    // Reject booking if target therapist is inactive
+    const therapist = await ctx.db.get(args.therapistId);
+    if (!therapist || therapist.active === false) {
+      throw new Error("Cannot book with an inactive therapist");
+    }
+
     if (args.overCapacity) {
       // Only owners can override capacity
       const identity = await ctx.auth.getUserIdentity();
@@ -36,7 +43,7 @@ export const create = mutation({
         .query("users")
         .withIndex("by_authId", (q) => q.eq("authId", identity.subject))
         .unique();
-      if (!authUser || authUser.role !== "owner") {
+      if (!authUser || !hasRole(authUser.roles ?? (authUser.role ? [authUser.role] : []), Role.Owner)) {
         throw new Error("Only owners can override venue capacity");
       }
     }
@@ -192,7 +199,7 @@ export const reschedule = mutation({
     assertOrgAccess(user, venue.orgId);
 
     // Therapists can only reschedule their own bookings
-    if (user.role === "therapist" && user._id.toString() !== booking.therapistId.toString()) {
+    if (!hasRole(user.roles, Role.Owner) && user._id.toString() !== booking.therapistId.toString()) {
       throw new Error("Therapists can only reschedule their own bookings");
     }
 
