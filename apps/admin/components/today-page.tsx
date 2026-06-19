@@ -13,21 +13,20 @@ import { Badge } from "@openschedule/ui/components/badge";
 
 interface TodayPageProps {
   orgSlug: string;
-  venueSlug?: string;
+  venueSlug: string;
 }
 
-export function TodayPage({ orgSlug }: TodayPageProps) {
+export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
   const [selectedDate, setSelectedDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [viewScope, setViewScope] = useState<"my" | "all">("my");
 
   const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
-  const venues = useQuery(
-    convexApi.queries.venues.listByOrg,
-    org ? { orgId: org._id } : "skip",
+  const venue = useQuery(
+    convexApi.queries.venues.getBySlugFull,
+    org ? { orgId: org._id, slug: venueSlug } : "skip",
   );
-  const venue = venues?.[0] ?? null;
 
   const bookings = useQuery(
     convexApi.queries.bookings.listByVenueAndDate,
@@ -61,7 +60,7 @@ export function TodayPage({ orgSlug }: TodayPageProps) {
     setSelectedDate((d) => format(addDays(d, 1), "yyyy-MM-dd"));
   }, []);
 
-  if (org === undefined || venues === undefined) {
+  if (org === undefined || venue === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading...</p>
@@ -80,10 +79,7 @@ export function TodayPage({ orgSlug }: TodayPageProps) {
   if (!venue) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-center space-y-2">
-          <p className="text-muted-foreground">No venue configured yet.</p>
-          <p className="text-muted-foreground text-sm">Go to Settings to create your first venue.</p>
-        </div>
+        <p className="text-muted-foreground">Venue not found.</p>
       </div>
     );
   }

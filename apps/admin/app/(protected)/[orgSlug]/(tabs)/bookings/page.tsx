@@ -7,5 +7,5 @@ export default function BookingsRoute({
   params: Promise<{ orgSlug: string }>;
 }) {
   const { orgSlug } = use(params);
-  return <BookingsPage orgSlug={orgSlug} />;
+  return <BookingsPage orgSlug={orgSlug} venueSlug="" />;
 }

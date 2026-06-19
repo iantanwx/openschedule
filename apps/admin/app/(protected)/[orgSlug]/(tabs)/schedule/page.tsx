@@ -7,5 +7,5 @@ export default function ScheduleRoute({
   params: Promise<{ orgSlug: string }>;
 }) {
   const { orgSlug } = use(params);
-  return <SchedulePage orgSlug={orgSlug} />;
+  return <SchedulePage orgSlug={orgSlug} venueSlug="" />;
 }

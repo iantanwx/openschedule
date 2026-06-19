@@ -12,12 +12,12 @@ import { ViewToggle } from "./view-toggle";
 
 interface BookingsPageProps {
   orgSlug: string;
-  venueSlug?: string;
+  venueSlug: string;
 }
 
 type StatusFilter = "all" | "pending" | "confirmed" | "cancelled";
 
-export function BookingsPage({ orgSlug }: BookingsPageProps) {
+export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [therapistFilter, setTherapistFilter] = useState<string | null>(null);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
@@ -25,11 +25,10 @@ export function BookingsPage({ orgSlug }: BookingsPageProps) {
 
   const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
-  const venues = useQuery(
-    convexApi.queries.venues.listByOrg,
-    org ? { orgId: org._id } : "skip",
+  const venue = useQuery(
+    convexApi.queries.venues.getBySlugFull,
+    org ? { orgId: org._id, slug: venueSlug } : "skip",
   );
-  const venue = venues?.[0] ?? null;
 
   const therapists = useQuery(
     convexApi.queries.users.listByVenue,

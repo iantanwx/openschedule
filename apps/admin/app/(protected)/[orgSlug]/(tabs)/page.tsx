@@ -7,5 +7,5 @@ export default function TodayRoute({
   params: Promise<{ orgSlug: string }>;
 }) {
   const { orgSlug } = use(params);
-  return <TodayPage orgSlug={orgSlug} />;
+  return <TodayPage orgSlug={orgSlug} venueSlug="" />;
 }
