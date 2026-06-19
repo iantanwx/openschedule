@@ -1,7 +1,7 @@
 import { TopBar } from "@/components/top-bar";
-import { TabBar } from "@/components/tab-bar";
+import { OrgNav } from "@/components/org-nav";
 
-export default function TabsLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -9,8 +9,8 @@ export default function TabsLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <TopBar />
-      <main className="flex-1 pb-16">{children}</main>
-      <TabBar />
+      <OrgNav />
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
