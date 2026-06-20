@@ -25,7 +25,10 @@ export function TopBar() {
   const orgSlug = params.orgSlug;
   const venueSlug = params.venueSlug;
 
-  const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
+  const org = useQuery(
+    convexApi.queries.organizations.getBySlug,
+    orgSlug ? { slug: orgSlug } : "skip",
+  );
   const venue = useQuery(
     convexApi.queries.venues.getBySlugFull,
     org && venueSlug ? { orgId: org._id, slug: venueSlug } : "skip",
@@ -48,9 +51,13 @@ export function TopBar() {
   return (
     <header className="flex h-14 items-center justify-between border-b px-4">
       <div className="flex items-center gap-1.5">
-        <Link href={`/${orgSlug}`} className="text-sm font-semibold hover:text-foreground/80">
-          {orgName}
-        </Link>
+        {orgSlug ? (
+          <Link href={`/${orgSlug}`} className="text-sm font-semibold hover:text-foreground/80">
+            {orgName}
+          </Link>
+        ) : (
+          <span className="text-sm font-semibold">{orgName}</span>
+        )}
         {venue && venueSlug && (
           <>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
