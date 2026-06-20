@@ -10,10 +10,11 @@ interface TherapistCardProps {
   orgSlug: string
   venueSlug: string
   isWildcard?: boolean
+  hrefOverride?: string
 }
 
-export function TherapistCard({ id, name, orgSlug, venueSlug, isWildcard }: TherapistCardProps) {
-  const href = `/${orgSlug}/${venueSlug}/book/${isWildcard ? "any" : id}`
+export function TherapistCard({ id, name, orgSlug, venueSlug, isWildcard, hrefOverride }: TherapistCardProps) {
+  const href = hrefOverride ?? `/${orgSlug}/${venueSlug}/book/${isWildcard ? "any" : id}`
 
   return (
     <Link href={href}>
