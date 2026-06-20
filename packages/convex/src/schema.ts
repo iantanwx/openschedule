@@ -100,6 +100,7 @@ export default defineSchema({
     overCapacity: v.boolean(),
     cancelToken: v.optional(v.string()),
     serviceId: v.optional(v.id("services")),
+    googleCalendarEventId: v.optional(v.string()),
   })
     .index("by_venueId", ["venueId"])
     .index("by_therapistId", ["therapistId"])
