@@ -141,6 +141,10 @@ export const confirm = mutation({
       bookingId: args.id,
       event: "confirmed",
     });
+    await ctx.scheduler.runAfter(0, internal.actions.syncCalendarEvent.send, {
+      bookingId: args.id,
+      action: "create",
+    });
   },
 });
 
@@ -256,6 +260,15 @@ export const reschedule = mutation({
     await ctx.scheduler.runAfter(0, internal.actions.sendBookingNotification.send, {
       bookingId: args.id,
       event: "rescheduled",
+    });
+    // Delete old calendar event, then create new one with updated times
+    await ctx.scheduler.runAfter(0, internal.actions.syncCalendarEvent.send, {
+      bookingId: args.id,
+      action: "delete",
+    });
+    await ctx.scheduler.runAfter(0, internal.actions.syncCalendarEvent.send, {
+      bookingId: args.id,
+      action: "create",
     });
   },
 });
