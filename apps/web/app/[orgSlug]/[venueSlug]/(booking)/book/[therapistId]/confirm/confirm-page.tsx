@@ -27,6 +27,8 @@ export function ConfirmPage({ orgSlug, venueSlug, therapistId }: ConfirmPageProp
   const searchParams = useSearchParams()
   const date = searchParams.get("date")
   const time = searchParams.get("time")
+  const endTime = searchParams.get("endTime")
+  const serviceId = searchParams.get("serviceId")
 
   const org = useQuery(orgGetBySlug, { slug: orgSlug }) as { _id: string } | null | undefined
   const venue = useQuery(venueGetBySlug, org ? { orgId: org._id, slug: venueSlug } : "skip") as { _id: string } | null | undefined
@@ -52,6 +54,8 @@ export function ConfirmPage({ orgSlug, venueSlug, therapistId }: ConfirmPageProp
       therapistId={therapistId}
       date={date}
       time={time}
+      endTime={endTime}
+      serviceId={serviceId}
     />
   )
 }

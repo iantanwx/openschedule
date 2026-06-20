@@ -1,12 +1,12 @@
 "use client"
 
 import { useQuery } from "convex/react"
+import { useSearchParams } from "next/navigation"
 import type { FunctionReference } from "convex/server"
 import { api } from "@openschedule/convex/api"
 import { DateTimePage } from "./date-time-page"
 import { Skeleton } from "@openschedule/ui/components/skeleton"
 
-// FilterApi doesn't fully resolve across package boundaries in monorepo .d.ts
 const convexApi = api as unknown as {
   queries: {
     organizations: { getBySlug: FunctionReference<"query"> }
@@ -23,6 +23,9 @@ interface Props {
 }
 
 export function DateTimePageWrapper({ orgSlug, venueSlug, therapistId }: Props) {
+  const searchParams = useSearchParams()
+  const serviceId = searchParams.get("serviceId")
+
   const org = useQuery(orgGetBySlug, { slug: orgSlug }) as
     | { _id: string; name: string }
     | null
@@ -46,6 +49,7 @@ export function DateTimePageWrapper({ orgSlug, venueSlug, therapistId }: Props) 
       venueSlug={venueSlug}
       therapistId={therapistId}
       venueId={venue._id}
+      serviceId={serviceId}
     />
   )
 }

@@ -17,7 +17,6 @@ const convexApi = api as unknown as {
   queries: {
     availability: { getSlotsForAllTherapists: FunctionReference<"query"> }
     users: { getPublic: FunctionReference<"query"> }
-    schedules: { getByTherapistAndVenue: FunctionReference<"query"> }
   }
   mutations: {
     customers: { getOrCreate: FunctionReference<"mutation"> }
@@ -27,7 +26,6 @@ const convexApi = api as unknown as {
 
 const availabilityGetSlots = convexApi.queries.availability.getSlotsForAllTherapists
 const usersGetPublic = convexApi.queries.users.getPublic
-const schedulesGetByTherapistAndVenue = convexApi.queries.schedules.getByTherapistAndVenue
 const customersGetOrCreate = convexApi.mutations.customers.getOrCreate
 const bookingsCreate = convexApi.mutations.bookings.create
 
@@ -46,6 +44,8 @@ interface BookingFormProps {
   therapistId: string
   date: string
   time: string
+  endTime: string | null
+  serviceId: string | null
 }
 
 export function BookingForm({
@@ -56,6 +56,8 @@ export function BookingForm({
   therapistId,
   date,
   time,
+  endTime,
+  serviceId,
 }: BookingFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", notes: "" })
@@ -69,7 +71,7 @@ export function BookingForm({
   // For "any" flow — resolve which therapist to assign
   const allSlots = useQuery(
     availabilityGetSlots,
-    therapistId === "any" ? { venueId } : "skip",
+    therapistId === "any" && serviceId ? { venueId, serviceId } : "skip",
   )
 
   const resolvedTherapistId = therapistId === "any"
@@ -81,14 +83,6 @@ export function BookingForm({
     usersGetPublic,
     resolvedTherapistId ? { id: resolvedTherapistId } : "skip",
   ) as { _id: string; name: string } | null | undefined
-
-  // Get schedule to compute endTime
-  const schedule = useQuery(
-    schedulesGetByTherapistAndVenue,
-    resolvedTherapistId ? { therapistId: resolvedTherapistId, venueId } : "skip",
-  ) as { slotDuration: number } | null | undefined
-
-  const endTime = schedule ? computeEndTime(time, schedule.slotDuration) : null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -109,7 +103,7 @@ export function BookingForm({
     }
 
     if (!resolvedTherapistId || !endTime) {
-      setSubmitError("Unable to resolve therapist or time slot. Please go back and try again.")
+      setSubmitError("Unable to resolve booking details. Please go back and try again.")
       return
     }
 
@@ -131,6 +125,7 @@ export function BookingForm({
         startTime: time,
         endTime,
         createdBy: "customer",
+        ...(serviceId ? { serviceId: serviceId as any } : {}),
       })
 
       router.push(`/${orgSlug}/${venueSlug}/bookings/${bookingId}`)
@@ -241,16 +236,6 @@ function resolveRandomTherapist(
   const picked = available[randomIndex]
   if (!picked) return null
   return picked
-}
-
-function computeEndTime(startTime: string, slotDuration: number): string {
-  const parts = startTime.split(":")
-  const hours = Number(parts[0])
-  const minutes = Number(parts[1])
-  const totalMinutes = hours * 60 + minutes + slotDuration
-  const h = Math.floor(totalMinutes / 60)
-  const m = totalMinutes % 60
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`
 }
 
 function formatDate(date: string): string {

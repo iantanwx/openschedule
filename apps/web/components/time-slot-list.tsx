@@ -8,6 +8,7 @@ interface TimeSlotListProps {
   therapistId: string
   orgSlug: string
   venueSlug: string
+  serviceId: string | null
 }
 
 export function TimeSlotList({
@@ -16,6 +17,7 @@ export function TimeSlotList({
   therapistId,
   orgSlug,
   venueSlug,
+  serviceId,
 }: TimeSlotListProps) {
   if (slots.length === 0) {
     return (
@@ -31,10 +33,12 @@ export function TimeSlotList({
         <TimeSlotButton
           key={slot.startTime}
           startTime={slot.startTime}
+          endTime={slot.endTime}
           date={selectedDate}
           therapistId={therapistId}
           orgSlug={orgSlug}
           venueSlug={venueSlug}
+          serviceId={serviceId}
         />
       ))}
     </div>
@@ -43,18 +47,23 @@ export function TimeSlotList({
 
 function TimeSlotButton({
   startTime,
+  endTime,
   date,
   therapistId,
   orgSlug,
   venueSlug,
+  serviceId,
 }: {
   startTime: string
+  endTime: string
   date: string
   therapistId: string
   orgSlug: string
   venueSlug: string
+  serviceId: string | null
 }) {
-  const href = `/${orgSlug}/${venueSlug}/book/${therapistId}/confirm?date=${date}&time=${startTime}`
+  const serviceParam = serviceId ? `&serviceId=${serviceId}` : ""
+  const href = `/${orgSlug}/${venueSlug}/book/${therapistId}/confirm?date=${date}&time=${startTime}&endTime=${endTime}${serviceParam}`
 
   return (
     <Button variant="outline" className="w-full justify-center" asChild>

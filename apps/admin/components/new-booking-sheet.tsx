@@ -28,10 +28,11 @@ interface NewBookingSheetProps {
   onClose: () => void;
 }
 
-type Step = "therapist" | "date" | "slot" | "customer";
+type Step = "service" | "therapist" | "date" | "slot" | "customer";
 
 export function NewBookingSheet({ orgSlug, venueId, onClose }: NewBookingSheetProps) {
-  const [step, setStep] = useState<Step>("therapist");
+  const [step, setStep] = useState<Step>("service");
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [selectedTherapistId, setSelectedTherapistId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<{ startTime: string; endTime: string } | null>(null);
@@ -41,11 +42,20 @@ export function NewBookingSheet({ orgSlug, venueId, onClose }: NewBookingSheetPr
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
-  const therapists = useQuery(convexApi.queries.users.listByVenue, { venueId });
+  const services = useQuery(
+    convexApi.queries.services.listByOrg,
+    org ? { orgId: org._id } : "skip",
+  );
+  const therapists = useQuery(
+    convexApi.queries.therapistServices.listTherapistsByService,
+    selectedServiceId ? { serviceId: selectedServiceId as any, venueId } : "skip",
+  );
 
   const slots = useQuery(
     convexApi.queries.availability.getSlots,
-    selectedTherapistId ? { venueId, therapistId: selectedTherapistId } : "skip",
+    selectedTherapistId && selectedServiceId
+      ? { venueId, therapistId: selectedTherapistId as any, serviceId: selectedServiceId as any }
+      : "skip",
   );
 
   const createBooking = useMutation(convexApi.mutations.bookings.create);
@@ -80,6 +90,7 @@ export function NewBookingSheet({ orgSlug, venueId, onClose }: NewBookingSheetPr
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
         createdBy: "owner",
+        ...(selectedServiceId ? { serviceId: selectedServiceId } : {}),
       });
 
       onClose();
@@ -94,6 +105,25 @@ export function NewBookingSheet({ orgSlug, venueId, onClose }: NewBookingSheetPr
         <DialogHeader>
           <DialogTitle>New Booking</DialogTitle>
         </DialogHeader>
+
+        {/* Step 0: Pick service */}
+        {step === "service" && (
+          <div className="space-y-3">
+            <p className="text-sm font-medium">Select a service</p>
+            {(services ?? []).map((service: any) => (
+              <Button
+                key={service._id}
+                variant="outline"
+                className="w-full justify-start gap-3"
+                onClick={() => { setSelectedServiceId(service._id); setStep("therapist"); }}
+              >
+                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: service.color }} />
+                <span>{service.name}</span>
+                <span className="ml-auto text-muted-foreground">{service.duration} min</span>
+              </Button>
+            ))}
+          </div>
+        )}
 
         {/* Step 1: Pick therapist */}
         {step === "therapist" && (
@@ -117,6 +147,9 @@ export function NewBookingSheet({ orgSlug, venueId, onClose }: NewBookingSheetPr
                 ))}
               </SelectContent>
             </Select>
+            <Button variant="outline" size="sm" onClick={() => setStep("service")}>
+              Back
+            </Button>
           </div>
         )}
 

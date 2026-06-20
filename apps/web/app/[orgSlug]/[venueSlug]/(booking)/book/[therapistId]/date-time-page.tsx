@@ -30,19 +30,20 @@ interface DateTimePageProps {
   venueSlug: string
   therapistId: string
   venueId: string
+  serviceId: string | null
 }
 
-export function DateTimePage({ orgSlug, venueSlug, therapistId, venueId }: DateTimePageProps) {
+export function DateTimePage({ orgSlug, venueSlug, therapistId, venueId, serviceId }: DateTimePageProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   const singleSlots = useQuery(
     getSlots,
-    therapistId !== "any" ? { venueId, therapistId } : "skip",
+    therapistId !== "any" && serviceId ? { venueId, therapistId, serviceId } : "skip",
   ) as SlotsByDate | undefined
 
   const allSlots = useQuery(
     getSlotsForAllTherapists,
-    therapistId === "any" ? { venueId } : "skip",
+    therapistId === "any" && serviceId ? { venueId, serviceId } : "skip",
   ) as SlotsByTherapist | undefined
 
   const availableDates: SlotsByDate | undefined =
@@ -84,6 +85,7 @@ export function DateTimePage({ orgSlug, venueSlug, therapistId, venueId }: DateT
                     therapistId={therapistId}
                     orgSlug={orgSlug}
                     venueSlug={venueSlug}
+                    serviceId={serviceId}
                   />
                 ) : (
                   <p className="py-8 text-center text-sm text-muted-foreground">

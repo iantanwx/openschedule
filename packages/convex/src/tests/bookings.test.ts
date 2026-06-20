@@ -1018,4 +1018,72 @@ describe("booking mutations", () => {
       }),
     ).rejects.toThrow("Booking not found");
   });
+
+  test("stores serviceId on booking when provided", async () => {
+    const t = convexTest(schema, modules);
+
+    const orgId = await t.run(async (ctx) => {
+      return await ctx.db.insert("organizations", {
+        authId: "test-org-auth",
+        name: "Test Org",
+        slug: "test-org",
+      });
+    });
+    const venueId = await t.run(async (ctx) => {
+      return await ctx.db.insert("venues", {
+        orgId,
+        name: "Test Venue",
+        slug: "test-venue",
+        timezone: "America/New_York",
+        capacity: 3,
+        dayStart: "09:00",
+        dayEnd: "17:00",
+        status: "active",
+      });
+    });
+    const serviceId = await t.run(async (ctx) => {
+      return await ctx.db.insert("services", {
+        orgId,
+        name: "Deep Tissue",
+        slug: "deep-tissue",
+        description: "90 min massage",
+        duration: 90,
+        price: 15000,
+        color: "#4f46e5",
+        status: "active",
+      });
+    });
+    const therapistId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        authId: "test-therapist-auth",
+        email: "therapist@test.com",
+        name: "Jane",
+        roles: ["therapist"],
+        orgId,
+      });
+    });
+    const customerId = await t.mutation(api.mutations.customers.getOrCreate, {
+      orgId,
+      email: "customer@test.com",
+      name: "John",
+    });
+
+    const bookingId = await t.mutation(api.mutations.bookings.create, {
+      venueId,
+      therapistId,
+      customerId,
+      date: "2025-07-01",
+      startTime: "09:00",
+      endTime: "10:30",
+      createdBy: "customer",
+      serviceId,
+    });
+
+    const booking = await t.run(async (ctx) => {
+      const b = await ctx.db.get(bookingId);
+      if (b && "serviceId" in b) return b.serviceId;
+      return undefined;
+    });
+    expect(booking).toBe(serviceId);
+  });
 });

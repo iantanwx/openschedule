@@ -6,7 +6,6 @@ interface ScheduleForSlots {
   workingDays: number[];
   startTime: string;
   endTime: string;
-  slotDuration: number;
 }
 
 interface BlockoutForSlots {
@@ -35,6 +34,7 @@ export interface TimeSlot {
 
 export interface ComputeSlotsInput {
   schedule: ScheduleForSlots;
+  serviceDuration: number;
   dates: string[];
   blockouts: BlockoutForSlots[];
   bookings: BookingForSlots[];
@@ -56,7 +56,7 @@ export interface ComputeSlotsInput {
 export function computeAvailableSlots(
   input: ComputeSlotsInput,
 ): Record<string, TimeSlot[]> {
-  const { schedule, dates, blockouts, bookings, venueCapacity, allBookingsForVenueByDate } = input;
+  const { schedule, serviceDuration, dates, blockouts, bookings, venueCapacity, allBookingsForVenueByDate } = input;
   const result: Record<string, TimeSlot[]> = {};
 
   for (const date of dates) {
@@ -72,7 +72,7 @@ export function computeAvailableSlots(
     const candidates = generateCandidateSlots(
       schedule.startTime,
       schedule.endTime,
-      schedule.slotDuration,
+      serviceDuration,
     );
 
     // Step 3: Filter out blockouts for this date
@@ -118,22 +118,24 @@ export function computeAvailableSlots(
   return result;
 }
 
+const SLOT_ALIGNMENT = 15; // minutes
+
 function generateCandidateSlots(
   startTime: string,
   endTime: string,
-  slotDuration: number,
+  serviceDuration: number,
 ): TimeSlot[] {
   const slots: TimeSlot[] = [];
   const startMin = timeToMinutes(startTime);
   const endMin = timeToMinutes(endTime);
 
   let current = startMin;
-  while (current + slotDuration <= endMin) {
+  while (current + serviceDuration <= endMin) {
     slots.push({
       startTime: minutesToTime(current),
-      endTime: minutesToTime(current + slotDuration),
+      endTime: minutesToTime(current + serviceDuration),
     });
-    current += slotDuration;
+    current += SLOT_ALIGNMENT;
   }
 
   return slots;

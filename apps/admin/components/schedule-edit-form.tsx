@@ -26,7 +26,6 @@ interface ScheduleFormData {
   workingDays: number[];
   startTime: string;
   endTime: string;
-  slotDuration: number;
   availabilityHorizonDays: number;
 }
 
@@ -51,8 +50,6 @@ const DAY_OPTIONS = [
   { value: 6, label: "Sat" },
 ];
 
-const SLOT_DURATIONS = [30, 45, 60, 90, 120];
-
 export function ScheduleEditForm({
   schedule,
   venue,
@@ -76,7 +73,6 @@ export function ScheduleEditForm({
   const [endTime, setEndTime] = useState(
     schedule?.endTime || venue.dayEnd || "17:00",
   );
-  const [slotDuration, setSlotDuration] = useState(schedule?.slotDuration ?? 60);
   const [horizon, setHorizon] = useState(schedule?.availabilityHorizonDays ?? 30);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -101,7 +97,6 @@ export function ScheduleEditForm({
         workingDays,
         startTime,
         endTime,
-        slotDuration,
         availabilityHorizonDays: horizon,
       });
       onClose();
@@ -190,26 +185,6 @@ export function ScheduleEditForm({
                 onChange={(e) => setEndTime(e.target.value)}
               />
             </div>
-          </div>
-
-          {/* Slot duration */}
-          <div className="space-y-1">
-            <Label>Slot Duration</Label>
-            <Select
-              value={String(slotDuration)}
-              onValueChange={(val) => setSlotDuration(Number(val))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SLOT_DURATIONS.map((d) => (
-                  <SelectItem key={d} value={String(d)}>
-                    {d} minutes
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Availability horizon */}

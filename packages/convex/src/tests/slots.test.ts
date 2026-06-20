@@ -6,12 +6,14 @@ describe("computeAvailableSlots", () => {
     workingDays: [1, 2, 3, 4, 5], // Mon-Fri
     startTime: "09:00",
     endTime: "17:00",
-    slotDuration: 60,
   };
 
+  // With 15-min alignment and 60-min service in 8h window:
+  // slots start at 09:00, 09:15, ..., 16:00 → (16:00 - 09:00)/15 + 1 = 29 slots
   test("generates slots for a working day with no conflicts", () => {
     const result = computeAvailableSlots({
       schedule: baseSchedule,
+      serviceDuration: 60,
       dates: ["2025-06-16"], // Monday
       blockouts: [],
       bookings: [],
@@ -19,12 +21,12 @@ describe("computeAvailableSlots", () => {
       allBookingsForVenueByDate: {},
     });
 
-    expect(result["2025-06-16"]).toHaveLength(8); // 09:00-17:00, 60min slots
+    expect(result["2025-06-16"]).toHaveLength(29);
     expect(result["2025-06-16"]![0]).toEqual({
       startTime: "09:00",
       endTime: "10:00",
     });
-    expect(result["2025-06-16"]![7]).toEqual({
+    expect(result["2025-06-16"]![28]).toEqual({
       startTime: "16:00",
       endTime: "17:00",
     });
@@ -33,6 +35,7 @@ describe("computeAvailableSlots", () => {
   test("returns empty array for non-working days", () => {
     const result = computeAvailableSlots({
       schedule: baseSchedule,
+      serviceDuration: 60,
       dates: ["2025-06-15"], // Sunday
       blockouts: [],
       bookings: [],
@@ -46,6 +49,7 @@ describe("computeAvailableSlots", () => {
   test("removes slots that overlap with blockouts", () => {
     const result = computeAvailableSlots({
       schedule: baseSchedule,
+      serviceDuration: 60,
       dates: ["2025-06-16"], // Monday
       blockouts: [{ date: "2025-06-16", startTime: "10:00", endTime: "12:00" }],
       bookings: [],
@@ -53,8 +57,11 @@ describe("computeAvailableSlots", () => {
       allBookingsForVenueByDate: {},
     });
 
-    // 09:00-10:00 OK, 10:00-11:00 blocked, 11:00-12:00 blocked, 12:00+ OK
-    expect(result["2025-06-16"]).toHaveLength(6);
+    // Blocked: slots where [start, start+60) overlaps [10:00, 12:00)
+    // i.e. start < 12:00 AND start+60 > 10:00 → start >= 09:15 AND start < 12:00
+    // Blocked starts: 09:15, 09:30, 09:45, 10:00, 10:15, 10:30, 10:45, 11:00, 11:15, 11:30, 11:45 = 11
+    // Available: 29 - 11 = 18
+    expect(result["2025-06-16"]).toHaveLength(18);
     expect(result["2025-06-16"]![0]).toEqual({
       startTime: "09:00",
       endTime: "10:00",
@@ -68,6 +75,7 @@ describe("computeAvailableSlots", () => {
   test("removes slots that overlap with existing bookings", () => {
     const result = computeAvailableSlots({
       schedule: baseSchedule,
+      serviceDuration: 60,
       dates: ["2025-06-16"],
       blockouts: [],
       bookings: [
@@ -77,7 +85,10 @@ describe("computeAvailableSlots", () => {
       allBookingsForVenueByDate: {},
     });
 
-    expect(result["2025-06-16"]).toHaveLength(7);
+    // Blocked: slots overlapping [09:00, 10:00) → start < 10:00 AND start+60 > 09:00
+    // start < 10:00: 09:00, 09:15, 09:30, 09:45 = 4 blocked
+    // Available: 29 - 4 = 25
+    expect(result["2025-06-16"]).toHaveLength(25);
     expect(result["2025-06-16"]![0]).toEqual({
       startTime: "10:00",
       endTime: "11:00",
@@ -87,6 +98,7 @@ describe("computeAvailableSlots", () => {
   test("ignores cancelled bookings", () => {
     const result = computeAvailableSlots({
       schedule: baseSchedule,
+      serviceDuration: 60,
       dates: ["2025-06-16"],
       blockouts: [],
       bookings: [
@@ -96,12 +108,13 @@ describe("computeAvailableSlots", () => {
       allBookingsForVenueByDate: {},
     });
 
-    expect(result["2025-06-16"]).toHaveLength(8);
+    expect(result["2025-06-16"]).toHaveLength(29);
   });
 
   test("removes slots when venue is at capacity", () => {
     const result = computeAvailableSlots({
       schedule: baseSchedule,
+      serviceDuration: 60,
       dates: ["2025-06-16"],
       blockouts: [],
       bookings: [],
@@ -114,8 +127,9 @@ describe("computeAvailableSlots", () => {
       },
     });
 
-    // 09:00-10:00 is at capacity (2 bookings, 2 beds), rest are free
-    expect(result["2025-06-16"]).toHaveLength(7);
+    // Same overlap logic as bookings: slots starting 09:00-09:45 overlap [09:00, 10:00) = 4 blocked
+    // Available: 29 - 4 = 25
+    expect(result["2025-06-16"]).toHaveLength(25);
     expect(result["2025-06-16"]![0]).toEqual({
       startTime: "10:00",
       endTime: "11:00",
@@ -124,7 +138,8 @@ describe("computeAvailableSlots", () => {
 
   test("handles 30-minute slot durations", () => {
     const result = computeAvailableSlots({
-      schedule: { ...baseSchedule, slotDuration: 30 },
+      schedule: baseSchedule,
+      serviceDuration: 30,
       dates: ["2025-06-16"],
       blockouts: [],
       bookings: [],
@@ -132,7 +147,8 @@ describe("computeAvailableSlots", () => {
       allBookingsForVenueByDate: {},
     });
 
-    expect(result["2025-06-16"]).toHaveLength(16); // 8 hours * 2 slots/hour
+    // 30-min service, 15-min alignment: starts at 09:00, 09:15, ..., 16:30 → (16:30-09:00)/15 + 1 = 31
+    expect(result["2025-06-16"]).toHaveLength(31);
     expect(result["2025-06-16"]![0]).toEqual({
       startTime: "09:00",
       endTime: "09:30",

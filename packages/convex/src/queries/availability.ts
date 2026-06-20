@@ -7,12 +7,14 @@ export const getSlots = query({
   args: {
     venueId: v.id("venues"),
     therapistId: v.id("users"),
+    serviceId: v.id("services"),
   },
   handler: async (ctx, args) => {
     const venue = await ctx.db.get(args.venueId);
-    if (!venue) {
-      throw new Error("Venue not found");
-    }
+    if (!venue) throw new Error("Venue not found");
+
+    const service = await ctx.db.get(args.serviceId);
+    if (!service) throw new Error("Service not found");
 
     const schedule = await ctx.db
       .query("schedules")
@@ -25,47 +27,35 @@ export const getSlots = query({
       return {};
     }
 
-    // Compute date range: today → today + horizonDays
     const today = todayInTimezone(venue.timezone);
     const dates = generateDateRange(today, schedule.availabilityHorizonDays);
-    const startDate = dates[0]!;
-    const endDate = dates[dates.length - 1]!;
+    const startDate = dates[0];
+    const endDate = dates[dates.length - 1];
 
-    // Fetch blockouts for this therapist in the date range
+    if (!startDate || !endDate) return {};
+
     const allBlockouts = await ctx.db
       .query("blockouts")
       .withIndex("by_therapistId_and_date", (q) =>
-        q
-          .eq("therapistId", args.therapistId)
-          .gte("date", startDate)
-          .lte("date", endDate),
+        q.eq("therapistId", args.therapistId).gte("date", startDate).lte("date", endDate),
       )
       .take(200);
     const blockouts = allBlockouts.filter((b) => b.status === "active");
 
-    // Fetch therapist's bookings in the date range
     const therapistBookings = await ctx.db
       .query("bookings")
       .withIndex("by_therapistId_and_date", (q) =>
-        q
-          .eq("therapistId", args.therapistId)
-          .gte("date", startDate)
-          .lte("date", endDate),
+        q.eq("therapistId", args.therapistId).gte("date", startDate).lte("date", endDate),
       )
       .take(500);
 
-    // Fetch all venue bookings for capacity check
     const venueBookings = await ctx.db
       .query("bookings")
       .withIndex("by_venueId_and_date", (q) =>
-        q
-          .eq("venueId", args.venueId)
-          .gte("date", startDate)
-          .lte("date", endDate),
+        q.eq("venueId", args.venueId).gte("date", startDate).lte("date", endDate),
       )
       .take(1000);
 
-    // Group venue bookings by date for capacity computation
     const allBookingsForVenueByDate: Record<string, { startTime: string; endTime: string }[]> = {};
     for (const booking of venueBookings) {
       if (booking.status === "cancelled") continue;
@@ -75,10 +65,7 @@ export const getSlots = query({
         dateBookings = [];
         allBookingsForVenueByDate[dateKey] = dateBookings;
       }
-      dateBookings.push({
-        startTime: booking.startTime,
-        endTime: booking.endTime,
-      });
+      dateBookings.push({ startTime: booking.startTime, endTime: booking.endTime });
     }
 
     return computeAvailableSlots({
@@ -86,20 +73,11 @@ export const getSlots = query({
         workingDays: schedule.workingDays,
         startTime: schedule.startTime,
         endTime: schedule.endTime,
-        slotDuration: schedule.slotDuration,
       },
+      serviceDuration: service.duration,
       dates,
-      blockouts: blockouts.map((b) => ({
-        date: b.date,
-        startTime: b.startTime,
-        endTime: b.endTime,
-      })),
-      bookings: therapistBookings.map((b) => ({
-        date: b.date,
-        startTime: b.startTime,
-        endTime: b.endTime,
-        status: b.status,
-      })),
+      blockouts: blockouts.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime })),
+      bookings: therapistBookings.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime, status: b.status })),
       venueCapacity: venue.capacity,
       allBookingsForVenueByDate,
     });
@@ -109,39 +87,45 @@ export const getSlots = query({
 export const getSlotsForAllTherapists = query({
   args: {
     venueId: v.id("venues"),
+    serviceId: v.id("services"),
   },
   handler: async (ctx, args) => {
     const venue = await ctx.db.get(args.venueId);
-    if (!venue) {
-      throw new Error("Venue not found");
-    }
+    if (!venue) throw new Error("Venue not found");
 
-    // Get all schedules for this venue
+    const service = await ctx.db.get(args.serviceId);
+    if (!service) throw new Error("Service not found");
+
+    // Get therapists assigned to this service who have active schedules at this venue
+    const assignments = await ctx.db
+      .query("therapistServices")
+      .withIndex("by_serviceId", (q) => q.eq("serviceId", args.serviceId))
+      .take(100);
+
     const allSchedules = await ctx.db
       .query("schedules")
       .withIndex("by_venueId", (q) => q.eq("venueId", args.venueId))
       .take(100);
-    const schedules = allSchedules.filter((s) => s.status === "active");
+    const activeSchedules = allSchedules.filter((s) => s.status === "active");
 
-    if (schedules.length === 0) {
-      return {};
-    }
+    // Only include therapists with both: assigned to service + active schedule at venue
+    const assignedTherapistIds = new Set(assignments.map((a) => a.therapistId.toString()));
+    const schedules = activeSchedules.filter((s) => assignedTherapistIds.has(s.therapistId.toString()));
 
-    // Use the max horizon across all therapists
+    if (schedules.length === 0) return {};
+
     const maxHorizon = Math.max(...schedules.map((s) => s.availabilityHorizonDays));
     const today = todayInTimezone(venue.timezone);
     const dates = generateDateRange(today, Math.min(maxHorizon, 31));
-    const startDate = dates[0]!;
-    const endDate = dates[dates.length - 1]!;
+    const startDate = dates[0];
+    const endDate = dates[dates.length - 1];
 
-    // Fetch all venue bookings for capacity check (shared across therapists)
+    if (!startDate || !endDate) return {};
+
     const venueBookings = await ctx.db
       .query("bookings")
       .withIndex("by_venueId_and_date", (q) =>
-        q
-          .eq("venueId", args.venueId)
-          .gte("date", startDate)
-          .lte("date", endDate),
+        q.eq("venueId", args.venueId).gte("date", startDate).lte("date", endDate),
       )
       .take(1000);
 
@@ -154,13 +138,9 @@ export const getSlotsForAllTherapists = query({
         dateBookings = [];
         allBookingsForVenueByDate[dateKey] = dateBookings;
       }
-      dateBookings.push({
-        startTime: booking.startTime,
-        endTime: booking.endTime,
-      });
+      dateBookings.push({ startTime: booking.startTime, endTime: booking.endTime });
     }
 
-    // Compute availability per therapist
     const result: Record<string, Record<string, { startTime: string; endTime: string }[]>> = {};
 
     for (const schedule of schedules) {
@@ -169,10 +149,7 @@ export const getSlotsForAllTherapists = query({
       const allBlockouts = await ctx.db
         .query("blockouts")
         .withIndex("by_therapistId_and_date", (q) =>
-          q
-            .eq("therapistId", therapistId)
-            .gte("date", startDate)
-            .lte("date", endDate),
+          q.eq("therapistId", therapistId).gte("date", startDate).lte("date", endDate),
         )
         .take(200);
       const blockouts = allBlockouts.filter((b) => b.status === "active");
@@ -180,10 +157,7 @@ export const getSlotsForAllTherapists = query({
       const therapistBookings = await ctx.db
         .query("bookings")
         .withIndex("by_therapistId_and_date", (q) =>
-          q
-            .eq("therapistId", therapistId)
-            .gte("date", startDate)
-            .lte("date", endDate),
+          q.eq("therapistId", therapistId).gte("date", startDate).lte("date", endDate),
         )
         .take(500);
 
@@ -194,20 +168,11 @@ export const getSlotsForAllTherapists = query({
           workingDays: schedule.workingDays,
           startTime: schedule.startTime,
           endTime: schedule.endTime,
-          slotDuration: schedule.slotDuration,
         },
+        serviceDuration: service.duration,
         dates: scheduleDates,
-        blockouts: blockouts.map((b) => ({
-          date: b.date,
-          startTime: b.startTime,
-          endTime: b.endTime,
-        })),
-        bookings: therapistBookings.map((b) => ({
-          date: b.date,
-          startTime: b.startTime,
-          endTime: b.endTime,
-          status: b.status,
-        })),
+        blockouts: blockouts.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime })),
+        bookings: therapistBookings.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime, status: b.status })),
         venueCapacity: venue.capacity,
         allBookingsForVenueByDate,
       });

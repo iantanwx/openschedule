@@ -176,6 +176,60 @@ export const convexApi = api as unknown as {
     availability: {
       getSlots: FunctionReference<"query", "public", { venueId: string; therapistId: string }, Record<string, Array<{ startTime: string; endTime: string }>>>;
     };
+    services: {
+      listByOrg: FunctionReference<"query", "public", { orgId: string }, Array<{
+        _id: string;
+        _creationTime: number;
+        orgId: string;
+        name: string;
+        slug: string;
+        description: string;
+        duration: number;
+        price: number;
+        color: string;
+        status: "active" | "archived";
+      }>>;
+      listAllByOrg: FunctionReference<"query", "public", { orgId: string }, Array<{
+        _id: string;
+        _creationTime: number;
+        orgId: string;
+        name: string;
+        slug: string;
+        description: string;
+        duration: number;
+        price: number;
+        color: string;
+        status: "active" | "archived";
+      }>>;
+      getBySlug: FunctionReference<"query", "public", { orgId: string; slug: string }, {
+        _id: string;
+        orgId: string;
+        name: string;
+        slug: string;
+        description: string;
+        duration: number;
+        price: number;
+        color: string;
+        status: "active" | "archived";
+      } | null>;
+    };
+    therapistServices: {
+      listByTherapist: FunctionReference<"query", "public", { therapistId: string }, Array<{
+        _id: string;
+        orgId: string;
+        name: string;
+        slug: string;
+        description: string;
+        duration: number;
+        price: number;
+        color: string;
+        status: "active" | "archived";
+      }>>;
+      listTherapistsByService: FunctionReference<"query", "public", { serviceId: string; venueId: string }, Array<{
+        _id: string;
+        name: string;
+      }>>;
+    };
     settings: {
       getByOrg: FunctionReference<"query", "public", { orgId: string }, {
         businessName: string;
@@ -270,6 +324,16 @@ export const convexApi = api as unknown as {
       }, void>;
       remove: FunctionReference<"mutation", "public", { id: string }, void>;
       activate: FunctionReference<"mutation", "public", { id: string }, void>;
+    };
+    services: {
+      create: FunctionReference<"mutation">;
+      update: FunctionReference<"mutation">;
+      archive: FunctionReference<"mutation">;
+      unarchive: FunctionReference<"mutation">;
+    };
+    therapistServices: {
+      assign: FunctionReference<"mutation">;
+      remove: FunctionReference<"mutation">;
     };
     settings: {
       upsert: FunctionReference<"mutation", "public", {

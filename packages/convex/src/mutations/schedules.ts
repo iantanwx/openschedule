@@ -10,7 +10,7 @@ export const upsert = mutation({
     workingDays: v.array(v.number()),
     startTime: v.string(),
     endTime: v.string(),
-    slotDuration: v.number(),
+    slotDuration: v.optional(v.number()),
     availabilityHorizonDays: v.number(),
   },
   handler: async (ctx, args) => {
@@ -36,17 +36,27 @@ export const upsert = mutation({
       .unique();
 
     if (existing) {
-      await ctx.db.patch(existing._id, {
+      const patchData: Record<string, unknown> = {
         workingDays: args.workingDays,
         startTime: args.startTime,
         endTime: args.endTime,
-        slotDuration: args.slotDuration,
         availabilityHorizonDays: args.availabilityHorizonDays,
-      });
+      };
+      if (args.slotDuration !== undefined) patchData.slotDuration = args.slotDuration;
+      await ctx.db.patch(existing._id, patchData);
       return existing._id;
     }
 
-    return await ctx.db.insert("schedules", { ...args, status: "active" });
+    return await ctx.db.insert("schedules", {
+      therapistId: args.therapistId,
+      venueId: args.venueId,
+      workingDays: args.workingDays,
+      startTime: args.startTime,
+      endTime: args.endTime,
+      availabilityHorizonDays: args.availabilityHorizonDays,
+      status: "active",
+      ...(args.slotDuration !== undefined ? { slotDuration: args.slotDuration } : {}),
+    });
   },
 });
 
