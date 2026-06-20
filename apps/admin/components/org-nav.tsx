@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { Users, Settings } from "lucide-react";
+import { Layers, Users, Settings } from "lucide-react";
 
 export function OrgNav() {
   const pathname = usePathname();
@@ -18,6 +18,7 @@ export function OrgNav() {
 
   const links = [
     { label: "Team", href: `/${orgSlug}/team`, icon: Users },
+    { label: "Services", href: `/${orgSlug}/services`, icon: Layers },
     { label: "Settings", href: `/${orgSlug}/settings`, icon: Settings },
   ];
 
