@@ -239,6 +239,14 @@ export const convexApi = api as unknown as {
         emailNotificationsEnabled: boolean;
       } | null>;
     };
+    integrations: {
+      getByCurrentUser: FunctionReference<"query", "public", Record<string, never>, {
+        _id: string;
+        provider: string;
+        enabled: boolean;
+        connectedAt: number;
+      } | null>;
+    };
   };
   mutations: {
     bookings: {
@@ -346,6 +354,14 @@ export const convexApi = api as unknown as {
           emailNotificationsEnabled: boolean;
         };
       }, void>;
+    };
+    integrations: {
+      upsert: FunctionReference<"mutation", "public", {
+        accessToken: string;
+        refreshToken: string;
+        expiresAt: number;
+      }, string>;
+      disconnect: FunctionReference<"mutation", "public", Record<string, never>, void>;
     };
     generateUploadUrl: {
       generateUploadUrl: FunctionReference<"mutation", "public", Record<string, never>, string>;
