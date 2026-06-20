@@ -23,13 +23,36 @@ export default defineSchema({
     .index("by_orgId", ["orgId"])
     .index("by_orgId_and_slug", ["orgId", "slug"]),
 
+  services: defineTable({
+    orgId: v.id("organizations"),
+    name: v.string(),
+    slug: v.string(),
+    description: v.string(),
+    duration: v.number(),
+    price: v.number(),
+    color: v.string(),
+    status: v.union(v.literal("active"), v.literal("archived")),
+  })
+    .index("by_orgId", ["orgId"])
+    .index("by_orgId_and_slug", ["orgId", "slug"]),
+
+  therapistServices: defineTable({
+    therapistId: v.id("users"),
+    serviceId: v.id("services"),
+    orgId: v.id("organizations"),
+  })
+    .index("by_therapistId", ["therapistId"])
+    .index("by_serviceId", ["serviceId"])
+    .index("by_orgId", ["orgId"])
+    .index("by_therapistId_and_serviceId", ["therapistId", "serviceId"]),
+
   schedules: defineTable({
     therapistId: v.id("users"),
     venueId: v.id("venues"),
     workingDays: v.array(v.number()),
     startTime: v.string(),
     endTime: v.string(),
-    slotDuration: v.number(),
+    slotDuration: v.optional(v.number()),
     availabilityHorizonDays: v.number(),
     status: v.union(v.literal("active"), v.literal("inactive")),
   })
@@ -76,6 +99,7 @@ export default defineSchema({
     ),
     overCapacity: v.boolean(),
     cancelToken: v.optional(v.string()),
+    serviceId: v.optional(v.id("services")),
   })
     .index("by_venueId", ["venueId"])
     .index("by_therapistId", ["therapistId"])

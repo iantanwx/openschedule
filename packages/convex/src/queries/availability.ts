@@ -25,6 +25,11 @@ export const getSlots = query({
       return {};
     }
 
+    const slotDuration = schedule.slotDuration;
+    if (slotDuration === undefined) {
+      return {};
+    }
+
     // Compute date range: today → today + horizonDays
     const today = todayInTimezone(venue.timezone);
     const dates = generateDateRange(today, schedule.availabilityHorizonDays);
@@ -86,7 +91,7 @@ export const getSlots = query({
         workingDays: schedule.workingDays,
         startTime: schedule.startTime,
         endTime: schedule.endTime,
-        slotDuration: schedule.slotDuration,
+        slotDuration,
       },
       dates,
       blockouts: blockouts.map((b) => ({
@@ -189,12 +194,17 @@ export const getSlotsForAllTherapists = query({
 
       const scheduleDates = generateDateRange(today, Math.min(schedule.availabilityHorizonDays, 31));
 
+      const slotDuration = schedule.slotDuration;
+      if (slotDuration === undefined) {
+        continue;
+      }
+
       result[therapistId] = computeAvailableSlots({
         schedule: {
           workingDays: schedule.workingDays,
           startTime: schedule.startTime,
           endTime: schedule.endTime,
-          slotDuration: schedule.slotDuration,
+          slotDuration,
         },
         dates: scheduleDates,
         blockouts: blockouts.map((b) => ({
