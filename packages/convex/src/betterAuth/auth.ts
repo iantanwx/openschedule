@@ -123,6 +123,31 @@ export const authComponent = createClient<DataModel, typeof schema>(
             roles: mergedRoles as ("owner" | "therapist")[],
             active: user.active ?? true,
           });
+
+          // Auto-assign all active org services to the new therapist
+          if (mergedRoles.includes("therapist")) {
+            const orgServices = await ctx.db
+              .query("services")
+              .withIndex("by_orgId", (q) => q.eq("orgId", org._id))
+              .take(100);
+            const activeServices = orgServices.filter((s) => s.status === "active");
+            for (const service of activeServices) {
+              // Check no duplicate
+              const existing = await ctx.db
+                .query("therapistServices")
+                .withIndex("by_therapistId_and_serviceId", (q) =>
+                  q.eq("therapistId", user._id).eq("serviceId", service._id),
+                )
+                .unique();
+              if (!existing) {
+                await ctx.db.insert("therapistServices", {
+                  therapistId: user._id,
+                  serviceId: service._id,
+                  orgId: org._id,
+                });
+              }
+            }
+          }
         },
         onUpdate: async (ctx, doc) => {
           const user = await ctx.db
