@@ -25,4 +25,9 @@ export async function performCancel(
     internal.actions.sendBookingNotification.send,
     { bookingId, event: "cancelled" },
   );
+  await ctx.scheduler.runAfter(
+    0,
+    internal.actions.syncCalendarEvent.send,
+    { bookingId, action: "delete" },
+  );
 }
