@@ -20,6 +20,7 @@ export const create = mutation({
       v.literal("owner"),
     ),
     overCapacity: v.optional(v.boolean()),
+    serviceId: v.optional(v.id("services")),
   },
   handler: async (ctx, args) => {
     const venue = await ctx.db.get(args.venueId);
@@ -102,6 +103,7 @@ export const create = mutation({
       createdBy: args.createdBy,
       overCapacity: args.overCapacity ?? false,
       cancelToken,
+      serviceId: args.serviceId,
     });
     await ctx.scheduler.runAfter(
       0,
