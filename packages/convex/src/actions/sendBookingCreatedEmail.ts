@@ -25,12 +25,12 @@ export const send = internalAction({
     );
     if (!venue) return;
 
-    // Honor the org's email-notification gate (consistent with sendBookingNotification)
+    // Honor the org's email-notification gate (default to enabled)
     const settings = await ctx.runQuery(
       internal.queries.internal.settings.getByOrgInternal,
       { orgId: venue.orgId },
     );
-    if (!settings || !settings.emailNotificationsEnabled) return;
+    if (settings && !settings.emailNotificationsEnabled) return;
 
     const organization = await ctx.runQuery(
       internal.queries.internal.organizations.getInternal,

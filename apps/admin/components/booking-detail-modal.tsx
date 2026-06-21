@@ -65,6 +65,7 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, onClo
             bookingId={bookingId}
             therapistId={booking.therapistId}
             venueId={venueId}
+            serviceId={booking.serviceId ?? null}
             onDone={() => {
               setShowReschedule(false);
               onClose();

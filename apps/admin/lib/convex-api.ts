@@ -74,6 +74,7 @@ export const convexApi = api as unknown as {
         status: "pending" | "confirmed" | "cancelled";
         createdBy: "customer" | "therapist" | "owner";
         overCapacity: boolean;
+        serviceId?: string;
       } | null>;
       listByVenueAndDate: FunctionReference<"query", "public", { venueId: string; date: string }, Array<{
         _id: string;
@@ -124,7 +125,7 @@ export const convexApi = api as unknown as {
         workingDays: number[];
         startTime: string;
         endTime: string;
-        slotDuration: number;
+        slotDuration?: number;
         availabilityHorizonDays: number;
       }>>;
     };
@@ -174,7 +175,7 @@ export const convexApi = api as unknown as {
       } | null>;
     };
     availability: {
-      getSlots: FunctionReference<"query", "public", { venueId: string; therapistId: string }, Record<string, Array<{ startTime: string; endTime: string }>>>;
+      getSlots: FunctionReference<"query", "public", { venueId: string; therapistId: string; serviceId: string }, Record<string, Array<{ startTime: string; endTime: string }>>>;
     };
     services: {
       listByOrg: FunctionReference<"query", "public", { orgId: string }, Array<{
@@ -306,7 +307,7 @@ export const convexApi = api as unknown as {
         workingDays: number[];
         startTime: string;
         endTime: string;
-        slotDuration: number;
+        slotDuration?: number;
         availabilityHorizonDays: number;
       }, string>;
       remove: FunctionReference<"mutation", "public", { id: string }, void>;

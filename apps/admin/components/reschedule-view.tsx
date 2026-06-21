@@ -11,6 +11,7 @@ interface RescheduleViewProps {
   bookingId: string;
   therapistId: string;
   venueId: string;
+  serviceId: string | null;
   onDone: () => void;
   onBack: () => void;
 }
@@ -19,6 +20,7 @@ export function RescheduleView({
   bookingId,
   therapistId,
   venueId,
+  serviceId,
   onDone,
   onBack,
 }: RescheduleViewProps) {
@@ -29,10 +31,12 @@ export function RescheduleView({
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const slots = useQuery(convexApi.queries.availability.getSlots, {
-    venueId,
-    therapistId,
-  });
+  const slots = useQuery(
+    convexApi.queries.availability.getSlots,
+    serviceId
+      ? { venueId, therapistId, serviceId }
+      : "skip",
+  );
 
   const rescheduleMutation = useMutation(
     convexApi.mutations.bookings.reschedule,

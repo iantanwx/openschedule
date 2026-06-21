@@ -12,7 +12,6 @@ interface ScheduleCardProps {
     workingDays: number[];
     startTime: string;
     endTime: string;
-    slotDuration: number;
     availabilityHorizonDays: number;
   };
   onEdit: (scheduleId: string) => void;
@@ -55,7 +54,7 @@ export function ScheduleCard({ schedule, onEdit }: ScheduleCardProps) {
           <p>
             {schedule.startTime} – {schedule.endTime}
           </p>
-          <p>{schedule.slotDuration} min slots · {schedule.availabilityHorizonDays} day horizon</p>
+          <p>{schedule.availabilityHorizonDays} day horizon</p>
         </div>
       </CardContent>
     </Card>

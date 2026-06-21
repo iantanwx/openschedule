@@ -44,8 +44,8 @@ export const send = internalAction({
       { orgId: venue.orgId },
     );
 
-    // If notifications disabled, skip
-    if (!settings || !settings.emailNotificationsEnabled) {
+    // Default to enabled when no settings doc exists
+    if (settings && !settings.emailNotificationsEnabled) {
       return;
     }
 
