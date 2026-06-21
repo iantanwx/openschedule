@@ -102,6 +102,12 @@ export const convexApi = api as unknown as {
         createdBy: "customer" | "therapist" | "owner";
         overCapacity: boolean;
       }>>;
+      statsByOrg: FunctionReference<"query", "public", { orgId: string; date: string }, {
+        total: number;
+        confirmed: number;
+        pending: number;
+        revenue: number;
+      }>;
       listByTherapistAndDateRange: FunctionReference<"query", "public", { therapistId: string; startDate: string; endDate: string }, Array<{
         _id: string;
         _creationTime: number;
@@ -260,6 +266,16 @@ export const convexApi = api as unknown as {
         createdAt: number;
       }>>;
       unreadCount: FunctionReference<"query", "public", Record<string, never>, number>;
+      listOrgActivity: FunctionReference<"query", "public", { orgId: string; limit?: number }, Array<{
+        _id: string;
+        _creationTime: number;
+        recipientId: string;
+        type: "booking_created" | "booking_cancelled" | "booking_rescheduled" | "therapist_joined";
+        orgId: string;
+        payload: Record<string, unknown>;
+        read: boolean;
+        createdAt: number;
+      }>>;
     };
   };
   mutations: {

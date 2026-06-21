@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import { getAuthenticatedUser } from "../lib/auth";
 import type { Booking } from "../types/bookings.queries";
 
 export const get = query({
@@ -189,5 +190,66 @@ export const listByVenueDateRange = query({
         overCapacity,
       }),
     );
+  },
+});
+
+export const statsByOrg = query({
+  args: { orgId: v.id("organizations"), date: v.string() },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    const isOwner = user.roles.includes("owner");
+
+    // Get all venues for this org
+    const venues = await ctx.db
+      .query("venues")
+      .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
+      .take(20);
+
+    let allBookings: Array<{ status: string; serviceId?: string }> = [];
+
+    for (const venue of venues) {
+      const bookings = await ctx.db
+        .query("bookings")
+        .withIndex("by_venueId_and_date", (q) =>
+          q.eq("venueId", venue._id).eq("date", args.date),
+        )
+        .take(200);
+
+      const filtered = isOwner
+        ? bookings
+        : bookings.filter((b) => b.therapistId === user._id);
+
+      for (const b of filtered) {
+        allBookings.push({ status: b.status, serviceId: b.serviceId as string | undefined });
+      }
+    }
+
+    const nonCancelled = allBookings.filter((b) => b.status !== "cancelled");
+    const confirmed = nonCancelled.filter((b) => b.status === "confirmed");
+    const pending = nonCancelled.filter((b) => b.status === "pending");
+
+    // Resolve revenue from confirmed bookings with serviceId
+    let revenue = 0;
+    const serviceIds = [...new Set(confirmed.filter((b) => b.serviceId).map((b) => b.serviceId))];
+    const serviceMap = new Map<string, number>();
+    for (const sid of serviceIds) {
+      if (!sid) continue;
+      const service = await ctx.db.get(sid as any);
+      if (service && "price" in service) {
+        serviceMap.set(sid, (service as any).price ?? 0);
+      }
+    }
+    for (const b of confirmed) {
+      if (b.serviceId) {
+        revenue += serviceMap.get(b.serviceId) ?? 0;
+      }
+    }
+
+    return {
+      total: nonCancelled.length,
+      confirmed: confirmed.length,
+      pending: pending.length,
+      revenue,
+    };
   },
 });

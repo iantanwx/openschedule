@@ -5,7 +5,7 @@ import { timeRangesOverlap } from "../lib/time";
 import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 import { performCancel } from "../lib/bookings";
 import { hasRole, Role } from "../lib/roles";
-import { createNotification, createNotificationsForOwners } from "../lib/notifications";
+import { createNotification } from "../lib/notifications";
 
 export const create = mutation({
   args: {
@@ -153,14 +153,6 @@ export const create = mutation({
       });
     }
 
-    // Notify all owners (excluding the actor if they're an owner)
-    await createNotificationsForOwners(ctx, {
-      orgId: venue.orgId,
-      type: "booking_created",
-      payload: notifPayload,
-      excludeUserId,
-    });
-
     return bookingId;
   },
 });
@@ -236,12 +228,6 @@ export const cancel = mutation({
             payload: cancelPayload,
           });
         }
-        await createNotificationsForOwners(ctx, {
-          orgId: cancelVenue.orgId,
-          type: "booking_cancelled",
-          payload: cancelPayload,
-          excludeUserId: user._id,
-        });
       }
     }
   },
@@ -259,7 +245,7 @@ export const cancelWithToken = mutation({
     }
     await performCancel(ctx, args.id);
 
-    // In-app notifications — customer cancelled, notify everyone
+    // In-app notifications — customer cancelled, notify therapist
     const tokenCancelledBooking = await ctx.db.get(args.id);
     if (tokenCancelledBooking) {
       const tokenCustomer = await ctx.db.get(tokenCancelledBooking.customerId);
@@ -275,11 +261,6 @@ export const cancelWithToken = mutation({
           recipientId: tokenCancelledBooking.therapistId,
           type: "booking_cancelled",
           orgId: tokenVenue.orgId,
-          payload: tokenPayload,
-        });
-        await createNotificationsForOwners(ctx, {
-          orgId: tokenVenue.orgId,
-          type: "booking_cancelled",
           payload: tokenPayload,
         });
       }
@@ -397,13 +378,6 @@ export const reschedule = mutation({
           payload: reschPayload,
         });
       }
-      // Notify owners (excluding the actor)
-      await createNotificationsForOwners(ctx, {
-        orgId: venue.orgId,
-        type: "booking_rescheduled",
-        payload: reschPayload,
-        excludeUserId: user._id,
-      });
     }
   },
 });

@@ -1,65 +1,31 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { format } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
-import { TimeGrid } from "./time-grid";
-import { BookingDetailModal } from "./booking-detail-modal";
-import { Badge } from "@openschedule/ui/components/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@openschedule/ui/components/select";
+import { Card, CardContent } from "@openschedule/ui/components/card";
+import { formatNotification } from "@/lib/format-notification";
+import { CalendarCheck, Clock, DollarSign, Calendar } from "lucide-react";
 
 interface OrgDashboardPageProps {
   orgSlug: string;
 }
 
 export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-  const [venueFilter, setVenueFilter] = useState<string>("all");
-
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
-  const venues = useQuery(
-    convexApi.queries.venues.listByOrg,
-    org ? { orgId: org._id } : "skip",
-  );
-
   const today = format(new Date(), "yyyy-MM-dd");
 
-  // Fetch bookings for all venues today
-  const firstVenue = venues?.[0] ?? null;
-  const secondVenue = venues?.[1] ?? null;
-  const thirdVenue = venues?.[2] ?? null;
-
-  const bookingsFirst = useQuery(
-    convexApi.queries.bookings.listByVenueAndDate,
-    firstVenue ? { venueId: firstVenue._id, date: today } : "skip",
-  );
-  const bookingsSecond = useQuery(
-    convexApi.queries.bookings.listByVenueAndDate,
-    secondVenue ? { venueId: secondVenue._id, date: today } : "skip",
-  );
-  const bookingsThird = useQuery(
-    convexApi.queries.bookings.listByVenueAndDate,
-    thirdVenue ? { venueId: thirdVenue._id, date: today } : "skip",
+  const stats = useQuery(
+    convexApi.queries.bookings.statsByOrg,
+    org ? { orgId: org._id, date: today } : "skip",
   );
 
-  const allBookings = useMemo(() => {
-    const combined = [
-      ...(bookingsFirst ?? []),
-      ...(bookingsSecond ?? []),
-      ...(bookingsThird ?? []),
-    ];
-    if (venueFilter === "all") return combined;
-    return combined.filter((b) => b.venueId === venueFilter);
-  }, [bookingsFirst, bookingsSecond, bookingsThird, venueFilter]);
+  const activity = useQuery(
+    convexApi.queries.notifications.listOrgActivity,
+    org ? { orgId: org._id, limit: 50 } : "skip",
+  );
 
-  if (!org || venues === undefined) {
+  if (!org) {
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Loading...</p>
@@ -67,69 +33,107 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
     );
   }
 
-  if (!venues || venues.length === 0) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center space-y-2">
-          <h2 className="text-lg font-semibold">Welcome to {org.name}</h2>
-          <p className="text-muted-foreground">Create your first venue using the switcher above.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Use the first venue's hours for the aggregated grid (best-effort)
-  const gridVenue = firstVenue;
-  const activeBookings = allBookings.filter((b) => b.status !== "cancelled");
-  const confirmedCount = activeBookings.filter((b) => b.status === "confirmed").length;
-  const pendingCount = activeBookings.filter((b) => b.status === "pending").length;
-
   return (
-    <div className="space-y-4 p-4">
-      {/* Aggregated today */}
-      <div className="flex items-center gap-3">
-        <h2 className="text-lg font-semibold">Today</h2>
-        {venues.length > 1 && (
-          <Select value={venueFilter} onValueChange={setVenueFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All venues</SelectItem>
-              {venues.map((v) => (
-                <SelectItem key={v._id} value={v._id}>
-                  {v.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        <Badge variant="secondary">{activeBookings.length} bookings</Badge>
-        <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">
-          {confirmedCount} confirmed
-        </Badge>
-        <Badge variant="secondary" className="bg-amber-50 text-amber-700">
-          {pendingCount} pending
-        </Badge>
+    <div className="space-y-6 p-4">
+      {/* Stats cards */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatCard
+          label="Bookings Today"
+          value={stats?.total ?? 0}
+          icon={Calendar}
+        />
+        <StatCard
+          label="Confirmed"
+          value={stats?.confirmed ?? 0}
+          icon={CalendarCheck}
+          accent="text-emerald-600"
+        />
+        <StatCard
+          label="Pending"
+          value={stats?.pending ?? 0}
+          icon={Clock}
+          accent="text-amber-600"
+        />
+        <StatCard
+          label="Revenue Today"
+          value={formatCurrency(stats?.revenue ?? 0)}
+          icon={DollarSign}
+        />
       </div>
 
-      {gridVenue && (
-        <TimeGrid
-          bookings={allBookings}
-          dayStart={gridVenue.dayStart}
-          dayEnd={gridVenue.dayEnd}
-          onBookingTap={setSelectedBookingId}
-        />
-      )}
-
-      {selectedBookingId && firstVenue && (
-        <BookingDetailModal
-          bookingId={selectedBookingId}
-          venueId={firstVenue._id}
-          readOnly={false}
-          onClose={() => setSelectedBookingId(null)}
-        />
-      )}
+      {/* Activity feed */}
+      <div>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Recent Activity</h2>
+        {activity === undefined ? (
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        ) : activity.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            No activity yet
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {activity.map((item) => {
+              const formatted = formatNotification(item.type, item.payload as Record<string, unknown>);
+              const Icon = formatted.icon;
+              return (
+                <div
+                  key={item._id}
+                  className="flex items-start gap-3 rounded-md px-3 py-2 hover:bg-muted/50"
+                >
+                  <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm">{formatted.text}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatRelativeTime(item.createdAt)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  accent,
+}: {
+  label: string;
+  value: number | string;
+  icon: React.ComponentType<{ className?: string }>;
+  accent?: string;
+}) {
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-3 p-4">
+        <Icon className={`h-5 w-5 shrink-0 ${accent ?? "text-muted-foreground"}`} />
+        <div>
+          <p className={`text-2xl font-semibold ${accent ?? ""}`}>{value}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function formatCurrency(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "yesterday";
+  return `${days}d ago`;
 }
