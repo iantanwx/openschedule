@@ -219,6 +219,11 @@ export const convexApi = api as unknown as {
         color: string;
         status: "active" | "archived";
       } | null>;
+      get: FunctionReference<"query", "public", { id: string }, {
+        _id: string;
+        name: string;
+        duration: number;
+      } | null>;
     };
     therapistServices: {
       listByTherapist: FunctionReference<"query", "public", { therapistId: string }, Array<{

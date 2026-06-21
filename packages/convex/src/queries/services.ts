@@ -33,3 +33,12 @@ export const getBySlug = query({
       .unique();
   },
 });
+
+export const get = query({
+  args: { id: v.id("services") },
+  handler: async (ctx, args) => {
+    const service = await ctx.db.get(args.id);
+    if (!service) return null;
+    return { _id: service._id, name: service.name, duration: service.duration };
+  },
+});
