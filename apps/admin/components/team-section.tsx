@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { convexApi } from "@/lib/convex-api";
 import { authClient } from "@/lib/auth-client";
+import { convexApi } from "@/lib/convex-api";
 import { Button } from "@openschedule/ui/components/button";
 import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
@@ -18,8 +18,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@openschedule/ui/components/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@openschedule/ui/components/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 interface Member {
   id: string;
@@ -45,6 +51,7 @@ export function TeamSection() {
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [removingMember, setRemovingMember] = useState<Member | null>(null);
   const setActiveMutation = useMutation(convexApi.mutations.users.setActive);
   const toggleTherapistMutation = useMutation(convexApi.mutations.users.toggleTherapistRole);
   const currentUser = useQuery(convexApi.queries.users.getSelf);
@@ -165,6 +172,7 @@ export function TeamSection() {
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>Team</CardTitle>
@@ -188,36 +196,27 @@ export function TeamSection() {
                       {member.role === "owner" ? "Owner" : "Therapist"}
                     </Badge>
                     {member.role !== "owner" && isOwner && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleActive(member.userId, true)}
-                      >
-                        Deactivate
-                      </Button>
-                    )}
-                    {member.role !== "owner" && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-destructive">
-                            Remove
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Actions</span>
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remove team member?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will remove {member.user.name} from the organization. Their active schedules will be deactivated and future bookings cancelled.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleRemoveMember(member.id)}>
-                              Remove
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleToggleActive(member.userId, true)}
+                          >
+                            Deactivate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => setRemovingMember(member)}
+                          >
+                            Remove from team
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     )}
                   </div>
                 </li>
@@ -302,5 +301,29 @@ export function TeamSection() {
         )}
       </CardContent>
     </Card>
+
+    {/* Remove member confirmation dialog */}
+    <AlertDialog open={removingMember !== null} onOpenChange={() => setRemovingMember(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remove team member?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will remove {removingMember?.user.name} from the organization. Their active schedules will be deactivated and future bookings cancelled.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => {
+            if (removingMember) {
+              handleRemoveMember(removingMember.id);
+            }
+            setRemovingMember(null);
+          }}>
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 }
