@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useQuery } from "convex/react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { format, addDays, subDays } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
 import { TimeGrid } from "./time-grid";
@@ -17,7 +18,14 @@ interface TodayPageProps {
 }
 
 export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
-  const [selectedDate, setSelectedDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Derive date from URL search param, default to today
+  const dateParam = searchParams.get("date");
+  const selectedDate = dateParam ?? format(new Date(), "yyyy-MM-dd");
+
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [viewScope, setViewScope] = useState<"my" | "all">("my");
 
@@ -52,13 +60,22 @@ export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
   // Read-only mode: therapist viewing "all"
   const isReadOnly = isTherapist && viewScope === "all";
 
+  // Scroll to top when date resets (navigating to base without ?date)
+  useEffect(() => {
+    if (!dateParam) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [dateParam]);
+
   const handlePrev = useCallback(() => {
-    setSelectedDate((d) => format(subDays(d, 1), "yyyy-MM-dd"));
-  }, []);
+    const newDate = format(subDays(selectedDate, 1), "yyyy-MM-dd");
+    router.replace(`${pathname}?date=${newDate}`, { scroll: false });
+  }, [selectedDate, router, pathname]);
 
   const handleNext = useCallback(() => {
-    setSelectedDate((d) => format(addDays(d, 1), "yyyy-MM-dd"));
-  }, []);
+    const newDate = format(addDays(selectedDate, 1), "yyyy-MM-dd");
+    router.replace(`${pathname}?date=${newDate}`, { scroll: false });
+  }, [selectedDate, router, pathname]);
 
   if (org === undefined || venue === undefined) {
     return (
