@@ -102,7 +102,7 @@ export function TopBar({ className }: TopBarProps) {
       {/* Right: avatar dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <button aria-label="User menu" className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
