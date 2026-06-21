@@ -59,11 +59,11 @@ export const send = internalAction({
     const viewUrl = `${webUrl}/${organization.slug}/${venue.slug}/bookings/${booking._id}`;
     const cancelUrl = `${webUrl}/${organization.slug}/${venue.slug}/bookings/${booking._id}/cancel?token=${booking.cancelToken}`;
 
-    const subject = `Booking request received — ${booking.date} at ${booking.startTime}`;
+    const subject = `Booking confirmed — ${booking.date} at ${booking.startTime}`;
     const body = [
       `Hi ${customer.name},`,
       ``,
-      `We've received your booking request — the studio will confirm shortly.`,
+      `Your booking has been confirmed.`,
       ``,
       `Booking details:`,
       `Date: ${booking.date}`,

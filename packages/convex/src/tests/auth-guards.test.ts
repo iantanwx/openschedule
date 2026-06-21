@@ -488,6 +488,11 @@ describe("auth guards", () => {
       createdBy: "customer",
     });
 
+    // Manually set to pending to test the confirm path
+    await t.run(async (ctx) => {
+      await ctx.db.patch(bookingId, { status: "pending" });
+    });
+
     const asOwner = t.withIdentity({
       subject: "test-owner-auth",
       issuer: "https://test.com",

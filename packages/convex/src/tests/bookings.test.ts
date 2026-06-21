@@ -6,7 +6,7 @@ import schema from "../schema";
 const modules = import.meta.glob("../**/*.ts");
 
 describe("booking mutations", () => {
-  test("creates a pending booking", async () => {
+  test("creates a confirmed booking", async () => {
     const t = convexTest(schema, modules);
 
     // Insert org and venue directly (venues.create is now auth-guarded)
@@ -58,7 +58,7 @@ describe("booking mutations", () => {
 
     const booking = await t.query(api.queries.bookings.get, { id: bookingId });
     expect(booking).toMatchObject({
-      status: "pending",
+      status: "confirmed",
       date: "2025-06-16",
       startTime: "09:00",
       endTime: "10:00",
@@ -341,6 +341,11 @@ describe("booking mutations", () => {
       createdBy: "customer",
     });
 
+    // Manually set to pending to test the confirm path
+    await t.run(async (ctx) => {
+      await ctx.db.patch(bookingId, { status: "pending" });
+    });
+
     // Confirm requires authenticated therapist/owner
     const asTherapist = t.withIdentity({
       subject: "test-therapist-auth",
@@ -408,9 +413,9 @@ describe("booking mutations", () => {
       t.mutation(api.mutations.bookings.cancel, { id: bookingId }),
     ).rejects.toThrow();
 
-    // Status unchanged
+    // Status should remain confirmed
     const booking = await t.query(api.queries.bookings.get, { id: bookingId });
-    expect(booking?.status).toBe("pending");
+    expect(booking?.status).toBe("confirmed");
   });
 
   test("cancels a booking", async () => {
@@ -551,7 +556,7 @@ describe("booking mutations", () => {
     expect(booking?.date).toBe("2025-06-17");
     expect(booking?.startTime).toBe("10:00");
     expect(booking?.endTime).toBe("11:00");
-    expect(booking?.status).toBe("pending");
+    expect(booking?.status).toBe("confirmed");
   });
 
   test("prevents rescheduling to a conflicting time slot", async () => {
@@ -893,7 +898,7 @@ describe("booking mutations", () => {
     ).rejects.toThrow("Invalid or missing cancel token");
 
     const booking = await t.query(api.queries.bookings.get, { id: bookingId });
-    expect(booking?.status).toBe("pending");
+    expect(booking?.status).toBe("confirmed");
   });
 
   test("cancelWithToken on an already-cancelled booking throws", async () => {

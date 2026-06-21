@@ -99,7 +99,7 @@ export const create = mutation({
       date: args.date,
       startTime: args.startTime,
       endTime: args.endTime,
-      status: "pending",
+      status: "confirmed",
       createdBy: args.createdBy,
       overCapacity: args.overCapacity ?? false,
       cancelToken,
@@ -109,6 +109,11 @@ export const create = mutation({
       0,
       internal.actions.sendBookingCreatedEmail.send,
       { bookingId },
+    );
+    await ctx.scheduler.runAfter(
+      0,
+      internal.actions.syncCalendarEvent.send,
+      { bookingId, action: "create" },
     );
     return bookingId;
   },
