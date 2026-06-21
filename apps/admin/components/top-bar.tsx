@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
-import { useActiveOrganization } from "@/lib/auth-client";
-import { useSession, signOut } from "@/lib/auth-client";
+import { useActiveOrganization, useSession, signOut } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { Avatar, AvatarFallback } from "@openschedule/ui/components/avatar";
 import {
@@ -14,10 +13,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@openschedule/ui/components/dropdown-menu";
-import { VenueSwitcher } from "./venue-switcher";
-import { ChevronRight, Settings, LogOut } from "lucide-react";
+import { ArrowLeft, ChevronDown, Settings, LogOut } from "lucide-react";
 
-export function TopBar() {
+interface TopBarProps {
+  className?: string;
+}
+
+export function TopBar({ className }: TopBarProps) {
   const router = useRouter();
   const { data: activeOrg } = useActiveOrganization();
   const { data: session } = useSession();
@@ -33,8 +35,13 @@ export function TopBar() {
     convexApi.queries.venues.getBySlugFull,
     org && venueSlug ? { orgId: org._id, slug: venueSlug } : "skip",
   );
+  const venues = useQuery(
+    convexApi.queries.venues.listByOrg,
+    org ? { orgId: org._id } : "skip",
+  );
 
   const orgName = activeOrg?.name ?? org?.name ?? "Organization";
+  const venueName = venue?.name ?? venueSlug;
   const userName = session?.user?.name ?? "U";
   const initials = userName
     .split(" ")
@@ -42,33 +49,57 @@ export function TopBar() {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const hasMultipleVenues = venues && venues.length > 1;
 
   async function handleSignOut() {
     await signOut();
     router.push("/login");
   }
 
+  function handleVenueSwitch(targetSlug: string) {
+    router.push(`/${orgSlug}/venues/${targetSlug}`);
+  }
+
   return (
-    <header className="flex h-14 items-center justify-between border-b px-4">
-      <div className="flex items-center gap-1.5">
-        {orgSlug ? (
-          <Link href={`/${orgSlug}`} className="text-sm font-semibold hover:text-foreground/80">
-            {orgName}
-          </Link>
-        ) : (
-          <span className="text-sm font-semibold">{orgName}</span>
-        )}
-        {venue && venueSlug && (
-          <>
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-            <VenueSwitcher
-              orgId={org?._id ?? ""}
-              orgSlug={orgSlug}
-              currentVenueName={venue.name}
-            />
-          </>
-        )}
+    <header className={`flex h-14 items-center justify-between border-b px-4 ${className ?? ""}`}>
+      {/* Left: back arrow + org logo + venue switcher */}
+      <div className="flex items-center gap-3">
+        <Link
+          href={`/${orgSlug}`}
+          className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent"
+          aria-label="Back to organization"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background text-xs font-bold">
+          {orgName.charAt(0).toUpperCase()}
+        </div>
+        <div className="flex items-center gap-1">
+          {hasMultipleVenues ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-foreground/80">
+                {venueName}
+                <ChevronDown className="h-3 w-3" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {venues.map((v) => (
+                  <DropdownMenuItem
+                    key={v._id}
+                    onClick={() => handleVenueSwitch(v.slug)}
+                    className={v.slug === venueSlug ? "font-semibold" : ""}
+                  >
+                    {v.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <span className="text-sm font-medium">{venueName}</span>
+          )}
+        </div>
       </div>
+
+      {/* Right: avatar dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
