@@ -13,7 +13,7 @@ export interface EmailPayload {
  */
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.FROM_EMAIL ?? "noreply@openschedule.com";
+  const from = process.env.TRANSACTIONAL_FROM_EMAIL ?? "noreply@notifications.opencal.xyz";
 
   if (!apiKey) {
     console.log("[EMAIL DEV MODE] Would send email:");

@@ -236,7 +236,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
         async sendInvitationEmail(data) {
           try {
             const apiKey = process.env.RESEND_API_KEY;
-            const from = process.env.FROM_EMAIL ?? "noreply@openschedule.com";
+            const from = process.env.TRANSACTIONAL_FROM_EMAIL ?? "noreply@notifications.opencal.xyz";
             const appUrl = process.env.APP_URL ?? "http://localhost:3001";
             const acceptUrl = `${appUrl}/invite/${data.id}`;
 
