@@ -64,5 +64,31 @@ export const toggleTherapistRole = mutation({
       : [...currentRoles, Role.Therapist];
 
     await ctx.db.patch(user._id, { roles: newRoles });
+
+    // When adding therapist role, auto-assign all active org services
+    if (!hasTherapist) {
+      const services = await ctx.db
+        .query("services")
+        .withIndex("by_orgId", (q) => q.eq("orgId", user.orgId))
+        .take(100);
+      const activeServices = services.filter((s) => s.status === "active");
+
+      for (const service of activeServices) {
+        // Check for existing assignment to avoid duplicates
+        const existing = await ctx.db
+          .query("therapistServices")
+          .withIndex("by_therapistId_and_serviceId", (q) =>
+            q.eq("therapistId", user._id).eq("serviceId", service._id),
+          )
+          .unique();
+        if (!existing) {
+          await ctx.db.insert("therapistServices", {
+            therapistId: user._id,
+            serviceId: service._id,
+            orgId: user.orgId,
+          });
+        }
+      }
+    }
   },
 });
