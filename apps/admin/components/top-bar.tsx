@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
-import { useActiveOrganization, useSession, signOut } from "@/lib/auth-client";
+import { useSession, signOut } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { Avatar, AvatarFallback } from "@openschedule/ui/components/avatar";
 import {
@@ -13,8 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@openschedule/ui/components/dropdown-menu";
-import { ArrowLeft, ChevronDown, Settings, LogOut } from "lucide-react";
+import { ChevronsUpDown, Check, Settings, LogOut } from "lucide-react";
 import { NotificationBell } from "./notification-bell";
+import { cn } from "@openschedule/ui/lib/utils";
 
 interface TopBarProps {
   className?: string;
@@ -22,7 +22,6 @@ interface TopBarProps {
 
 export function TopBar({ className }: TopBarProps) {
   const router = useRouter();
-  const { data: activeOrg } = useActiveOrganization();
   const { data: session } = useSession();
   const params = useParams<{ orgSlug: string; venueSlug: string }>();
   const orgSlug = params.orgSlug;
@@ -32,17 +31,14 @@ export function TopBar({ className }: TopBarProps) {
     convexApi.queries.organizations.getBySlug,
     orgSlug ? { slug: orgSlug } : "skip",
   );
-  const venue = useQuery(
-    convexApi.queries.venues.getBySlugFull,
-    org && venueSlug ? { orgId: org._id, slug: venueSlug } : "skip",
-  );
   const venues = useQuery(
     convexApi.queries.venues.listByOrg,
     org ? { orgId: org._id } : "skip",
   );
 
-  const orgName = activeOrg?.name ?? org?.name ?? "Organization";
-  const venueName = venue?.name ?? venueSlug;
+  const currentVenue = venues?.find((v) => v.slug === venueSlug);
+  const label = currentVenue?.name ?? "All Venues";
+
   const userName = session?.user?.name ?? "U";
   const initials = userName
     .split(" ")
@@ -50,57 +46,51 @@ export function TopBar({ className }: TopBarProps) {
     .join("")
     .slice(0, 2)
     .toUpperCase();
-  const hasMultipleVenues = venues && venues.length > 1;
 
   async function handleSignOut() {
     await signOut();
     router.push("/login");
   }
 
-  function handleVenueSwitch(targetSlug: string) {
-    router.push(`/${orgSlug}/venues/${targetSlug}`);
+  function handleVenueSwitch(slug: string) {
+    router.push(`/${orgSlug}/venues/${slug}`);
+  }
+
+  function handleAllVenues() {
+    router.push(`/${orgSlug}`);
   }
 
   return (
-    <header className={`flex h-14 items-center justify-between border-b px-4 ${className ?? ""}`}>
-      {/* Left: back arrow + org logo + venue switcher */}
-      <div className="flex items-center gap-3">
-        <Link
-          href={`/${orgSlug}`}
-          className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent"
-          aria-label="Back to organization"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background text-xs font-bold">
-          {orgName.charAt(0).toUpperCase()}
-        </div>
-        <div className="flex items-center gap-1">
-          {hasMultipleVenues ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-foreground/80">
-                {venueName}
-                <ChevronDown className="h-3 w-3" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {venues.map((v) => (
-                  <DropdownMenuItem
-                    key={v._id}
-                    onClick={() => handleVenueSwitch(v.slug)}
-                    className={v.slug === venueSlug ? "font-semibold" : ""}
-                  >
-                    {v.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <span className="text-sm font-medium">{venueName}</span>
-          )}
-        </div>
-      </div>
+    <header className={cn("flex h-14 items-center justify-between border-b px-4", className)}>
+      {/* Left: venue switcher */}
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium hover:bg-accent/50 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          {label}
+          <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[200px]">
+          <DropdownMenuItem
+            onClick={handleAllVenues}
+            className="flex items-center justify-between"
+          >
+            <span>All Venues</span>
+            {!venueSlug && <Check className="h-4 w-4 shrink-0" />}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {(venues ?? []).map((venue) => (
+            <DropdownMenuItem
+              key={venue._id}
+              onClick={() => handleVenueSwitch(venue.slug)}
+              className="flex items-center justify-between"
+            >
+              <span className="truncate">{venue.name}</span>
+              {venue.slug === venueSlug && <Check className="h-4 w-4 shrink-0" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      {/* Right: notifications + avatar dropdown */}
+      {/* Right: notifications + avatar */}
       <div className="flex items-center gap-1">
         <NotificationBell />
         <DropdownMenu>
@@ -118,10 +108,10 @@ export function TopBar({ className }: TopBarProps) {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/account" className="flex items-center gap-2">
+              <a href="/account" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 Account Settings
-              </Link>
+              </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-destructive">

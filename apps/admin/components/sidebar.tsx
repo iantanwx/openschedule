@@ -9,8 +9,6 @@ import { convexApi } from "@/lib/convex-api";
 import { getVisibleOrgLinks } from "@/lib/nav/org-links";
 import { getVisibleVenueTabs } from "@/lib/nav/venue-tabs";
 import { OrgSwitcher } from "./org-switcher";
-import { VenueSwitcherBar } from "./venue-switcher-bar";
-import { NotificationBell } from "./notification-bell";
 
 interface SidebarProps {
   className?: string;
@@ -39,11 +37,6 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Org switcher */}
       <div className="border-b px-2 py-2">
         <OrgSwitcher />
-      </div>
-
-      {/* Venue switcher */}
-      <div className="border-b px-2 py-2">
-        <VenueSwitcherBar className="" />
       </div>
 
       {/* Nav links */}
@@ -90,10 +83,7 @@ export function Sidebar({ className }: SidebarProps) {
       </nav>
 
       {/* Bottom section */}
-      <div className="border-t px-2 py-2 space-y-1">
-        <div className="flex items-center justify-between px-2 py-1">
-          <NotificationBell />
-        </div>
+      <div className="border-t px-2 py-2">
         <Link
           href="/account"
           className={cn(
