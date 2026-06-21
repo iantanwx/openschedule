@@ -34,8 +34,8 @@ export function Sidebar({ className }: SidebarProps) {
         className,
       )}
     >
-      {/* Org switcher */}
-      <div className="border-b px-2 py-2">
+      {/* Org switcher — matches top bar h-14 */}
+      <div className="flex h-14 items-center border-b px-2">
         <OrgSwitcher />
       </div>
 
