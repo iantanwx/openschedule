@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@openschedule/ui/globals.css";
 import { ConvexClientProvider } from "@/components/convex-provider";
 import { cn } from "@openschedule/ui/lib/utils";
+import { Toaster } from "sonner";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -24,6 +25,7 @@ export default function RootLayout({
     >
       <body>
         <ConvexClientProvider>{children}</ConvexClientProvider>
+        <Toaster position="top-right" />
       </body>
     </html>
   );

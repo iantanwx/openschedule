@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@openschedule/ui/components/dropdown-menu";
 import { ArrowLeft, ChevronDown, Settings, LogOut } from "lucide-react";
+import { NotificationBell } from "./notification-bell";
 
 interface TopBarProps {
   className?: string;
@@ -99,34 +100,37 @@ export function TopBar({ className }: TopBarProps) {
         </div>
       </div>
 
-      {/* Right: avatar dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button aria-label="User menu" className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <div className="px-2 py-1.5">
-            <p className="text-sm font-medium">{userName}</p>
-            <p className="text-xs text-muted-foreground">{session?.user?.email}</p>
-          </div>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/account" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Account Settings
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-destructive">
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Right: notifications + avatar dropdown */}
+      <div className="flex items-center gap-1">
+        <NotificationBell />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button aria-label="User menu" className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium">{userName}</p>
+              <p className="text-xs text-muted-foreground">{session?.user?.email}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/account" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Account Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-destructive">
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   );
 }

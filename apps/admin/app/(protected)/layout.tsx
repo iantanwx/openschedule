@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { useEffect } from "react";
+import { NotificationToast } from "@/components/notification-toast";
 
 export default function ProtectedLayout({
   children,
@@ -30,5 +31,10 @@ export default function ProtectedLayout({
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <NotificationToast />
+      {children}
+    </>
+  );
 }
