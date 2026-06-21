@@ -30,7 +30,7 @@ export function BookingCard({ booking, onTap }: BookingCardProps) {
 
   return (
     <Card
-      className="cursor-pointer transition-shadow hover:shadow-md"
+      className="cursor-pointer transition-colors hover:border-foreground/30"
       onClick={() => onTap(booking._id)}
       role="button"
       tabIndex={0}

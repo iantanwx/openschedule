@@ -97,7 +97,7 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
         showTherapistFilter={isOwner || (isTherapist && viewScope === "all")}
       />
 
-      <div className="flex-1 space-y-2 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 space-y-2 overflow-y-auto px-4 pt-2 pb-4">
         {filteredBookings.length === 0 ? (
           <p className="pt-8 text-center text-sm text-muted-foreground">
             No bookings match your filters.
