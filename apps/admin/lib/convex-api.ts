@@ -248,6 +248,19 @@ export const convexApi = api as unknown as {
         connectedAt: number;
       } | null>;
     };
+    notifications: {
+      listRecent: FunctionReference<"query", "public", { limit?: number }, Array<{
+        _id: string;
+        _creationTime: number;
+        recipientId: string;
+        type: "booking_created" | "booking_cancelled" | "booking_rescheduled" | "therapist_joined";
+        orgId: string;
+        payload: Record<string, unknown>;
+        read: boolean;
+        createdAt: number;
+      }>>;
+      unreadCount: FunctionReference<"query", "public", Record<string, never>, number>;
+    };
   };
   mutations: {
     bookings: {
@@ -363,6 +376,10 @@ export const convexApi = api as unknown as {
         expiresAt: number;
       }, string>;
       disconnect: FunctionReference<"mutation", "public", Record<string, never>, void>;
+    };
+    notifications: {
+      markRead: FunctionReference<"mutation", "public", { id: string }, void>;
+      markAllRead: FunctionReference<"mutation", "public", Record<string, never>, void>;
     };
     generateUploadUrl: {
       generateUploadUrl: FunctionReference<"mutation", "public", Record<string, never>, string>;
