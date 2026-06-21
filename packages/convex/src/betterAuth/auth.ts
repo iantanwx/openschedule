@@ -9,6 +9,7 @@ import { components } from "../_generated/api";
 import { internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
+import { createNotificationsForOwners } from "../lib/notifications";
 import schema from "./schema";
 
 export const authComponent = createClient<DataModel, typeof schema>(
@@ -147,6 +148,18 @@ export const authComponent = createClient<DataModel, typeof schema>(
                 });
               }
             }
+          }
+
+          // Notify owners about new therapist
+          if (newRole === "therapist") {
+            await createNotificationsForOwners(ctx, {
+              orgId: org._id,
+              type: "therapist_joined",
+              payload: {
+                therapistName: user.name,
+                therapistId: user._id,
+              },
+            });
           }
         },
         onUpdate: async (ctx, doc) => {

@@ -130,6 +130,22 @@ export default defineSchema({
     .index("by_scopeId", ["scopeId"])
     .index("by_scopeId_and_provider", ["scopeId", "provider"]),
 
+  notifications: defineTable({
+    recipientId: v.id("users"),
+    type: v.union(
+      v.literal("booking_created"),
+      v.literal("booking_cancelled"),
+      v.literal("booking_rescheduled"),
+      v.literal("therapist_joined"),
+    ),
+    orgId: v.id("organizations"),
+    payload: v.any(),
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_recipientId_and_createdAt", ["recipientId", "createdAt"])
+    .index("by_recipientId_and_read", ["recipientId", "read"]),
+
   users: defineTable({
     authId: v.string(),
     email: v.string(),

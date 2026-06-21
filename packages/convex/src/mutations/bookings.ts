@@ -5,6 +5,7 @@ import { timeRangesOverlap } from "../lib/time";
 import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 import { performCancel } from "../lib/bookings";
 import { hasRole, Role } from "../lib/roles";
+import { createNotification, createNotificationsForOwners } from "../lib/notifications";
 
 export const create = mutation({
   args: {
@@ -115,6 +116,51 @@ export const create = mutation({
       internal.actions.syncCalendarEvent.send,
       { bookingId, action: "create" },
     );
+
+    // In-app notifications
+    const customer = await ctx.db.get(args.customerId);
+    const service = args.serviceId ? await ctx.db.get(args.serviceId) : null;
+    const notifPayload = {
+      bookingId,
+      customerName: customer?.name ?? "Unknown",
+      date: args.date,
+      startTime: args.startTime,
+      serviceName: service?.name ?? "Appointment",
+    };
+
+    // Determine if creator should be excluded (admin-created bookings)
+    let excludeUserId: typeof args.therapistId | undefined;
+    if (args.createdBy === "owner" || args.createdBy === "therapist") {
+      const identity = await ctx.auth.getUserIdentity();
+      if (identity) {
+        const actorUser = await ctx.db
+          .query("users")
+          .withIndex("by_authId", (q) => q.eq("authId", identity.subject))
+          .unique();
+        if (actorUser) {
+          excludeUserId = actorUser._id;
+        }
+      }
+    }
+
+    // Notify the assigned therapist (unless they created it themselves)
+    if (args.therapistId !== excludeUserId) {
+      await createNotification(ctx, {
+        recipientId: args.therapistId,
+        type: "booking_created",
+        orgId: venue.orgId,
+        payload: notifPayload,
+      });
+    }
+
+    // Notify all owners (excluding the actor if they're an owner)
+    await createNotificationsForOwners(ctx, {
+      orgId: venue.orgId,
+      type: "booking_created",
+      payload: notifPayload,
+      excludeUserId,
+    });
+
     return bookingId;
   },
 });
@@ -169,6 +215,35 @@ export const cancel = mutation({
     }
 
     await performCancel(ctx, args.id);
+
+    // In-app notifications for cancellation
+    const cancelledBooking = await ctx.db.get(args.id);
+    if (cancelledBooking) {
+      const cancelCustomer = await ctx.db.get(cancelledBooking.customerId);
+      const cancelVenue = await ctx.db.get(cancelledBooking.venueId);
+      const cancelPayload = {
+        bookingId: args.id,
+        customerName: cancelCustomer?.name ?? "Unknown",
+        date: cancelledBooking.date,
+        startTime: cancelledBooking.startTime,
+      };
+      if (cancelVenue) {
+        if (cancelledBooking.therapistId !== user._id) {
+          await createNotification(ctx, {
+            recipientId: cancelledBooking.therapistId,
+            type: "booking_cancelled",
+            orgId: cancelVenue.orgId,
+            payload: cancelPayload,
+          });
+        }
+        await createNotificationsForOwners(ctx, {
+          orgId: cancelVenue.orgId,
+          type: "booking_cancelled",
+          payload: cancelPayload,
+          excludeUserId: user._id,
+        });
+      }
+    }
   },
 });
 
@@ -183,6 +258,32 @@ export const cancelWithToken = mutation({
       throw new Error("Invalid or missing cancel token");
     }
     await performCancel(ctx, args.id);
+
+    // In-app notifications — customer cancelled, notify everyone
+    const tokenCancelledBooking = await ctx.db.get(args.id);
+    if (tokenCancelledBooking) {
+      const tokenCustomer = await ctx.db.get(tokenCancelledBooking.customerId);
+      const tokenVenue = await ctx.db.get(tokenCancelledBooking.venueId);
+      const tokenPayload = {
+        bookingId: args.id,
+        customerName: tokenCustomer?.name ?? "Unknown",
+        date: tokenCancelledBooking.date,
+        startTime: tokenCancelledBooking.startTime,
+      };
+      if (tokenVenue) {
+        await createNotification(ctx, {
+          recipientId: tokenCancelledBooking.therapistId,
+          type: "booking_cancelled",
+          orgId: tokenVenue.orgId,
+          payload: tokenPayload,
+        });
+        await createNotificationsForOwners(ctx, {
+          orgId: tokenVenue.orgId,
+          type: "booking_cancelled",
+          payload: tokenPayload,
+        });
+      }
+    }
   },
 });
 
@@ -275,5 +376,34 @@ export const reschedule = mutation({
       bookingId: args.id,
       action: "create",
     });
+
+    // In-app notification for reschedule
+    const rescheduledBooking = await ctx.db.get(args.id);
+    if (rescheduledBooking) {
+      const reschCustomer = await ctx.db.get(rescheduledBooking.customerId);
+      const reschPayload = {
+        bookingId: args.id,
+        customerName: reschCustomer?.name ?? "Unknown",
+        newDate: args.newDate,
+        newStartTime: args.newStartTime,
+        rescheduledBy: user.name,
+      };
+      // Notify the assigned therapist only if actor is different
+      if (rescheduledBooking.therapistId !== user._id) {
+        await createNotification(ctx, {
+          recipientId: rescheduledBooking.therapistId,
+          type: "booking_rescheduled",
+          orgId: venue.orgId,
+          payload: reschPayload,
+        });
+      }
+      // Notify owners (excluding the actor)
+      await createNotificationsForOwners(ctx, {
+        orgId: venue.orgId,
+        type: "booking_rescheduled",
+        payload: reschPayload,
+        excludeUserId: user._id,
+      });
+    }
   },
 });

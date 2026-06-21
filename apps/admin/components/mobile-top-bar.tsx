@@ -15,6 +15,7 @@ import {
 } from "@openschedule/ui/components/dropdown-menu";
 import { ArrowLeft, ChevronDown, Settings, LogOut } from "lucide-react";
 import { cn } from "@openschedule/ui/lib/utils";
+import { NotificationBell } from "./notification-bell";
 
 interface MobileTopBarProps {
   mode: "org" | "venue";
@@ -105,7 +106,12 @@ export function MobileTopBar({ mode, className }: MobileTopBarProps) {
           </span>
           <span className="text-sm font-semibold">{orgName}</span>
         </div>
-        <div className="flex flex-1 justify-end">{avatarDropdown}</div>
+        <div className="flex flex-1 justify-end">
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            {avatarDropdown}
+          </div>
+        </div>
       </header>
     );
   }
@@ -147,7 +153,12 @@ export function MobileTopBar({ mode, className }: MobileTopBarProps) {
           <span className="text-sm font-semibold">{venueName}</span>
         )}
       </div>
-      <div className="flex flex-1 justify-end">{avatarDropdown}</div>
+      <div className="flex flex-1 justify-end">
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          {avatarDropdown}
+        </div>
+      </div>
     </header>
   );
 }
