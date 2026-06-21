@@ -6,8 +6,8 @@ import { useQuery } from "convex/react";
 import { User } from "lucide-react";
 import { cn } from "@openschedule/ui/lib/utils";
 import { convexApi } from "@/lib/convex-api";
-import { useActiveOrganization } from "@/lib/auth-client";
 import { getVisibleOrgLinks } from "@/lib/nav/org-links";
+import { OrgSwitcher } from "./org-switcher";
 
 interface SidebarProps {
   className?: string;
@@ -18,14 +18,10 @@ export function Sidebar({ className }: SidebarProps) {
   const params = useParams<{ orgSlug: string }>();
   const orgSlug = params.orgSlug ?? "";
 
-  const { data: activeOrg } = useActiveOrganization();
   const currentUser = useQuery(convexApi.queries.users.getSelf);
 
   const isOwner = currentUser?.roles.includes("owner") ?? false;
   const visibleLinks = getVisibleOrgLinks(isOwner);
-
-  const orgName = activeOrg?.name ?? "Org";
-  const orgInitial = orgName.charAt(0).toUpperCase();
 
   return (
     <aside
@@ -34,16 +30,13 @@ export function Sidebar({ className }: SidebarProps) {
         className,
       )}
     >
-      {/* Org identity */}
-      <div className="flex items-center gap-2 px-4 py-4">
-        <span className="flex h-7 w-7 items-center justify-center rounded-sm bg-primary text-xs font-semibold text-primary-foreground">
-          {orgInitial}
-        </span>
-        <span className="truncate text-sm font-medium">{orgName}</span>
+      {/* Org switcher */}
+      <div className="border-b px-2 py-2">
+        <OrgSwitcher />
       </div>
 
       {/* Nav links */}
-      <nav className="flex flex-1 flex-col gap-1 px-2">
+      <nav className="flex flex-1 flex-col gap-1 px-2 pt-2">
         {visibleLinks.map((link) => {
           const Icon = link.icon;
           const active = link.isActive(pathname, orgSlug);
