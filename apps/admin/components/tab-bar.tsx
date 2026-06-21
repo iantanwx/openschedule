@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useParams } from "next/navigation";
+import { usePathname, useParams, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { Calendar, List, Clock, Settings } from "lucide-react";
@@ -53,6 +53,7 @@ interface TabBarProps {
 
 export function TabBar({ className }: TabBarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const params = useParams<{ orgSlug: string; venueSlug: string }>();
   const orgSlug = params.orgSlug;
   const venueSlug = params.venueSlug;
@@ -64,6 +65,15 @@ export function TabBar({ className }: TabBarProps) {
 
   const visibleTabs = tabs.filter((tab) => !tab.ownerOnly || isOwner);
 
+  function handleTodayClick(e: React.MouseEvent, tab: Tab) {
+    if (tab.label === "Today" && tab.match(pathname, base)) {
+      e.preventDefault();
+      // Already on Today — navigate to base (no ?date), triggering scroll-to-top + reset
+      router.push(base);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
   return (
     <nav className={`fixed inset-x-0 bottom-0 z-50 border-t bg-background ${className ?? ""}`}>
       <ul className="flex h-16 items-center justify-around">
@@ -74,6 +84,7 @@ export function TabBar({ className }: TabBarProps) {
             <li key={tab.label}>
               <Link
                 href={tab.href}
+                onClick={(e) => handleTodayClick(e, tab)}
                 className={`flex flex-col items-center gap-1 px-3 py-2 text-xs transition-colors ${
                   isActive
                     ? "text-foreground"
