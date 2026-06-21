@@ -1,28 +1,35 @@
 "use client"
 
+import Link from "next/link"
 import { useQuery } from "convex/react"
 import type { FunctionReference } from "convex/server"
 import { api } from "@openschedule/convex/api"
 import { Badge } from "@openschedule/ui/components/badge"
 import { Card } from "@openschedule/ui/components/card"
+import { ArrowLeft } from "lucide-react"
 
 // FilterApi doesn't fully resolve across package boundaries in monorepo .d.ts
 const convexApi = api as unknown as {
   queries: {
     bookings: { get: FunctionReference<"query"> }
     users: { getPublic: FunctionReference<"query"> }
+    organizations: { getBySlug: FunctionReference<"query"> }
   }
 }
 
 const bookingsGet = convexApi.queries.bookings.get
 const usersGetPublic = convexApi.queries.users.getPublic
+const orgGetBySlug = convexApi.queries.organizations.getBySlug
 
 interface BookingConfirmationProps {
   bookingId: string
+  orgSlug: string
+  venueSlug: string
 }
 
-export function BookingConfirmation({ bookingId }: BookingConfirmationProps) {
+export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingConfirmationProps) {
   const booking = useQuery(bookingsGet, { id: bookingId })
+  const org = useQuery(orgGetBySlug, { slug: orgSlug })
 
   if (booking === undefined) {
     return (
@@ -97,6 +104,16 @@ export function BookingConfirmation({ bookingId }: BookingConfirmationProps) {
           Need to cancel? Use the link in your booking confirmation email.
         </p>
       )}
+
+      <div className="text-center">
+        <Link
+          href={`/${orgSlug}/${venueSlug}`}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to {org?.name ?? "booking"}
+        </Link>
+      </div>
     </div>
   )
 }

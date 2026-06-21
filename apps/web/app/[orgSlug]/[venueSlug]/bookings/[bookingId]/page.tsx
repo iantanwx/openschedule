@@ -5,6 +5,6 @@ interface PageProps {
 }
 
 export default async function BookingDetailPage({ params }: PageProps) {
-  const { bookingId } = await params
-  return <ConfirmationPage bookingId={bookingId} />
+  const { orgSlug, venueSlug, bookingId } = await params
+  return <ConfirmationPage bookingId={bookingId} orgSlug={orgSlug} venueSlug={venueSlug} />
 }

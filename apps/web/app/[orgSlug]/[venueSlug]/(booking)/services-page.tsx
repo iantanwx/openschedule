@@ -58,7 +58,7 @@ export function ServicesPage({ orgSlug, venueSlug }: ServicesPageProps) {
           Select a service to view available times
         </p>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {(services as Array<{ _id: string; slug: string; name: string; description: string; duration: number; price: number; color: string }>).map((service) => (
           <ServiceCard
             key={service._id}
