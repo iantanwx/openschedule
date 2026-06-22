@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { format, addDays } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
+import { useViewScope } from "@/lib/hooks/use-view-scope";
 import { FilterBar } from "./filter-bar";
 import { BookingCard } from "./booking-card";
 import { BookingDetailModal } from "./booking-detail-modal";
@@ -21,7 +22,6 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [therapistFilter, setTherapistFilter] = useState<string | null>(null);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-  const [viewScope, setViewScope] = useState<"my" | "all">("my");
 
   const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
@@ -44,37 +44,26 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
     venue ? { venueId: venue._id, startDate: today, endDate } : "skip",
   );
 
-  const isTherapist = currentUser?.roles.includes("therapist") ?? false;
-  const isOwner = currentUser?.roles.includes("owner") ?? false;
-  const isReadOnly = !isOwner;
+  const { viewScope, setViewScope, showToggle, showTherapistFilter, isReadOnly, filteredByScope } =
+    useViewScope({ currentUser, bookings });
 
-  // Client-side filtering
+  // Additional client-side filtering (status + therapist dropdown)
   const filteredBookings = useMemo(() => {
-    if (!bookings) return [];
-
-    let filtered = bookings;
-
-    // Scope by role
-    if (!isOwner && currentUser) {
-      // Pure therapists always see only their own
-      filtered = filtered.filter((b) => b.therapistId === currentUser._id);
-    } else if (isOwner && viewScope === "my" && currentUser) {
-      // Owner in "My" view sees only their own
-      filtered = filtered.filter((b) => b.therapistId === currentUser._id);
-    }
-
-    return filtered
+    return filteredByScope
       .filter((b) => {
         if (statusFilter !== "all" && b.status !== statusFilter) return false;
         if (therapistFilter && b.therapistId !== therapistFilter) return false;
         return true;
       })
       .sort((a, b) => {
-        // Sort by date descending, then startTime descending
-        if (a.date !== b.date) return b.date.localeCompare(a.date);
-        return b.startTime.localeCompare(a.startTime);
+        const dateA = a.date as string;
+        const dateB = b.date as string;
+        const startA = a.startTime as string;
+        const startB = b.startTime as string;
+        if (dateA !== dateB) return dateB.localeCompare(dateA);
+        return startB.localeCompare(startA);
       });
-  }, [bookings, statusFilter, therapistFilter, isTherapist, viewScope, currentUser]);
+  }, [filteredByScope, statusFilter, therapistFilter]);
 
   if (!org || !venue) {
     return (
@@ -87,7 +76,7 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 px-4 pt-2">
-        {isOwner && (
+        {showToggle && (
           <ViewToggle value={viewScope} onChange={setViewScope} />
         )}
       </div>
@@ -98,7 +87,7 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
         therapistId={therapistFilter}
         onTherapistChange={setTherapistFilter}
         therapists={therapists ?? []}
-        showTherapistFilter={isOwner && viewScope === "all"}
+        showTherapistFilter={showTherapistFilter}
       />
 
       <div className="flex-1 space-y-2 overflow-y-auto px-4 pt-2 pb-4">
@@ -109,8 +98,8 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
         ) : (
           filteredBookings.map((booking) => (
             <BookingCard
-              key={booking._id}
-              booking={booking}
+              key={booking._id as string}
+              booking={booking as any}
               onTap={setSelectedBookingId}
             />
           ))

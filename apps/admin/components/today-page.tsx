@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { format, addDays, subDays } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
+import { useViewScope } from "@/lib/hooks/use-view-scope";
 import { TimeGrid } from "./time-grid";
 import { DayNav } from "./day-nav";
 import { BookingDetailModal } from "./booking-detail-modal";
@@ -27,7 +28,6 @@ export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
   const selectedDate = dateParam ?? format(new Date(), "yyyy-MM-dd");
 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-  const [viewScope, setViewScope] = useState<"my" | "all">("my");
 
   const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
@@ -41,24 +41,8 @@ export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
     venue ? { venueId: venue._id, date: selectedDate } : "skip",
   );
 
-  const isTherapist = currentUser?.roles.includes("therapist") ?? false;
-  const isOwner = currentUser?.roles.includes("owner") ?? false;
-
-  // For therapists in "my" view, filter to only their bookings
-  const displayedBookings = useMemo(() => {
-    if (!bookings) return [];
-    if (isOwner || (isTherapist && viewScope === "all")) {
-      return bookings;
-    }
-    // Therapist "my" view
-    if (isTherapist && currentUser) {
-      return bookings.filter((b) => b.therapistId === currentUser._id);
-    }
-    return bookings;
-  }, [bookings, isOwner, isTherapist, viewScope, currentUser]);
-
-  // Read-only mode: therapist viewing "all"
-  const isReadOnly = isTherapist && viewScope === "all";
+  const { viewScope, setViewScope, showToggle, isReadOnly, filteredByScope: displayedBookings } =
+    useViewScope({ currentUser, bookings });
 
   // Scroll to top when date resets (navigating to base without ?date)
   useEffect(() => {
@@ -112,7 +96,7 @@ export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
 
       {/* View toggle + stats banner */}
       <div className="flex items-center gap-2 px-4 pb-2">
-        {isTherapist && (
+        {showToggle && (
           <ViewToggle value={viewScope} onChange={setViewScope} />
         )}
         <Badge variant="secondary">{activeBookings.length} bookings</Badge>
