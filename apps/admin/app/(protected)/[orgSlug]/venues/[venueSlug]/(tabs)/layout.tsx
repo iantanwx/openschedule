@@ -6,9 +6,9 @@ export default function VenueTabsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <div className="flex-1 pb-16 md:pb-0">{children}</div>
+    <div className="flex h-full flex-col">
+      <div className="min-h-0 flex-1">{children}</div>
       <TabBar className="md:hidden" />
-    </>
+    </div>
   );
 }
