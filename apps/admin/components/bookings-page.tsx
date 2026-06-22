@@ -94,7 +94,7 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
         therapistId={therapistFilter}
         onTherapistChange={setTherapistFilter}
         therapists={therapists ?? []}
-        showTherapistFilter={isTherapist ? viewScope === "all" : isOwner}
+        showTherapistFilter={!isTherapist || viewScope === "all"}
       />
 
       <div className="flex-1 space-y-2 overflow-y-auto px-4 pt-2 pb-4">
