@@ -20,6 +20,7 @@ export const get = query({
       status: booking.status,
       createdBy: booking.createdBy,
       overCapacity: booking.overCapacity,
+      serviceId: booking.serviceId,
     };
   },
 });
@@ -46,6 +47,7 @@ export const listByVenueAndDate = query({
         status,
         createdBy,
         overCapacity,
+        serviceId,
       }) => ({
         _id,
         _creationTime,
@@ -58,6 +60,7 @@ export const listByVenueAndDate = query({
         status,
         createdBy,
         overCapacity,
+        serviceId,
       }),
     );
   },
@@ -92,6 +95,7 @@ export const listByTherapistAndDateRange = query({
         status,
         createdBy,
         overCapacity,
+        serviceId,
       }) => ({
         _id,
         _creationTime,
@@ -104,6 +108,7 @@ export const listByTherapistAndDateRange = query({
         status,
         createdBy,
         overCapacity,
+        serviceId,
       }),
     );
   },
@@ -130,6 +135,7 @@ export const listByCustomer = query({
         status,
         createdBy,
         overCapacity,
+        serviceId,
       }) => ({
         _id,
         _creationTime,
@@ -142,6 +148,7 @@ export const listByCustomer = query({
         status,
         createdBy,
         overCapacity,
+        serviceId,
       }),
     );
   },
@@ -176,6 +183,7 @@ export const listByVenueDateRange = query({
         status,
         createdBy,
         overCapacity,
+        serviceId,
       }) => ({
         _id,
         _creationTime,
@@ -188,6 +196,7 @@ export const listByVenueDateRange = query({
         status,
         createdBy,
         overCapacity,
+        serviceId,
       }),
     );
   },

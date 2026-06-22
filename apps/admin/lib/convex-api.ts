@@ -88,6 +88,7 @@ export const convexApi = api as unknown as {
         status: "pending" | "confirmed" | "cancelled";
         createdBy: "customer" | "therapist" | "owner";
         overCapacity: boolean;
+        serviceId?: string;
       }>>;
       listByVenueDateRange: FunctionReference<"query", "public", { venueId: string; startDate: string; endDate: string }, Array<{
         _id: string;
@@ -101,6 +102,7 @@ export const convexApi = api as unknown as {
         status: "pending" | "confirmed" | "cancelled";
         createdBy: "customer" | "therapist" | "owner";
         overCapacity: boolean;
+        serviceId?: string;
       }>>;
       statsByOrg: FunctionReference<"query", "public", { orgId: string; date: string }, {
         total: number;
