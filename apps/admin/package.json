@@ -16,6 +16,7 @@
     "@openschedule/convex": "workspace:*",
     "@openschedule/lib": "workspace:*",
     "@openschedule/ui": "workspace:*",
+    "@react-google-maps/api": "^2.20.8",
     "better-auth": "^1.6.0",
     "convex": "^1.21.0",
     "date-fns": "^4.4.0",
