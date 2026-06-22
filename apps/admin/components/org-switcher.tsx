@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient, useActiveOrganization } from "@/lib/auth-client";
 import { ChevronsUpDown, Check, Plus } from "lucide-react";
@@ -39,15 +40,33 @@ export function OrgSwitcher() {
     router.push(`/${org.slug}`);
   }
 
+  const activeSlug = activeOrg?.slug ?? orgs[0]?.slug;
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-accent/50 outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-primary text-xs font-semibold text-primary-foreground">
-          {orgInitial}
-        </span>
-        <span className="flex-1 truncate text-sm font-medium">{orgName}</span>
-        <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-      </DropdownMenuTrigger>
+    <div className="flex w-full items-center gap-2 px-2 py-2">
+      {activeSlug ? (
+        <Link
+          href={`/${activeSlug}`}
+          className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+          aria-label="Go to organization home"
+        >
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-primary text-xs font-semibold text-primary-foreground">
+            {orgInitial}
+          </span>
+          <span className="flex-1 truncate text-sm font-medium">{orgName}</span>
+        </Link>
+      ) : (
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-primary text-xs font-semibold text-primary-foreground">
+            {orgInitial}
+          </span>
+          <span className="flex-1 truncate text-sm font-medium">{orgName}</span>
+        </div>
+      )}
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex shrink-0 items-center justify-center rounded-md p-1 hover:bg-accent/50 outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Switch organization">
+          <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+        </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[180px]">
         {orgs.map((org) => (
           <DropdownMenuItem
@@ -65,6 +84,7 @@ export function OrgSwitcher() {
           Create Organization
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenu>
+    </div>
   );
 }
