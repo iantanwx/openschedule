@@ -1,9 +1,7 @@
 "use client";
 
-import { LoadScript } from "@react-google-maps/api";
+import { APIProvider } from "@vis.gl/react-google-maps";
 import type { ReactNode } from "react";
-
-const LIBRARIES: ("places")[] = ["places"];
 
 interface GoogleMapsProviderProps {
   children: ReactNode;
@@ -17,8 +15,8 @@ export function GoogleMapsProvider({ children }: GoogleMapsProviderProps) {
   }
 
   return (
-    <LoadScript googleMapsApiKey={apiKey} libraries={LIBRARIES}>
+    <APIProvider apiKey={apiKey}>
       {children}
-    </LoadScript>
+    </APIProvider>
   );
 }

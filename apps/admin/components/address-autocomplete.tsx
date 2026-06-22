@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useCallback } from "react";
-import { Autocomplete } from "@react-google-maps/api";
+import { useRef, useEffect, useCallback, useState } from "react";
+import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { Input } from "@openschedule/ui/components/input";
 
 interface AddressAutocompleteProps {
@@ -12,14 +12,17 @@ interface AddressAutocompleteProps {
 }
 
 export function AddressAutocomplete({ value, onChange, placeholder, id }: AddressAutocompleteProps) {
+  const places = useMapsLibrary("places");
+  const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const [inputValue, setInputValue] = useState(value);
 
-  const onLoad = useCallback((autocomplete: google.maps.places.Autocomplete) => {
-    autocompleteRef.current = autocomplete;
-  }, []);
+  // Sync external value changes
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
 
-  const onPlaceChanged = useCallback(() => {
+  const handlePlaceChanged = useCallback(() => {
     const place = autocompleteRef.current?.getPlace();
     if (!place) return;
 
@@ -29,10 +32,29 @@ export function AddressAutocomplete({ value, onChange, placeholder, id }: Addres
       ? { lat: location.lat(), lng: location.lng() }
       : null;
 
+    setInputValue(formattedAddress);
     onChange(formattedAddress, coordinates);
   }, [onChange]);
 
-  // Fallback to plain input if no API key
+  useEffect(() => {
+    if (!places || !inputRef.current) return;
+
+    // Create autocomplete instance once the places library is loaded
+    const autocomplete = new places.Autocomplete(inputRef.current, {
+      fields: ["formatted_address", "geometry"],
+    });
+    autocomplete.addListener("place_changed", handlePlaceChanged);
+    autocompleteRef.current = autocomplete;
+
+    return () => {
+      google.maps.event.clearInstanceListeners(autocomplete);
+      autocompleteRef.current = null;
+    };
+  }, [places, handlePlaceChanged]);
+
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  // Fallback to plain input if no API key (APIProvider won't load)
   if (!apiKey) {
     return (
       <Input
@@ -45,13 +67,15 @@ export function AddressAutocomplete({ value, onChange, placeholder, id }: Addres
   }
 
   return (
-    <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
-      <Input
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value, null)}
-        placeholder={placeholder ?? "Start typing an address..."}
-      />
-    </Autocomplete>
+    <Input
+      ref={inputRef}
+      id={id}
+      value={inputValue}
+      onChange={(e) => {
+        setInputValue(e.target.value);
+        onChange(e.target.value, null);
+      }}
+      placeholder={placeholder ?? "Start typing an address..."}
+    />
   );
 }

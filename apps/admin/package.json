@@ -16,7 +16,7 @@
     "@openschedule/convex": "workspace:*",
     "@openschedule/lib": "workspace:*",
     "@openschedule/ui": "workspace:*",
-    "@react-google-maps/api": "^2.20.8",
+    "@vis.gl/react-google-maps": "^1.8.3",
     "better-auth": "^1.6.0",
     "convex": "^1.21.0",
     "date-fns": "^4.4.0",
@@ -33,6 +33,7 @@
   "devDependencies": {
     "@openschedule/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4",
+    "@types/google.maps": "^3.65.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19"
