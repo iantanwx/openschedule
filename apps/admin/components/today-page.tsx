@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { format, addDays, subDays } from "date-fns";
@@ -12,6 +12,13 @@ import { BookingDetailModal } from "./booking-detail-modal";
 import { Fab } from "./fab";
 import { ViewToggle } from "./view-toggle";
 import { Badge } from "@openschedule/ui/components/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@openschedule/ui/components/select";
 
 interface TodayPageProps {
   orgSlug: string;
@@ -28,6 +35,7 @@ export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
   const selectedDate = dateParam ?? format(new Date(), "yyyy-MM-dd");
 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [therapistFilter, setTherapistFilter] = useState<string | null>(null);
 
   const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
@@ -41,8 +49,18 @@ export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
     venue ? { venueId: venue._id, date: selectedDate } : "skip",
   );
 
-  const { viewScope, setViewScope, showToggle, isReadOnly, filteredByScope: displayedBookings } =
+  const therapists = useQuery(
+    convexApi.queries.users.listByVenue,
+    venue ? { venueId: venue._id } : "skip",
+  );
+
+  const { viewScope, setViewScope, showToggle, showTherapistFilter, isReadOnly, filteredByScope } =
     useViewScope({ currentUser, bookings });
+
+  const displayedBookings = useMemo(() => {
+    if (!therapistFilter) return filteredByScope;
+    return filteredByScope.filter((b) => b.therapistId === therapistFilter);
+  }, [filteredByScope, therapistFilter]);
 
   // Scroll to top when date resets (navigating to base without ?date)
   useEffect(() => {
@@ -98,6 +116,24 @@ export function TodayPage({ orgSlug, venueSlug }: TodayPageProps) {
       <div className="flex items-center gap-2 px-4 pb-2">
         {showToggle && (
           <ViewToggle value={viewScope} onChange={setViewScope} />
+        )}
+        {showTherapistFilter && (
+          <Select
+            value={therapistFilter ?? "all"}
+            onValueChange={(val) => setTherapistFilter(val === "all" ? null : val)}
+          >
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="All therapists" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All therapists</SelectItem>
+              {(therapists ?? []).map((t) => (
+                <SelectItem key={t._id} value={t._id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
         <Badge variant="secondary">{activeBookings.length} bookings</Badge>
         <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">
