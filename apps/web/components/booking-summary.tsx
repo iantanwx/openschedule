@@ -5,6 +5,7 @@ import type { FunctionReference } from "convex/server"
 import { useParams, useSearchParams } from "next/navigation"
 import { api } from "@openschedule/convex/api"
 import { Skeleton } from "@openschedule/ui/components/skeleton"
+import { VenueMap } from "./venue-map"
 
 // FilterApi doesn't fully resolve across package boundaries in monorepo .d.ts
 // Cast through unknown to a concrete shape matching the actual generated API
@@ -66,6 +67,18 @@ export function BookingSummary({ orgSlug, venueSlug }: BookingSummaryProps) {
         <div className="mt-2">
           <p className="text-sm font-medium">{formatDate(date)}</p>
           {time && <p className="text-sm text-muted-foreground">{formatTime(time)}</p>}
+        </div>
+      )}
+
+      {venue.address && venue.coordinates && (
+        <div className="mt-4 border-t pt-3">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Location</p>
+          <VenueMap
+            address={venue.address}
+            coordinates={venue.coordinates as { lat: number; lng: number }}
+            venueName={venue.name}
+            height={120}
+          />
         </div>
       )}
     </div>
