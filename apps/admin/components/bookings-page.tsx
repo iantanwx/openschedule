@@ -46,7 +46,7 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
 
   const isTherapist = currentUser?.roles.includes("therapist") ?? false;
   const isOwner = currentUser?.roles.includes("owner") ?? false;
-  const isReadOnly = isTherapist && viewScope === "all";
+  const isReadOnly = !isOwner;
 
   // Client-side filtering
   const filteredBookings = useMemo(() => {
@@ -55,7 +55,11 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
     let filtered = bookings;
 
     // Scope by role
-    if (isTherapist && viewScope === "my" && currentUser) {
+    if (!isOwner && currentUser) {
+      // Pure therapists always see only their own
+      filtered = filtered.filter((b) => b.therapistId === currentUser._id);
+    } else if (isOwner && viewScope === "my" && currentUser) {
+      // Owner in "My" view sees only their own
       filtered = filtered.filter((b) => b.therapistId === currentUser._id);
     }
 
@@ -83,7 +87,7 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 px-4 pt-2">
-        {isTherapist && (
+        {isOwner && (
           <ViewToggle value={viewScope} onChange={setViewScope} />
         )}
       </div>
@@ -94,7 +98,7 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
         therapistId={therapistFilter}
         onTherapistChange={setTherapistFilter}
         therapists={therapists ?? []}
-        showTherapistFilter={!isTherapist || viewScope === "all"}
+        showTherapistFilter={isOwner && viewScope === "all"}
       />
 
       <div className="flex-1 space-y-2 overflow-y-auto px-4 pt-2 pb-4">
