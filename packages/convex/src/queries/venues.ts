@@ -10,8 +10,8 @@ export const listByOrg = query({
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
     const activeVenues = venues.filter((v) => v.status === "active");
-    return activeVenues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status }) => ({
-      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status,
+    return activeVenues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates }) => ({
+      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates,
     }));
   },
 });
@@ -24,7 +24,7 @@ export const listByOrgPublic = query({
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
     const activeVenues = venues.filter((v) => v.status === "active");
-    return activeVenues.map(({ _id, name, slug, timezone }) => ({ _id, name, slug, timezone }));
+    return activeVenues.map(({ _id, name, slug, timezone, address, coordinates }) => ({ _id, name, slug, timezone, address, coordinates }));
   },
 });
 
@@ -38,7 +38,7 @@ export const getBySlug = query({
       )
       .unique();
     if (!venue || venue.status !== "active") return null;
-    return { _id: venue._id, name: venue.name, slug: venue.slug, timezone: venue.timezone };
+    return { _id: venue._id, name: venue.name, slug: venue.slug, timezone: venue.timezone, address: venue.address, coordinates: venue.coordinates };
   },
 });
 
@@ -56,7 +56,7 @@ export const getBySlugFull = query({
       _id: venue._id, _creationTime: venue._creationTime, orgId: venue.orgId,
       name: venue.name, slug: venue.slug, timezone: venue.timezone,
       capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
-      status: venue.status,
+      status: venue.status, address: venue.address, coordinates: venue.coordinates,
     };
   },
 });
@@ -70,7 +70,7 @@ export const get = query({
       _id: venue._id, _creationTime: venue._creationTime, orgId: venue.orgId,
       name: venue.name, slug: venue.slug, timezone: venue.timezone,
       capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
-      status: venue.status,
+      status: venue.status, address: venue.address, coordinates: venue.coordinates,
     };
   },
 });
