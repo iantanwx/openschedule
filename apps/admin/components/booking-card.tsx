@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
+import { capitalize } from "@openschedule/lib/strings";
 import { Badge } from "@openschedule/ui/components/badge";
 import { Card, CardContent } from "@openschedule/ui/components/card";
 
@@ -59,7 +60,7 @@ export function BookingCard({ booking, onTap }: BookingCardProps) {
           </div>
         </div>
         <Badge className={STATUS_COLORS[booking.status]} variant="secondary">
-          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+          {capitalize(booking.status)}
         </Badge>
       </CardContent>
     </Card>

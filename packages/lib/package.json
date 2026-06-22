@@ -1,0 +1,16 @@
+{
+  "name": "@openschedule/lib",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@openschedule/typescript-config": "workspace:*",
+    "typescript": "^5.8.3"
+  }
+}

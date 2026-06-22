@@ -29,6 +29,9 @@ importers:
       '@openschedule/convex':
         specifier: workspace:*
         version: link:../../packages/convex
+      '@openschedule/lib':
+        specifier: workspace:*
+        version: link:../../packages/lib
       '@openschedule/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -176,6 +179,15 @@ importers:
       vitest:
         specifier: ^3.2.0
         version: 3.2.6(@edge-runtime/vm@4.0.4)(@types/node@20.19.41)(jiti@2.7.0)(lightningcss@1.32.0)
+
+  packages/lib:
+    devDependencies:
+      '@openschedule/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
 
   packages/typescript-config: {}
 
