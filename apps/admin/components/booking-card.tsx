@@ -59,7 +59,7 @@ export function BookingCard({ booking, onTap }: BookingCardProps) {
           </div>
         </div>
         <Badge className={STATUS_COLORS[booking.status]} variant="secondary">
-          {booking.status}
+          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
         </Badge>
       </CardContent>
     </Card>
