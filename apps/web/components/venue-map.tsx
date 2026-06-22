@@ -3,14 +3,17 @@
 interface VenueMapProps {
   address: string
   coordinates: { lat: number; lng: number }
+  placeId?: string
   venueName?: string
   height?: number
   showLink?: boolean
 }
 
-export function VenueMap({ address, coordinates, venueName, height = 120, showLink = false }: VenueMapProps) {
+export function VenueMap({ address, coordinates, placeId, venueName, height = 120, showLink = false }: VenueMapProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
+  const mapsUrl = placeId
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}&query_place_id=${placeId}`
+    : `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
 
   const staticMapUrl = apiKey
     ? `https://maps.googleapis.com/maps/api/staticmap?center=${coordinates.lat},${coordinates.lng}&zoom=15&size=600x${height * 2}&scale=2&markers=color:red|${coordinates.lat},${coordinates.lng}&key=${apiKey}`

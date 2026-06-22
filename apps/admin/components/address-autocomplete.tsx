@@ -6,7 +6,7 @@ import { Input } from "@openschedule/ui/components/input";
 
 interface AddressAutocompleteProps {
   value: string;
-  onChange: (address: string, coordinates: { lat: number; lng: number } | null) => void;
+  onChange: (address: string, coordinates: { lat: number; lng: number } | null, placeId: string | null) => void;
   placeholder?: string;
   id?: string;
 }
@@ -31,9 +31,10 @@ export function AddressAutocomplete({ value, onChange, placeholder, id }: Addres
     const coordinates = location
       ? { lat: location.lat(), lng: location.lng() }
       : null;
+    const placeId = place.place_id ?? null;
 
     setInputValue(formattedAddress);
-    onChange(formattedAddress, coordinates);
+    onChange(formattedAddress, coordinates, placeId);
   }, [onChange]);
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, id }: Addres
 
     // Create autocomplete instance once the places library is loaded
     const autocomplete = new places.Autocomplete(inputRef.current, {
-      fields: ["formatted_address", "geometry"],
+      fields: ["formatted_address", "geometry", "place_id"],
     });
     autocomplete.addListener("place_changed", handlePlaceChanged);
     autocompleteRef.current = autocomplete;
@@ -60,7 +61,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, id }: Addres
       <Input
         id={id}
         value={value}
-        onChange={(e) => onChange(e.target.value, null)}
+        onChange={(e) => onChange(e.target.value, null, null)}
         placeholder={placeholder ?? "Enter address"}
       />
     );
@@ -73,7 +74,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, id }: Addres
       value={inputValue}
       onChange={(e) => {
         setInputValue(e.target.value);
-        onChange(e.target.value, null);
+        onChange(e.target.value, null, null);
       }}
       placeholder={placeholder ?? "Start typing an address..."}
     />

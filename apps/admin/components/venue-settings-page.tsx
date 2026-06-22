@@ -51,6 +51,7 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
   const [dayEnd, setDayEnd] = useState("");
   const [address, setAddress] = useState("");
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [placeId, setPlaceId] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -68,6 +69,7 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
     setDayEnd(venue.dayEnd);
     setAddress(venue.address ?? "");
     setCoordinates(venue.coordinates ?? null);
+    setPlaceId(venue.placeId ?? null);
     setIsInitialized(true);
   }
 
@@ -100,6 +102,7 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
         dayEnd,
         address: address || undefined,
         coordinates: coordinates || undefined,
+        placeId: placeId || undefined,
       });
     } finally {
       setIsSaving(false);
@@ -186,9 +189,10 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
             <AddressAutocomplete
               id="venue-address"
               value={address}
-              onChange={(addr, coords) => {
+              onChange={(addr, coords, pId) => {
                 setAddress(addr);
                 if (coords) setCoordinates(coords);
+                if (pId) setPlaceId(pId);
               }}
               placeholder="Start typing an address..."
             />

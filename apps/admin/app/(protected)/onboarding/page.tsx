@@ -70,6 +70,7 @@ export default function OnboardingPage() {
   const [dayEnd, setDayEnd] = useState("17:00");
   const [address, setAddress] = useState("");
   const [venueCoordinates, setVenueCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [venuePlaceId, setVenuePlaceId] = useState<string | null>(null);
 
   // Shared state
   const [error, setError] = useState<string | null>(null);
@@ -127,6 +128,7 @@ export default function OnboardingPage() {
         dayEnd,
         address: address || undefined,
         coordinates: venueCoordinates || undefined,
+        placeId: venuePlaceId || undefined,
       });
       router.push(`/${orgSlug}`);
     } catch (err) {
@@ -249,9 +251,10 @@ export default function OnboardingPage() {
                 <AddressAutocomplete
                   id="venue-address"
                   value={address}
-                  onChange={(addr, coords) => {
+                  onChange={(addr, coords, pId) => {
                     setAddress(addr);
                     if (coords) setVenueCoordinates(coords);
+                    if (pId) setVenuePlaceId(pId);
                   }}
                   placeholder="Start typing an address..."
                 />

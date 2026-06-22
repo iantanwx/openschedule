@@ -20,6 +20,7 @@ export default defineSchema({
     dayEnd: v.string(),
     address: v.optional(v.string()),
     coordinates: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+    placeId: v.optional(v.string()),
     status: v.union(v.literal("active"), v.literal("archived")),
   })
     .index("by_orgId", ["orgId"])

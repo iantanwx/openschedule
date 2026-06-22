@@ -13,6 +13,7 @@ export const create = mutation({
     dayEnd: v.string(),
     address: v.optional(v.string()),
     coordinates: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+    placeId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
@@ -43,6 +44,7 @@ export const update = mutation({
     dayEnd: v.optional(v.string()),
     address: v.optional(v.string()),
     coordinates: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+    placeId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);

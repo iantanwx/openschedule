@@ -76,6 +76,7 @@ export function BookingSummary({ orgSlug, venueSlug }: BookingSummaryProps) {
           <VenueMap
             address={venue.address}
             coordinates={venue.coordinates as { lat: number; lng: number }}
+            placeId={(venue as any).placeId}
             venueName={venue.name}
             height={120}
           />

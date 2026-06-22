@@ -114,6 +114,7 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
           <VenueMap
             address={(venue as any).address}
             coordinates={(venue as any).coordinates as { lat: number; lng: number }}
+            placeId={(venue as any).placeId}
             venueName={(venue as any).name ?? ""}
             height={160}
             showLink
