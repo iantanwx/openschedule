@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
+import { useTheme } from "next-themes";
 import { useSession, signOut } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { Avatar, AvatarFallback } from "@openschedule/ui/components/avatar";
@@ -12,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@openschedule/ui/components/dropdown-menu";
-import { ChevronsUpDown, Check, Settings, LogOut } from "lucide-react";
+import { ChevronsUpDown, Check, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { NotificationBell } from "./notification-bell";
 import { cn } from "@openschedule/ui/lib/utils";
 
@@ -22,6 +23,7 @@ interface TopBarProps {
 
 export function TopBar({ className }: TopBarProps) {
   const router = useRouter();
+  const { resolvedTheme, setTheme } = useTheme();
   const { data: session } = useSession();
   const params = useParams<{ orgSlug: string; venueSlug: string }>();
   const orgSlug = params.orgSlug;
@@ -112,6 +114,13 @@ export function TopBar({ className }: TopBarProps) {
                 <Settings className="h-4 w-4" />
                 Account Settings
               </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className="flex items-center gap-2"
+            >
+              {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-destructive">

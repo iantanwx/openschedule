@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
+import { useTheme } from "next-themes";
 import { useActiveOrganization, useSession, signOut } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { Avatar, AvatarFallback } from "@openschedule/ui/components/avatar";
@@ -13,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@openschedule/ui/components/dropdown-menu";
-import { ArrowLeft, ChevronDown, Settings, LogOut } from "lucide-react";
+import { ArrowLeft, ChevronDown, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { cn } from "@openschedule/ui/lib/utils";
 import { NotificationBell } from "./notification-bell";
 
@@ -25,6 +26,7 @@ interface MobileTopBarProps {
 export function MobileTopBar({ mode, className }: MobileTopBarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { resolvedTheme, setTheme } = useTheme();
   const params = useParams<{ orgSlug: string; venueSlug: string }>();
   const orgSlug = params.orgSlug;
   const venueSlug = params.venueSlug;
@@ -86,6 +88,13 @@ export function MobileTopBar({ mode, className }: MobileTopBarProps) {
             <Settings className="h-4 w-4" />
             Account Settings
           </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          className="flex items-center gap-2"
+        >
+          {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-destructive">

@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "@openschedule/ui/globals.css";
 import { ConvexClientProvider } from "@/components/convex-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@openschedule/ui/lib/utils";
 import { Toaster } from "sonner";
 
@@ -24,7 +25,9 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
       <body>
-        <ConvexClientProvider>{children}</ConvexClientProvider>
+        <ThemeProvider>
+          <ConvexClientProvider>{children}</ConvexClientProvider>
+        </ThemeProvider>
         <Toaster position="top-right" />
       </body>
     </html>
