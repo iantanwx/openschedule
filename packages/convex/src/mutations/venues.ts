@@ -11,6 +11,8 @@ export const create = mutation({
     capacity: v.number(),
     dayStart: v.string(),
     dayEnd: v.string(),
+    address: v.optional(v.string()),
+    coordinates: v.optional(v.object({ lat: v.number(), lng: v.number() })),
   },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
@@ -39,6 +41,8 @@ export const update = mutation({
     capacity: v.optional(v.number()),
     dayStart: v.optional(v.string()),
     dayEnd: v.optional(v.string()),
+    address: v.optional(v.string()),
+    coordinates: v.optional(v.object({ lat: v.number(), lng: v.number() })),
   },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
@@ -63,7 +67,7 @@ export const update = mutation({
         throw new Error(`Venue with slug "${newSlug}" already exists in this org`);
       }
     }
-    const patch: Record<string, string | number> = {};
+    const patch: Record<string, string | number | { lat: number; lng: number }> = {};
     for (const [key, value] of Object.entries(fields)) {
       if (value !== undefined) {
         patch[key] = value;

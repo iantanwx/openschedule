@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "@openschedule/ui/globals.css";
 import { ConvexClientProvider } from "@/components/convex-provider";
+import { GoogleMapsProvider } from "@/components/google-maps-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@openschedule/ui/lib/utils";
 import { Toaster } from "sonner";
@@ -26,7 +27,9 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          <ConvexClientProvider>
+            <GoogleMapsProvider>{children}</GoogleMapsProvider>
+          </ConvexClientProvider>
         </ThemeProvider>
         <Toaster position="top-right" />
       </body>

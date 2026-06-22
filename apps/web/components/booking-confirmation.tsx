@@ -7,6 +7,7 @@ import { api } from "@openschedule/convex/api"
 import { Badge } from "@openschedule/ui/components/badge"
 import { Card } from "@openschedule/ui/components/card"
 import { ArrowLeft } from "lucide-react"
+import { VenueMap } from "./venue-map"
 
 // FilterApi doesn't fully resolve across package boundaries in monorepo .d.ts
 const convexApi = api as unknown as {
@@ -14,12 +15,14 @@ const convexApi = api as unknown as {
     bookings: { get: FunctionReference<"query"> }
     users: { getPublic: FunctionReference<"query"> }
     organizations: { getBySlug: FunctionReference<"query"> }
+    venues: { getBySlug: FunctionReference<"query"> }
   }
 }
 
 const bookingsGet = convexApi.queries.bookings.get
 const usersGetPublic = convexApi.queries.users.getPublic
 const orgGetBySlug = convexApi.queries.organizations.getBySlug
+const venueGetBySlug = convexApi.queries.venues.getBySlug
 
 interface BookingConfirmationProps {
   bookingId: string
@@ -30,6 +33,7 @@ interface BookingConfirmationProps {
 export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingConfirmationProps) {
   const booking = useQuery(bookingsGet, { id: bookingId })
   const org = useQuery(orgGetBySlug, { slug: orgSlug })
+  const venue = useQuery(venueGetBySlug, org ? { orgId: org._id, slug: venueSlug } : "skip")
 
   if (booking === undefined) {
     return (
@@ -103,6 +107,18 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
         <p className="text-center text-sm text-muted-foreground">
           Need to cancel? Use the link in your booking confirmation email.
         </p>
+      )}
+
+      {venue && (venue as any).address && (venue as any).coordinates && (
+        <div className="mt-6 overflow-hidden rounded-lg border">
+          <VenueMap
+            address={(venue as any).address}
+            coordinates={(venue as any).coordinates as { lat: number; lng: number }}
+            venueName={(venue as any).name ?? ""}
+            height={160}
+            showLink
+          />
+        </div>
       )}
 
       <div className="text-center">
