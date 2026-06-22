@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@openschedule/ui/components/select";
+import { AddressAutocomplete } from "./address-autocomplete";
 
 const TIMEZONES = [
   "America/New_York",
@@ -48,6 +49,8 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
   const [capacity, setCapacity] = useState(1);
   const [dayStart, setDayStart] = useState("");
   const [dayEnd, setDayEnd] = useState("");
+  const [address, setAddress] = useState("");
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -63,6 +66,8 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
     setCapacity(venue.capacity);
     setDayStart(venue.dayStart);
     setDayEnd(venue.dayEnd);
+    setAddress(venue.address ?? "");
+    setCoordinates(venue.coordinates ?? null);
     setIsInitialized(true);
   }
 
@@ -93,6 +98,8 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
         capacity,
         dayStart,
         dayEnd,
+        address: address || undefined,
+        coordinates: coordinates || undefined,
       });
     } finally {
       setIsSaving(false);
@@ -172,6 +179,19 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
                 onChange={(e) => setDayEnd(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="venue-address">Address</Label>
+            <AddressAutocomplete
+              id="venue-address"
+              value={address}
+              onChange={(addr, coords) => {
+                setAddress(addr);
+                if (coords) setCoordinates(coords);
+              }}
+              placeholder="Start typing an address..."
+            />
           </div>
 
           <div className="flex items-center gap-2 pt-2">

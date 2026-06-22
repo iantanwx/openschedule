@@ -35,6 +35,8 @@ export const convexApi = api as unknown as {
         dayStart: string;
         dayEnd: string;
         status: "active" | "archived";
+        address?: string;
+        coordinates?: { lat: number; lng: number };
       }>>;
       get: FunctionReference<"query", "public", { id: string }, {
         _id: string;
@@ -59,6 +61,8 @@ export const convexApi = api as unknown as {
         dayStart: string;
         dayEnd: string;
         status: "active" | "archived";
+        address?: string;
+        coordinates?: { lat: number; lng: number };
       } | null>;
     };
     bookings: {
@@ -323,6 +327,8 @@ export const convexApi = api as unknown as {
         capacity: number;
         dayStart: string;
         dayEnd: string;
+        address?: string;
+        coordinates?: { lat: number; lng: number };
       }, string>;
       update: FunctionReference<"mutation", "public", {
         id: string;
@@ -332,6 +338,8 @@ export const convexApi = api as unknown as {
         capacity?: number;
         dayStart?: string;
         dayEnd?: string;
+        address?: string;
+        coordinates?: { lat: number; lng: number };
       }, void>;
       archive: FunctionReference<"mutation", "public", { id: string }, void>;
       unarchive: FunctionReference<"mutation", "public", { id: string }, void>;

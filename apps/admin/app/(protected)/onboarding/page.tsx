@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { authClient } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
+import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { Button } from "@openschedule/ui/components/button";
 import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
@@ -67,6 +68,8 @@ export default function OnboardingPage() {
   const [capacity, setCapacity] = useState(1);
   const [dayStart, setDayStart] = useState("09:00");
   const [dayEnd, setDayEnd] = useState("17:00");
+  const [address, setAddress] = useState("");
+  const [venueCoordinates, setVenueCoordinates] = useState<{ lat: number; lng: number } | null>(null);
 
   // Shared state
   const [error, setError] = useState<string | null>(null);
@@ -122,6 +125,8 @@ export default function OnboardingPage() {
         capacity,
         dayStart,
         dayEnd,
+        address: address || undefined,
+        coordinates: venueCoordinates || undefined,
       });
       router.push(`/${orgSlug}`);
     } catch (err) {
@@ -238,6 +243,18 @@ export default function OnboardingPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="venue-address">Address</Label>
+                <AddressAutocomplete
+                  id="venue-address"
+                  value={address}
+                  onChange={(addr, coords) => {
+                    setAddress(addr);
+                    if (coords) setVenueCoordinates(coords);
+                  }}
+                  placeholder="Start typing an address..."
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="venue-capacity">Capacity</Label>
