@@ -3,6 +3,8 @@
 import { internalAction } from "../_generated/server";
 import { v } from "convex/values";
 import { sendEmail } from "./email";
+import { render } from "@react-email/render";
+import { Invitation, invitationPlainText } from "@openschedule/emails";
 
 export const send = internalAction({
   args: {
@@ -15,19 +17,20 @@ export const send = internalAction({
     const appUrl = process.env.APP_URL ?? "http://localhost:3001";
     const acceptUrl = `${appUrl}/invite/${args.invitationId}`;
 
+    const templateProps = {
+      inviterName: args.inviterName,
+      organizationName: args.organizationName,
+      acceptUrl,
+    };
+
+    const html = await render(Invitation(templateProps));
+    const text = invitationPlainText(templateProps);
+
     await sendEmail({
       to: [args.email],
       subject: `You've been invited to join ${args.organizationName}`,
-      text: [
-        `Hi,`,
-        ``,
-        `${args.inviterName} has invited you to join ${args.organizationName} on OpenSchedule.`,
-        ``,
-        `Click the link below to accept the invitation:`,
-        acceptUrl,
-        ``,
-        `If you don't have an account yet, you'll be prompted to create one.`,
-      ].join("\n"),
+      text,
+      html,
     });
   },
 });

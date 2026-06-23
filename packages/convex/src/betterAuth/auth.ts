@@ -248,55 +248,38 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
         requireEmailVerificationOnInvitation: false, // invitation IDs are unguessable Convex _ids (generateId: false)
         async sendInvitationEmail(data) {
           try {
-            const apiKey = process.env.RESEND_API_KEY;
-            const from = process.env.TRANSACTIONAL_FROM_EMAIL ?? "noreply@notifications.opencal.xyz";
             const appUrl = process.env.APP_URL ?? "http://localhost:3001";
             const acceptUrl = `${appUrl}/invite/${data.id}`;
 
             const orgName = data.organization?.name ?? "the organization";
             const inviterName = data.inviter?.user?.name ?? "Someone";
 
-            const subject = `You've been invited to join ${orgName}`;
-            const text = [
-              `Hi,`,
-              ``,
-              `${inviterName} has invited you to join ${orgName} on OpenSchedule.`,
-              ``,
-              `Click the link below to accept the invitation:`,
+            const templateProps = {
+              inviterName,
+              organizationName: orgName,
               acceptUrl,
-              ``,
-              `If you don't have an account yet, you'll be prompted to create one.`,
-            ].join("\n");
+            };
 
-            if (!apiKey) {
-              console.log("[EMAIL DEV MODE] Invitation email:");
-              console.log(`  To: ${data.email}`);
-              console.log(`  Subject: ${subject}`);
-              console.log(`  Body: ${text}`);
-              console.log(`  Accept URL: ${acceptUrl}`);
-              return;
-            }
+            const { render } = await import("@react-email/render");
+            const { Invitation, invitationPlainText } = await import(
+              "@openschedule/emails"
+            );
 
-            const response = await fetch("https://api.resend.com/emails", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${apiKey}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                from,
-                to: [data.email],
-                subject,
-                text,
-              }),
+            const html = await render(Invitation(templateProps));
+            const text = invitationPlainText(templateProps);
+
+            const { sendEmail } = await import("../actions/email");
+            await sendEmail({
+              to: [data.email],
+              subject: `You've been invited to join ${orgName}`,
+              text,
+              html,
             });
-
-            if (!response.ok) {
-              const errorBody = await response.text();
-              console.error(`[EMAIL ERROR] Invitation email failed: ${response.status}: ${errorBody}`);
-            }
           } catch (error) {
-            console.error("[EMAIL ERROR] Failed to send invitation email:", error);
+            console.error(
+              "[EMAIL ERROR] Failed to send invitation email:",
+              error,
+            );
           }
         },
       }),
