@@ -3,7 +3,15 @@
 import { internalAction } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
+import { format, parse } from "date-fns";
 import { sendEmail } from "./email";
+import { render } from "@react-email/render";
+import {
+  BookingCreated,
+  bookingCreatedPlainText,
+  generateIcs,
+  buildGoogleCalendarUrl,
+} from "@openschedule/emails";
 
 export const send = internalAction({
   args: { bookingId: v.id("bookings") },
@@ -55,32 +63,105 @@ export const send = internalAction({
       return;
     }
 
+    // Resolve service name
+    let serviceName = "Appointment";
+    if (booking.serviceId) {
+      const service = await ctx.runQuery(
+        internal.queries.internal.services.getInternal,
+        { id: booking.serviceId },
+      );
+      if (service) {
+        serviceName = service.name;
+      }
+    }
+
+    // Format date and time
+    const parsedDate = parse(booking.date, "yyyy-MM-dd", new Date());
+    const formattedDate = format(parsedDate, "EEEE, MMMM d, yyyy");
+    const formattedTime = `${formatTime(booking.startTime)} – ${formatTime(booking.endTime)}`;
+
+    // Build URLs
     const webUrl = process.env.WEB_URL ?? "http://localhost:3000";
     const viewUrl = `${webUrl}/${organization.slug}/${venue.slug}/bookings/${booking._id}`;
     const cancelUrl = `${webUrl}/${organization.slug}/${venue.slug}/bookings/${booking._id}/cancel?token=${booking.cancelToken}`;
 
-    const subject = `Booking confirmed — ${booking.date} at ${booking.startTime}`;
-    const body = [
-      `Hi ${customer.name},`,
-      ``,
-      `Your booking has been confirmed.`,
-      ``,
-      `Booking details:`,
-      `Date: ${booking.date}`,
-      `Time: ${booking.startTime} – ${booking.endTime}`,
-      `Therapist: ${therapist.name}`,
-      ``,
-      `View your booking:`,
+    // Venue location data
+    const address = venue.address;
+    const coordinates = venue.coordinates;
+    const placeId = venue.placeId;
+    const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
+
+    // Build Google Calendar URL
+    const startDateTime = `${booking.date.replace(/-/g, "")}T${booking.startTime.replace(/:/g, "")}00`;
+    const endDateTime = `${booking.date.replace(/-/g, "")}T${booking.endTime.replace(/:/g, "")}00`;
+    const timezone = venue.timezone ?? "UTC";
+
+    const calendarUrl = buildGoogleCalendarUrl({
+      title: `${serviceName} — ${organization.name}`,
+      startDate: startDateTime,
+      endDate: endDateTime,
+      timezone,
+      location: address,
+      description: `Therapist: ${therapist.name}\nService: ${serviceName}`,
+    });
+
+    // Generate .ics file
+    const icsContent = generateIcs({
+      summary: `${serviceName} — ${organization.name}`,
+      startDate: `${booking.date}T${booking.startTime}:00`,
+      endDate: `${booking.date}T${booking.endTime}:00`,
+      timezone,
+      location: address,
+      description: `Therapist: ${therapist.name}\nService: ${serviceName}`,
+    });
+
+    // Template props
+    const templateProps = {
+      customerName: customer.name,
+      orgName: organization.name,
+      serviceName,
+      date: formattedDate,
+      time: formattedTime,
+      therapistName: therapist.name,
+      address,
+      coordinates,
+      placeId,
       viewUrl,
-      ``,
-      `Need to cancel? Use this link:`,
       cancelUrl,
-    ].join("\n");
+      calendarUrl,
+      googleMapsApiKey,
+    };
+
+    // Render HTML
+    const html = await render(BookingCreated(templateProps));
+    const text = bookingCreatedPlainText(templateProps);
+
+    const subject = `Booking confirmed — ${formattedDate}`;
 
     await sendEmail({
       to: [customer.email],
       subject,
-      text: body,
+      text,
+      html,
+      attachments: [
+        {
+          filename: "booking.ics",
+          content: Buffer.from(icsContent).toString("base64"),
+          content_type: "text/calendar",
+        },
+      ],
     });
   },
 });
+
+/**
+ * Formats "HH:MM" (24h) to "h:mm AM/PM"
+ */
+function formatTime(time: string): string {
+  const [hoursStr, minutesStr] = time.split(":");
+  const hours = parseInt(hoursStr ?? "0", 10);
+  const minutes = minutesStr ?? "00";
+  const period = hours >= 12 ? "PM" : "AM";
+  const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+  return `${displayHour}:${minutes} ${period}`;
+}
