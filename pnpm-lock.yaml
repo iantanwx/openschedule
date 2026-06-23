@@ -154,6 +154,9 @@ importers:
       '@convex-dev/better-auth':
         specifier: ^0.12.4
         version: 0.12.4(@standard-schema/spec@1.1.0)(better-auth@1.6.18(next@16.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vitest@3.2.6(@edge-runtime/vm@4.0.4)(@types/node@20.19.41)(jiti@2.7.0)(lightningcss@1.32.0)))(convex@1.41.0(react@19.2.4))(hono@4.12.25)(react@19.2.4)(typescript@5.9.3)
+      '@openschedule/emails':
+        specifier: workspace:*
+        version: link:../emails
       better-auth:
         specifier: ^1.6.18
         version: 1.6.18(next@16.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vitest@3.2.6(@edge-runtime/vm@4.0.4)(@types/node@20.19.41)(jiti@2.7.0)(lightningcss@1.32.0))
