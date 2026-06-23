@@ -195,6 +195,21 @@ export function TeamSection() {
                     <Badge variant="secondary">
                       {member.role === "owner" ? "Owner" : "Therapist"}
                     </Badge>
+                    {member.role === "owner" && isOwner && member.user.email === currentUser?.email && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={handleToggleOwnTherapist}>
+                            {currentUser?.roles?.includes("therapist") ? "Remove Therapist Role" : "Add Therapist Role"}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                     {member.role !== "owner" && isOwner && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -283,22 +298,7 @@ export function TeamSection() {
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
 
-        {/* Owner self-toggle */}
-        {isOwner && currentUser && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Your Role</h4>
-            <div className="flex items-center gap-2">
-              <span className="text-sm">Also take bookings as a therapist</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleToggleOwnTherapist}
-              >
-                {currentUser.roles?.includes("therapist") ? "Remove Therapist Role" : "Add Therapist Role"}
-              </Button>
-            </div>
-          </div>
-        )}
+
       </CardContent>
     </Card>
 
