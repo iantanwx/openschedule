@@ -59,8 +59,8 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
     );
   }
 
-  // Therapists only see their own schedules
-  const displayedSchedules = isTherapist && currentUser
+  // Pure therapists (no owner role) see only their own schedules; owners see all
+  const displayedSchedules = !isOwner && isTherapist && currentUser
     ? (schedules ?? []).filter((s) => s.therapistId === currentUser._id)
     : schedules ?? [];
 
