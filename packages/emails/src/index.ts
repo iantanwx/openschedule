@@ -1,3 +1,13 @@
+// Templates
+export { BookingCreated, bookingCreatedPlainText } from "./templates/booking-created";
+export type { BookingCreatedProps } from "./templates/booking-created";
+export { BookingCancelled, bookingCancelledPlainText } from "./templates/booking-cancelled";
+export type { BookingCancelledProps } from "./templates/booking-cancelled";
+export { BookingRescheduled, bookingRescheduledPlainText } from "./templates/booking-rescheduled";
+export type { BookingRescheduledProps } from "./templates/booking-rescheduled";
+export { Invitation, invitationPlainText } from "./templates/invitation";
+export type { InvitationProps } from "./templates/invitation";
+
 // Components
 export { EmailLayout } from "./components/email-layout";
 export { DetailsCard } from "./components/details-card";
