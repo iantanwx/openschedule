@@ -236,6 +236,12 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
     secret: process.env.BETTER_AUTH_SECRET,
     database: authComponent.adapter(ctx),
     emailAndPassword: { enabled: true },
+    socialProviders: {
+      google: {
+        clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      },
+    },
     advanced: {
       database: {
         generateId: false, // Convex manages its own _id; prevents org plugin from injecting id
