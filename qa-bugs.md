@@ -1,0 +1,43 @@
+# QA Bugs
+
+- [x] 1. No way to navigate back from Services page. Top nav not sticky.
+- [x] 2. Create venue should be part of onboarding.
+- [x] 3. Add therapist role should be a popup context menu, not a button.
+- [x] 4. Venues should use top navbar switcher (Vercel-style org/project pattern).
+- [x] 5. Venues shouldn't show on home dashboard; separate page.
+- [x] 6. Customer web app home should have a directory of businesses.
+- [x] 7. Schedule shows `min slots` (leftover from slotDuration removal).
+- [x] 8. Booking goes to `pending` — should go straight to confirmed.
+- [x] 9. No confirmation email sent after confirming booking.
+- [x] 10. Clicking reschedule crashes the app.
+- [x] 11. Booking confirmation page has no way to navigate back.
+- [x] 12. No in-app notifications for therapist on new bookings. (P1)
+- [x] 13. No padding between service cards in booking flow.
+- [x] 14. Phone placeholder uses US code — should be dynamic by business locale.
+- [x] 15. No venue address field / Google Maps on booking page.
+- [x] 16. Clicking "Today" on bottom nav does nothing.
+- [x] 17. Email template ugly — implement react-email layout (copy Fresha).
+- [x] 18. No dark mode.
+- [x] 19. No nav switcher (org/venue) in desktop sidebar.
+- [x] 20. My/All filter shows therapist dropdown when "My" selected (shouldn't).
+- [x] 21. Status pills lowercase — should be capitalized.
+- [x] 22. Shell double scrollbar — should have fixed height, overflow on main only.
+- [x] 23. Clicking on org icon in switcher should navigate me back to org home. Click on the arrows should open the switcher menu.
+- [x] 24. Following the accept invitation link leads to sign in page, not sign up. This is very misleading. It should lead to sign up; the sign up page ought to indicate the the user has to sign up to accept the invitation, if there is an invitation id in the query paramters.
+- [x] 25. Owner is unable to set a schedule for therapists.
+- [x] 26. Able to book a slot that has already passed. For example, it is currently 24 june 9:23am. However, I can see a 9:00am slot for 24 june.
+- [x] 27. Vertical margin beween services in customer booking page is 0
+- [x] 28. Loading state says 'Loading...'. Use a spinner -- shadcn should have one.
+- [x] 29. Business settings page form is not populated, although business name was already provided at onboarding.
+- [x] 30. Venue settings has a Timezone field, but navigating it is unwieldy. Firstly, it isn't a formatted for display; there are underscores in the labels. Secondly, it should be a combobox. Finally, it's not comprehensive -- use a proper library (or the standard library) for this.
+- [x] 31. Blockout has a critical flaw. It only allows blocking out a single day. It should have a start day and time, and and end day and time. Validation ensures that it doesn't start before current time.
+- [x] 32. The "Add blockout" UI is unusual. We should move that option into the individual therapist modal in the `Schedule` page. It should expose a button that says "OoO", which then opens another modal, allowing the user to set an OoO range. Secondly, OoO should be displayed inline in the therapist schedule card, e.g. OoO 25 June 09:00 - 28 June 09:00.
+- [ ] 33. There is no week and month view in venue home, only day view. We should support toggling day/week/month, and rename `Today` in the navigation to `Calendar`. Use an existing library, if possible. We should also display OoO here. Brainstorm this one.
+- [x] 34. In mobile view, there's no way to navigate to other venues. Clicking the top doesn't allow returning to overview (to change org settings) and doesn't allow toggling between venues. Top nav should be venue picker. Secondly there should be a way to return to org home, probably a left arrow < that leads back to org home.
+- [x] 35. In dark mode, bookings on the calendar/day view have poor text contrast -- white and mid grey on light green.
+- [x] 36. Notification feed in org home and notification feed in nav bell menu are not the same. I can see "Ian joined the team" in both, but only home feed shows "New booking -- Ian, xxx". They should be consistent.
+- [x] 37. New booking notification doesn't show which therapist and which venue.
+- [x] 38. In mobile view, org home doesn't provide a way to select a venue. There should be a venue picker, or venue cards (like vercel), just below the feed.
+- [x] 39. Feed in mobile view (org home) should show 3 notifications, and expand to 5 with a down arrow icon (like vercel).
+- [ ] 40. No way to dismiss notification toast. Toast is white bg, very weird.
+- [ ] 41. Home view is very awkward. I see venues, then the overview, then the feed. We should do Overview first (add a header too), then feed, then venues. And all should have headers, for better separation visually.
