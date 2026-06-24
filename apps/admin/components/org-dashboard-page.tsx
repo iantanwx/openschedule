@@ -1,20 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { format } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
 import { Card, CardContent } from "@openschedule/ui/components/card";
 import { formatNotification } from "@/lib/format-notification";
-import { CalendarCheck, Clock, DollarSign, Calendar } from "lucide-react";
+import { CalendarCheck, Clock, DollarSign, Calendar, ChevronDown } from "lucide-react";
 import { Spinner } from "@openschedule/ui/components/spinner";
+import { VenueCard } from "./venue-card";
+import { Button } from "@openschedule/ui/components/button";
 
 interface OrgDashboardPageProps {
   orgSlug: string;
 }
 
+const FEED_COLLAPSED_COUNT = 3;
+const FEED_EXPANDED_COUNT = 10;
+
 export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
+  const [feedExpanded, setFeedExpanded] = useState(false);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
   const today = format(new Date(), "yyyy-MM-dd");
+
+  const venues = useQuery(
+    convexApi.queries.venues.listByOrg,
+    org ? { orgId: org._id } : "skip",
+  );
 
   const stats = useQuery(
     convexApi.queries.bookings.statsByOrg,
@@ -34,8 +46,24 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
     );
   }
 
+  const visibleFeedCount = feedExpanded ? FEED_EXPANDED_COUNT : FEED_COLLAPSED_COUNT;
+  const feedItems = activity?.slice(0, visibleFeedCount) ?? [];
+  const hasMoreFeed = (activity?.length ?? 0) > visibleFeedCount;
+
   return (
     <div className="space-y-6 p-4">
+      {/* Venue cards — mobile only */}
+      {venues && venues.length > 0 && (
+        <div className="space-y-2 md:hidden">
+          <h2 className="text-sm font-medium text-muted-foreground">Venues</h2>
+          <div className="grid grid-cols-1 gap-2">
+            {venues.map((venue) => (
+              <VenueCard key={venue._id} venue={venue} orgSlug={orgSlug} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Stats cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
@@ -73,7 +101,7 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
           </p>
         ) : (
           <div className="space-y-1">
-            {activity.map((item) => {
+            {feedItems.map((item) => {
               const formatted = formatNotification(item.type, item.payload as Record<string, unknown>);
               const Icon = formatted.icon;
               return (
@@ -91,6 +119,17 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
                 </div>
               );
             })}
+            {hasMoreFeed && !feedExpanded && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-muted-foreground"
+                onClick={() => setFeedExpanded(true)}
+              >
+                <ChevronDown className="mr-1 h-3.5 w-3.5" />
+                Show more
+              </Button>
+            )}
           </div>
         )}
       </div>
