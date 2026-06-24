@@ -13,6 +13,7 @@ export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = safeRedirect(searchParams.get("next"), "/onboarding");
+  const isInviteFlow = nextPath.startsWith("/invite/");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +41,9 @@ export default function SignupPage() {
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-bold">Create an account</h1>
           <p className="text-muted-foreground text-sm">
-            Get started with OpenSchedule
+            {isInviteFlow
+              ? "Create an account to accept your team invitation"
+              : "Get started with OpenSchedule"}
           </p>
         </div>
 

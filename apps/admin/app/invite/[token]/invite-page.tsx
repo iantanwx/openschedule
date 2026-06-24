@@ -16,7 +16,7 @@ export function InvitePage({ token }: { token: string }) {
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.replace(`/login?next=${encodeURIComponent(redirectTo)}`);
+      router.replace(`/signup?next=${encodeURIComponent(redirectTo)}`);
     }
   }, [isPending, session, redirectTo, router]);
 
