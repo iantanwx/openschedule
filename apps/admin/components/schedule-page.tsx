@@ -5,18 +5,9 @@ import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { ScheduleCard } from "./schedule-card";
 import { ScheduleEditForm } from "./schedule-edit-form";
-import { OooList } from "./ooo-list";
 import { OooForm } from "./ooo-form";
 import { Button } from "@openschedule/ui/components/button";
-import { Separator } from "@openschedule/ui/components/separator";
 import { Spinner } from "@openschedule/ui/components/spinner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@openschedule/ui/components/select";
 
 interface SchedulePageProps {
   orgSlug: string;
@@ -28,7 +19,7 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showOooForm, setShowOooForm] = useState(false);
   const [editingOooId, setEditingOooId] = useState<string | null>(null);
-  const [oooTherapistFilter, setOooTherapistFilter] = useState<string | null>(null);
+  const [oooTargetTherapistId, setOooTargetTherapistId] = useState<string | null>(null);
 
   const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
@@ -66,11 +57,6 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
     !!currentUser &&
     (isOwner ? (therapists?.length ?? 0) > 0 : isTherapist && displayedSchedules.length === 0);
 
-  // Determine which therapist's OoOs to show
-  const oooTherapistId = isTherapist
-    ? currentUser?._id ?? null
-    : oooTherapistFilter ?? (therapists?.[0]?._id ?? null);
-
   const editingSchedule = editingScheduleId
     ? schedules?.find((s) => s._id === editingScheduleId) ?? null
     : null;
@@ -78,6 +64,18 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
   const editingTherapistName = editingSchedule
     ? therapists?.find((t) => t._id === editingSchedule.therapistId)?.name ?? "Unknown"
     : "";
+
+  function handleAddOoo(therapistId: string) {
+    setOooTargetTherapistId(therapistId);
+    setEditingOooId(null);
+    setShowOooForm(true);
+  }
+
+  function handleEditOoo(oooId: string, therapistId: string) {
+    setOooTargetTherapistId(therapistId);
+    setEditingOooId(oooId);
+    setShowOooForm(true);
+  }
 
   return (
     <div className="space-y-4 p-4">
@@ -101,6 +99,8 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
               key={schedule._id}
               schedule={schedule}
               onEdit={setEditingScheduleId}
+              onAddOoo={handleAddOoo}
+              onEditOoo={handleEditOoo}
             />
           ))}
         </div>
@@ -129,57 +129,17 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
         />
       )}
 
-      <Separator />
-
-      {/* Out of Office section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Out of Office</h2>
-          <Button size="sm" onClick={() => setShowOooForm(true)}>
-            Add Out of Office
-          </Button>
-        </div>
-
-        {/* Therapist filter (owner only, when multiple therapists) */}
-        {isOwner && therapists && therapists.length > 1 && (
-          <Select
-            value={oooTherapistFilter ?? therapists[0]?._id ?? ""}
-            onValueChange={setOooTherapistFilter}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select therapist" />
-            </SelectTrigger>
-            <SelectContent>
-              {therapists.map((t) => (
-                <SelectItem key={t._id} value={t._id}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-
-        {oooTherapistId && (
-          <OooList
-            therapistId={oooTherapistId}
-            onEdit={(id) => {
-              setEditingOooId(id);
-              setShowOooForm(true);
-            }}
-          />
-        )}
-      </div>
-
-      {/* OoO form dialog */}
-      {showOooForm && oooTherapistId && (
+      {/* OoO form dialog — triggered by card callbacks */}
+      {showOooForm && oooTargetTherapistId && (
         <OooForm
-          therapistId={oooTherapistId}
+          therapistId={oooTargetTherapistId}
           editingId={editingOooId}
           therapists={therapists ?? []}
           isOwner={isOwner}
           onClose={() => {
             setShowOooForm(false);
             setEditingOooId(null);
+            setOooTargetTherapistId(null);
           }}
         />
       )}
