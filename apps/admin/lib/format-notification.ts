@@ -16,21 +16,26 @@ export function formatNotification(
   type: NotificationType,
   payload: Record<string, unknown>,
 ): FormattedNotification {
+  const therapistVenue = [payload.therapistName, payload.venueName]
+    .filter(Boolean)
+    .join(" · ");
+  const suffix = therapistVenue ? ` (${therapistVenue})` : "";
+
   switch (type) {
     case "booking_created":
       return {
         icon: CalendarPlus,
-        text: `New booking — ${payload.customerName}, ${payload.date} at ${payload.startTime}`,
+        text: `New booking — ${payload.customerName}, ${payload.date} at ${payload.startTime}${suffix}`,
       };
     case "booking_cancelled":
       return {
         icon: CalendarX,
-        text: `Booking cancelled — ${payload.customerName}, ${payload.date} at ${payload.startTime}`,
+        text: `Booking cancelled — ${payload.customerName}, ${payload.date} at ${payload.startTime}${suffix}`,
       };
     case "booking_rescheduled":
       return {
         icon: Clock,
-        text: `Booking rescheduled — ${payload.customerName}, now ${payload.newDate} at ${payload.newStartTime}`,
+        text: `Booking rescheduled — ${payload.customerName}, now ${payload.newDate} at ${payload.newStartTime}${suffix}`,
       };
     case "therapist_joined":
       return {

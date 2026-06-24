@@ -5,7 +5,7 @@ import { timeRangesOverlap } from "../lib/time";
 import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 import { performCancel } from "../lib/bookings";
 import { hasRole, Role } from "../lib/roles";
-import { createNotification } from "../lib/notifications";
+import { createNotification, createNotificationsForOwners } from "../lib/notifications";
 
 export const create = mutation({
   args: {
@@ -119,10 +119,13 @@ export const create = mutation({
 
     // In-app notifications
     const customer = await ctx.db.get(args.customerId);
+    const therapistUser = await ctx.db.get(args.therapistId);
     const service = args.serviceId ? await ctx.db.get(args.serviceId) : null;
     const notifPayload = {
       bookingId,
       customerName: customer?.name ?? "Unknown",
+      therapistName: therapistUser?.name ?? "Unknown",
+      venueName: venue.name,
       date: args.date,
       startTime: args.startTime,
       serviceName: service?.name ?? "Appointment",
@@ -152,6 +155,14 @@ export const create = mutation({
         payload: notifPayload,
       });
     }
+
+    // Notify all owners
+    await createNotificationsForOwners(ctx, {
+      orgId: venue.orgId,
+      type: "booking_created",
+      payload: notifPayload,
+      excludeUserId,
+    });
 
     return bookingId;
   },
@@ -212,10 +223,13 @@ export const cancel = mutation({
     const cancelledBooking = await ctx.db.get(args.id);
     if (cancelledBooking) {
       const cancelCustomer = await ctx.db.get(cancelledBooking.customerId);
+      const cancelTherapist = await ctx.db.get(cancelledBooking.therapistId);
       const cancelVenue = await ctx.db.get(cancelledBooking.venueId);
       const cancelPayload = {
         bookingId: args.id,
         customerName: cancelCustomer?.name ?? "Unknown",
+        therapistName: cancelTherapist?.name ?? "Unknown",
+        venueName: cancelVenue?.name ?? "Unknown",
         date: cancelledBooking.date,
         startTime: cancelledBooking.startTime,
       };
@@ -228,6 +242,12 @@ export const cancel = mutation({
             payload: cancelPayload,
           });
         }
+        await createNotificationsForOwners(ctx, {
+          orgId: cancelVenue.orgId,
+          type: "booking_cancelled",
+          payload: cancelPayload,
+          excludeUserId: user._id,
+        });
       }
     }
   },
@@ -245,14 +265,17 @@ export const cancelWithToken = mutation({
     }
     await performCancel(ctx, args.id);
 
-    // In-app notifications — customer cancelled, notify therapist
+    // In-app notifications — customer cancelled, notify therapist + owners
     const tokenCancelledBooking = await ctx.db.get(args.id);
     if (tokenCancelledBooking) {
       const tokenCustomer = await ctx.db.get(tokenCancelledBooking.customerId);
+      const tokenTherapist = await ctx.db.get(tokenCancelledBooking.therapistId);
       const tokenVenue = await ctx.db.get(tokenCancelledBooking.venueId);
       const tokenPayload = {
         bookingId: args.id,
         customerName: tokenCustomer?.name ?? "Unknown",
+        therapistName: tokenTherapist?.name ?? "Unknown",
+        venueName: tokenVenue?.name ?? "Unknown",
         date: tokenCancelledBooking.date,
         startTime: tokenCancelledBooking.startTime,
       };
@@ -261,6 +284,11 @@ export const cancelWithToken = mutation({
           recipientId: tokenCancelledBooking.therapistId,
           type: "booking_cancelled",
           orgId: tokenVenue.orgId,
+          payload: tokenPayload,
+        });
+        await createNotificationsForOwners(ctx, {
+          orgId: tokenVenue.orgId,
+          type: "booking_cancelled",
           payload: tokenPayload,
         });
       }
@@ -362,9 +390,12 @@ export const reschedule = mutation({
     const rescheduledBooking = await ctx.db.get(args.id);
     if (rescheduledBooking) {
       const reschCustomer = await ctx.db.get(rescheduledBooking.customerId);
+      const reschTherapist = await ctx.db.get(rescheduledBooking.therapistId);
       const reschPayload = {
         bookingId: args.id,
         customerName: reschCustomer?.name ?? "Unknown",
+        therapistName: reschTherapist?.name ?? "Unknown",
+        venueName: venue.name,
         newDate: args.newDate,
         newStartTime: args.newStartTime,
         rescheduledBy: user.name,
@@ -378,6 +409,12 @@ export const reschedule = mutation({
           payload: reschPayload,
         });
       }
+      await createNotificationsForOwners(ctx, {
+        orgId: venue.orgId,
+        type: "booking_rescheduled",
+        payload: reschPayload,
+        excludeUserId: user._id,
+      });
     }
   },
 });
