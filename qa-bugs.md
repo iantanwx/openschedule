@@ -42,5 +42,4 @@
 - [ ] 40. No way to dismiss notification toast. Toast is white bg, very weird.
 - [ ] 41. Home view is very awkward. I see venues, then the overview, then the feed. We should do Overview first (add a header too), then feed, then venues. And all should have headers, for better separation visually.
 - [ ] 42. No Google login. This was deferred, we can add it now.
-- [ ] 43. In Venue screen, the venue picker isn't working.
-- [ ] 44. No way to add more venues -- should have a Venues settings page that lists all venues, and clicking in brings you to the venue settings page for that venue.
+- [ ] 43. No way to add more venues -- "add new venue" shold be in the venue selector dropdown.

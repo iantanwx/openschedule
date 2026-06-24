@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { useTheme } from "next-themes";
@@ -13,8 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@openschedule/ui/components/dropdown-menu";
-import { ChevronsUpDown, Check, Settings, LogOut, Moon, Sun } from "lucide-react";
+import { ChevronsUpDown, Check, Plus, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { NotificationBell } from "./notification-bell";
+import { CreateVenueDialog } from "./create-venue-dialog";
 import { cn } from "@openschedule/ui/lib/utils";
 
 interface TopBarProps {
@@ -29,6 +31,9 @@ export function TopBar({ className }: TopBarProps) {
   const orgSlug = params.orgSlug;
   const venueSlug = params.venueSlug;
 
+  const [showCreateVenue, setShowCreateVenue] = useState(false);
+
+  const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(
     convexApi.queries.organizations.getBySlug,
     orgSlug ? { slug: orgSlug } : "skip",
@@ -38,6 +43,7 @@ export function TopBar({ className }: TopBarProps) {
     org ? { orgId: org._id } : "skip",
   );
 
+  const isOwner = currentUser?.roles.includes("owner") ?? false;
   const currentVenue = venues?.find((v) => v.slug === venueSlug);
   const label = currentVenue?.name ?? "All Venues";
 
@@ -89,6 +95,18 @@ export function TopBar({ className }: TopBarProps) {
               {venue.slug === venueSlug && <Check className="h-4 w-4 shrink-0" />}
             </DropdownMenuItem>
           ))}
+          {isOwner && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setShowCreateVenue(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Venue
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -130,6 +148,9 @@ export function TopBar({ className }: TopBarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {showCreateVenue && org && (
+        <CreateVenueDialog orgId={org._id} onClose={() => setShowCreateVenue(false)} />
+      )}
     </header>
   );
 }
