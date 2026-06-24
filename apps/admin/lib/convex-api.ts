@@ -147,13 +147,14 @@ export const convexApi = api as unknown as {
         availabilityHorizonDays: number;
       }>>;
     };
-    blockouts: {
+    ooo: {
       listByTherapist: FunctionReference<"query", "public", { therapistId: string }, Array<{
         _id: string;
         _creationTime: number;
         therapistId: string;
-        date: string;
+        startDate: string;
         startTime: string;
+        endDate: string;
         endTime: string;
         reason?: string;
         status: "active" | "inactive";
@@ -162,8 +163,9 @@ export const convexApi = api as unknown as {
         _id: string;
         _creationTime: number;
         therapistId: string;
-        date: string;
+        startDate: string;
         startTime: string;
+        endDate: string;
         endTime: string;
         reason?: string;
         status: "active" | "inactive";
@@ -372,18 +374,20 @@ export const convexApi = api as unknown as {
       setActive: FunctionReference<"mutation", "public", { userId: string; active: boolean }, null>;
       toggleTherapistRole: FunctionReference<"mutation", "public", Record<string, never>, null>;
     };
-    blockouts: {
+    ooo: {
       create: FunctionReference<"mutation", "public", {
         therapistId: string;
-        date: string;
+        startDate: string;
         startTime: string;
+        endDate: string;
         endTime: string;
         reason?: string;
       }, string>;
       update: FunctionReference<"mutation", "public", {
         id: string;
-        date?: string;
+        startDate?: string;
         startTime?: string;
+        endDate?: string;
         endTime?: string;
         reason?: string;
       }, void>;

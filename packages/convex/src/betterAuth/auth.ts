@@ -201,13 +201,13 @@ export const authComponent = createClient<DataModel, typeof schema>(
             }
           }
 
-          const blockouts = await ctx.db
-            .query("blockouts")
+          const oooEntries = await ctx.db
+            .query("ooo")
             .withIndex("by_therapistId", (q) => q.eq("therapistId", user._id))
             .take(200);
-          for (const blockout of blockouts) {
-            if (blockout.status === "active") {
-              await ctx.db.patch(blockout._id, { status: "inactive" });
+          for (const oooEntry of oooEntries) {
+            if (oooEntry.status === "active") {
+              await ctx.db.patch(oooEntry._id, { status: "inactive" });
             }
           }
 

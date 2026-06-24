@@ -17,7 +17,7 @@ export const clearAllTables = internalMutation({
       "organizations",
       "venues",
       "schedules",
-      "blockouts",
+      "ooo",
       "customers",
       "bookings",
       "settings",

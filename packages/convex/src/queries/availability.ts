@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { computeAvailableSlots } from "../lib/slots";
+import { expandOooToDateRanges } from "../lib/ooo";
 import { generateDateRange, todayInTimezone, nowTimeInTimezone } from "../lib/time";
 
 export const getSlots = query({
@@ -35,13 +36,22 @@ export const getSlots = query({
 
     if (!startDate || !endDate) return {};
 
-    const allBlockouts = await ctx.db
-      .query("blockouts")
-      .withIndex("by_therapistId_and_date", (q) =>
-        q.eq("therapistId", args.therapistId).gte("date", startDate).lte("date", endDate),
+    // Fetch OoO records overlapping this date window
+    const allOooRecords = await ctx.db
+      .query("ooo")
+      .withIndex("by_therapistId_and_startDate", (q) =>
+        q.eq("therapistId", args.therapistId).lte("startDate", endDate),
       )
       .take(200);
-    const blockouts = allBlockouts.filter((b) => b.status === "active");
+    const activeOoo = allOooRecords.filter((r) => r.endDate >= startDate && r.status === "active");
+
+    // Expand multi-day OoOs into per-day blockout entries
+    const blockouts = activeOoo.flatMap((r) =>
+      expandOooToDateRanges(
+        { startDate: r.startDate, startTime: r.startTime, endDate: r.endDate, endTime: r.endTime },
+        dates,
+      ),
+    );
 
     const therapistBookings = await ctx.db
       .query("bookings")
@@ -77,7 +87,7 @@ export const getSlots = query({
       },
       serviceDuration: service.duration,
       dates,
-      blockouts: blockouts.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime })),
+      blockouts,
       bookings: therapistBookings.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime, status: b.status })),
       venueCapacity: venue.capacity,
       allBookingsForVenueByDate,
@@ -99,7 +109,6 @@ export const getSlotsForAllTherapists = query({
     const service = await ctx.db.get(args.serviceId);
     if (!service) throw new Error("Service not found");
 
-    // Get therapists assigned to this service who have active schedules at this venue
     const assignments = await ctx.db
       .query("therapistServices")
       .withIndex("by_serviceId", (q) => q.eq("serviceId", args.serviceId))
@@ -111,7 +120,6 @@ export const getSlotsForAllTherapists = query({
       .take(100);
     const activeSchedules = allSchedules.filter((s) => s.status === "active");
 
-    // Only include therapists with both: assigned to service + active schedule at venue
     const assignedTherapistIds = new Set(assignments.map((a) => a.therapistId.toString()));
     const schedules = activeSchedules.filter((s) => assignedTherapistIds.has(s.therapistId.toString()));
 
@@ -150,13 +158,22 @@ export const getSlotsForAllTherapists = query({
     for (const schedule of schedules) {
       const therapistId = schedule.therapistId;
 
-      const allBlockouts = await ctx.db
-        .query("blockouts")
-        .withIndex("by_therapistId_and_date", (q) =>
-          q.eq("therapistId", therapistId).gte("date", startDate).lte("date", endDate),
+      const allOooRecords = await ctx.db
+        .query("ooo")
+        .withIndex("by_therapistId_and_startDate", (q) =>
+          q.eq("therapistId", therapistId).lte("startDate", endDate),
         )
         .take(200);
-      const blockouts = allBlockouts.filter((b) => b.status === "active");
+      const activeOoo = allOooRecords.filter((r) => r.endDate >= startDate && r.status === "active");
+
+      const scheduleDates = generateDateRange(today, Math.min(schedule.availabilityHorizonDays, 31));
+
+      const blockouts = activeOoo.flatMap((r) =>
+        expandOooToDateRanges(
+          { startDate: r.startDate, startTime: r.startTime, endDate: r.endDate, endTime: r.endTime },
+          scheduleDates,
+        ),
+      );
 
       const therapistBookings = await ctx.db
         .query("bookings")
@@ -164,8 +181,6 @@ export const getSlotsForAllTherapists = query({
           q.eq("therapistId", therapistId).gte("date", startDate).lte("date", endDate),
         )
         .take(500);
-
-      const scheduleDates = generateDateRange(today, Math.min(schedule.availabilityHorizonDays, 31));
 
       result[therapistId] = computeAvailableSlots({
         schedule: {
@@ -175,7 +190,7 @@ export const getSlotsForAllTherapists = query({
         },
         serviceDuration: service.duration,
         dates: scheduleDates,
-        blockouts: blockouts.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime })),
+        blockouts,
         bookings: therapistBookings.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime, status: b.status })),
         venueCapacity: venue.capacity,
         allBookingsForVenueByDate,

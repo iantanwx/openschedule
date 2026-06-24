@@ -5,8 +5,8 @@ import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { ScheduleCard } from "./schedule-card";
 import { ScheduleEditForm } from "./schedule-edit-form";
-import { BlockoutList } from "./blockout-list";
-import { BlockoutForm } from "./blockout-form";
+import { OooList } from "./ooo-list";
+import { OooForm } from "./ooo-form";
 import { Button } from "@openschedule/ui/components/button";
 import { Separator } from "@openschedule/ui/components/separator";
 import { Spinner } from "@openschedule/ui/components/spinner";
@@ -26,9 +26,9 @@ interface SchedulePageProps {
 export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
   const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showBlockoutForm, setShowBlockoutForm] = useState(false);
-  const [editingBlockoutId, setEditingBlockoutId] = useState<string | null>(null);
-  const [blockoutTherapistFilter, setBlockoutTherapistFilter] = useState<string | null>(null);
+  const [showOooForm, setShowOooForm] = useState(false);
+  const [editingOooId, setEditingOooId] = useState<string | null>(null);
+  const [oooTherapistFilter, setOooTherapistFilter] = useState<string | null>(null);
 
   const currentUser = useQuery(convexApi.queries.users.getSelf);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
@@ -42,8 +42,6 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
     venue ? { venueId: venue._id } : "skip",
   );
 
-  // Org-member therapists (NOT schedule-driven) so the create picker and
-  // blockout filter work before any schedule exists.
   const therapists = useQuery(
     convexApi.queries.users.listTherapistsByOrg,
     org ? { orgId: org._id } : "skip",
@@ -60,21 +58,18 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
     );
   }
 
-  // Pure therapists (no owner role) see only their own schedules; owners see all
   const displayedSchedules = !isOwner && isTherapist && currentUser
     ? (schedules ?? []).filter((s) => s.therapistId === currentUser._id)
     : schedules ?? [];
 
-  // Owner can add a schedule once the org has therapists; a therapist can add
-  // their own when they don't yet have one at this venue.
   const canAddSchedule =
     !!currentUser &&
     (isOwner ? (therapists?.length ?? 0) > 0 : isTherapist && displayedSchedules.length === 0);
 
-  // Determine which therapist's blockouts to show
-  const blockoutTherapistId = isTherapist
+  // Determine which therapist's OoOs to show
+  const oooTherapistId = isTherapist
     ? currentUser?._id ?? null
-    : blockoutTherapistFilter ?? (therapists?.[0]?._id ?? null);
+    : oooTherapistFilter ?? (therapists?.[0]?._id ?? null);
 
   const editingSchedule = editingScheduleId
     ? schedules?.find((s) => s._id === editingScheduleId) ?? null
@@ -136,20 +131,20 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
 
       <Separator />
 
-      {/* Blockouts section */}
+      {/* Out of Office section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Blockouts</h2>
-          <Button size="sm" onClick={() => setShowBlockoutForm(true)}>
-            Add Blockout
+          <h2 className="text-lg font-semibold">Out of Office</h2>
+          <Button size="sm" onClick={() => setShowOooForm(true)}>
+            Add Out of Office
           </Button>
         </div>
 
         {/* Therapist filter (owner only, when multiple therapists) */}
         {isOwner && therapists && therapists.length > 1 && (
           <Select
-            value={blockoutTherapistFilter ?? therapists[0]?._id ?? ""}
-            onValueChange={setBlockoutTherapistFilter}
+            value={oooTherapistFilter ?? therapists[0]?._id ?? ""}
+            onValueChange={setOooTherapistFilter}
           >
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Select therapist" />
@@ -164,27 +159,27 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
           </Select>
         )}
 
-        {blockoutTherapistId && (
-          <BlockoutList
-            therapistId={blockoutTherapistId}
+        {oooTherapistId && (
+          <OooList
+            therapistId={oooTherapistId}
             onEdit={(id) => {
-              setEditingBlockoutId(id);
-              setShowBlockoutForm(true);
+              setEditingOooId(id);
+              setShowOooForm(true);
             }}
           />
         )}
       </div>
 
-      {/* Blockout form dialog */}
-      {showBlockoutForm && blockoutTherapistId && (
-        <BlockoutForm
-          therapistId={blockoutTherapistId}
-          editingId={editingBlockoutId}
+      {/* OoO form dialog */}
+      {showOooForm && oooTherapistId && (
+        <OooForm
+          therapistId={oooTherapistId}
+          editingId={editingOooId}
           therapists={therapists ?? []}
           isOwner={isOwner}
           onClose={() => {
-            setShowBlockoutForm(false);
-            setEditingBlockoutId(null);
+            setShowOooForm(false);
+            setEditingOooId(null);
           }}
         />
       )}

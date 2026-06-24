@@ -66,16 +66,17 @@ export default defineSchema({
     .index("by_venueId", ["venueId"])
     .index("by_therapistId_and_venueId", ["therapistId", "venueId"]),
 
-  blockouts: defineTable({
+  ooo: defineTable({
     therapistId: v.id("users"),
-    date: v.string(),
+    startDate: v.string(),
     startTime: v.string(),
+    endDate: v.string(),
     endTime: v.string(),
     reason: v.optional(v.string()),
     status: v.union(v.literal("active"), v.literal("inactive")),
   })
     .index("by_therapistId", ["therapistId"])
-    .index("by_therapistId_and_date", ["therapistId", "date"]),
+    .index("by_therapistId_and_startDate", ["therapistId", "startDate"]),
 
   customers: defineTable({
     orgId: v.id("organizations"),
