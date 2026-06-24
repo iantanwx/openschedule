@@ -6,6 +6,7 @@ export default defineSchema({
     authId: v.string(),
     name: v.string(),
     slug: v.string(),
+    description: v.optional(v.string()),
   })
     .index("by_authId", ["authId"])
     .index("by_slug", ["slug"]),
@@ -21,6 +22,8 @@ export default defineSchema({
     address: v.optional(v.string()),
     coordinates: v.optional(v.object({ lat: v.number(), lng: v.number() })),
     placeId: v.optional(v.string()),
+    description: v.optional(v.string()),
+    coverImageId: v.optional(v.string()),
     status: v.union(v.literal("active"), v.literal("archived")),
   })
     .index("by_orgId", ["orgId"])
