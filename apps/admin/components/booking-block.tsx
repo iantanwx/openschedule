@@ -25,9 +25,9 @@ function timeToMinutes(time: string): number {
 }
 
 const STATUS_STYLES = {
-  confirmed: "bg-emerald-100 border-emerald-300 border",
-  pending: "bg-amber-100 border-amber-300 border",
-  cancelled: "bg-gray-100 border-gray-300 border opacity-50",
+  confirmed: "bg-emerald-100 border-emerald-300 border text-emerald-950 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-100",
+  pending: "bg-amber-100 border-amber-300 border text-amber-950 dark:bg-amber-950 dark:border-amber-800 dark:text-amber-100",
+  cancelled: "bg-gray-100 border-gray-300 border opacity-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300",
 } as const;
 
 export function BookingBlock({ booking, dayStartMinutes, dayEndMinutes, onTap }: BookingBlockProps) {
@@ -56,11 +56,11 @@ export function BookingBlock({ booking, dayStartMinutes, dayEndMinutes, onTap }:
       <div className="truncate font-medium">
         {booking.startTime}–{booking.endTime}
       </div>
-      <div className="truncate text-muted-foreground">
+      <div className="truncate opacity-75">
         {customer?.name ?? "Loading..."}
       </div>
       {therapist && (
-        <div className="truncate text-muted-foreground">
+        <div className="truncate opacity-75">
           {therapist.name}
         </div>
       )}
