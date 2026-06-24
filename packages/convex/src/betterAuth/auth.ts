@@ -236,6 +236,10 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
     secret: process.env.BETTER_AUTH_SECRET,
     database: authComponent.adapter(ctx),
     emailAndPassword: { enabled: true },
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+    },
     socialProviders: {
       google: {
         clientId: process.env.GOOGLE_CLIENT_ID ?? "",
