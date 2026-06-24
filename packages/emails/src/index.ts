@@ -7,6 +7,8 @@ export { BookingRescheduled, bookingRescheduledPlainText } from "./templates/boo
 export type { BookingRescheduledProps } from "./templates/booking-rescheduled";
 export { Invitation, invitationPlainText } from "./templates/invitation";
 export type { InvitationProps } from "./templates/invitation";
+export { EmailVerification, emailVerificationPlainText } from "./templates/email-verification";
+export type { EmailVerificationProps } from "./templates/email-verification";
 
 // Components
 export { EmailLayout } from "./components/email-layout";

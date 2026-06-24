@@ -235,10 +235,54 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
     baseURL: process.env.SITE_URL,
     secret: process.env.BETTER_AUTH_SECRET,
     database: authComponent.adapter(ctx),
-    emailAndPassword: { enabled: true },
-    accountLinking: {
+    emailAndPassword: {
       enabled: true,
-      trustedProviders: ["google"],
+      requireEmailVerification: true,
+    },
+    emailVerification: {
+      async sendVerificationEmail({ user, url }: { user: { name: string; email: string }; url: string }) {
+        try {
+          const apiKey = process.env.RESEND_API_KEY;
+          const from = process.env.TRANSACTIONAL_FROM_EMAIL ?? "noreply@notifications.opencal.xyz";
+
+          const { render } = await import("@react-email/render");
+          const { EmailVerification, emailVerificationPlainText } = await import("@openschedule/emails");
+
+          const templateProps = {
+            userName: user.name,
+            verificationUrl: url,
+          };
+
+          const html = await render(EmailVerification(templateProps));
+          const text = emailVerificationPlainText(templateProps);
+          const subject = "Verify your email — OpenSchedule";
+
+          if (!apiKey) {
+            console.log("[EMAIL DEV MODE] Verification email:");
+            console.log(`  To: ${user.email}`);
+            console.log(`  Subject: ${subject}`);
+            console.log(`  URL: ${url}`);
+            return;
+          }
+
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from,
+              to: [user.email],
+              subject,
+              text,
+              html,
+            }),
+          });
+        } catch (error) {
+          console.error("[EMAIL ERROR] Failed to send verification email:", error);
+        }
+      },
     },
     socialProviders: {
       google: {
