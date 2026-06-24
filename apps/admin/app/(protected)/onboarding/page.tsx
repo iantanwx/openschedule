@@ -53,6 +53,7 @@ function getBrowserTimezone(): string {
 export default function OnboardingPage() {
   const router = useRouter();
   const createVenue = useMutation(convexApi.mutations.venues.create);
+  const upsertSettings = useMutation(convexApi.mutations.settings.upsert);
 
   // Step state
   const [step, setStep] = useState<1 | 2>(1);
@@ -129,6 +130,17 @@ export default function OnboardingPage() {
         address: address || undefined,
         coordinates: venueCoordinates || undefined,
         placeId: venuePlaceId || undefined,
+      });
+      // Seed org settings with the business name from onboarding
+      await upsertSettings({
+        orgId: orgId as any,
+        data: {
+          businessName: orgName,
+          contactEmail: null,
+          contactPhone: null,
+          logoStorageId: null,
+          emailNotificationsEnabled: true,
+        },
       });
       router.push(`/${orgSlug}`);
     } catch (err) {
