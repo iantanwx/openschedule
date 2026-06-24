@@ -52,42 +52,33 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
 
   return (
     <div className="space-y-6 p-4">
-      {/* Venue cards — mobile only */}
-      {venues && venues.length > 0 && (
-        <div className="space-y-2 md:hidden">
-          <h2 className="text-sm font-medium text-muted-foreground">Venues</h2>
-          <div className="grid grid-cols-1 gap-2">
-            {venues.map((venue) => (
-              <VenueCard key={venue._id} venue={venue} orgSlug={orgSlug} />
-            ))}
-          </div>
+      {/* Overview stats */}
+      <div>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Overview</h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <StatCard
+            label="Bookings Today"
+            value={stats?.total ?? 0}
+            icon={Calendar}
+          />
+          <StatCard
+            label="Confirmed"
+            value={stats?.confirmed ?? 0}
+            icon={CalendarCheck}
+            accent="text-emerald-600"
+          />
+          <StatCard
+            label="Pending"
+            value={stats?.pending ?? 0}
+            icon={Clock}
+            accent="text-amber-600"
+          />
+          <StatCard
+            label="Revenue Today"
+            value={formatCurrency(stats?.revenue ?? 0)}
+            icon={DollarSign}
+          />
         </div>
-      )}
-
-      {/* Stats cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard
-          label="Bookings Today"
-          value={stats?.total ?? 0}
-          icon={Calendar}
-        />
-        <StatCard
-          label="Confirmed"
-          value={stats?.confirmed ?? 0}
-          icon={CalendarCheck}
-          accent="text-emerald-600"
-        />
-        <StatCard
-          label="Pending"
-          value={stats?.pending ?? 0}
-          icon={Clock}
-          accent="text-amber-600"
-        />
-        <StatCard
-          label="Revenue Today"
-          value={formatCurrency(stats?.revenue ?? 0)}
-          icon={DollarSign}
-        />
       </div>
 
       {/* Activity feed */}
@@ -133,6 +124,18 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
           </div>
         )}
       </div>
+
+      {/* Venue cards — mobile only */}
+      {venues && venues.length > 0 && (
+        <div className="space-y-2 md:hidden">
+          <h2 className="text-sm font-medium text-muted-foreground">Venues</h2>
+          <div className="grid grid-cols-1 gap-2">
+            {venues.map((venue) => (
+              <VenueCard key={venue._id} venue={venue} orgSlug={orgSlug} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

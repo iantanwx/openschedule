@@ -3,8 +3,8 @@ import "@openschedule/ui/globals.css";
 import { ConvexClientProvider } from "@/components/convex-provider";
 import { GoogleMapsProvider } from "@/components/google-maps-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ThemedToaster } from "@/components/themed-toaster";
 import { cn } from "@openschedule/ui/lib/utils";
-import { Toaster } from "sonner";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -30,8 +30,8 @@ export default function RootLayout({
           <ConvexClientProvider>
             <GoogleMapsProvider>{children}</GoogleMapsProvider>
           </ConvexClientProvider>
+          <ThemedToaster />
         </ThemeProvider>
-        <Toaster position="top-right" />
       </body>
     </html>
   );
