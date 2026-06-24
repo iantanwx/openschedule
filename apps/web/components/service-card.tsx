@@ -19,7 +19,7 @@ export function ServiceCard({ slug, name, description, duration, price, color, o
   const href = `/${orgSlug}/${venueSlug}/book/service/${slug}`
 
   return (
-    <Link href={href}>
+    <Link href={href} className="block">
       <Card className="flex cursor-pointer items-start gap-4 p-5 transition-colors hover:bg-accent">
         <div className="mt-1 h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: color }} />
         <div className="flex-1 space-y-1">
