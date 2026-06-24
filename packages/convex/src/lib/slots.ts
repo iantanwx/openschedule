@@ -41,6 +41,10 @@ export interface ComputeSlotsInput {
   venueCapacity: number;
   /** All active bookings (any therapist) at the venue, grouped by date — for capacity check */
   allBookingsForVenueByDate: Record<string, VenueBookingSlot[]>;
+  /** Today's date in venue timezone (YYYY-MM-DD) — used to filter past slots */
+  todayDate?: string;
+  /** Current time in venue timezone (HH:MM) — slots before this on todayDate are excluded */
+  nowTime?: string;
 }
 
 /**
@@ -56,8 +60,9 @@ export interface ComputeSlotsInput {
 export function computeAvailableSlots(
   input: ComputeSlotsInput,
 ): Record<string, TimeSlot[]> {
-  const { schedule, serviceDuration, dates, blockouts, bookings, venueCapacity, allBookingsForVenueByDate } = input;
+  const { schedule, serviceDuration, dates, blockouts, bookings, venueCapacity, allBookingsForVenueByDate, todayDate, nowTime } = input;
   const result: Record<string, TimeSlot[]> = {};
+  const nowMinutes = nowTime ? timeToMinutes(nowTime) : null;
 
   for (const date of dates) {
     const dayOfWeek = getDayOfWeek(date);
@@ -87,6 +92,13 @@ export function computeAvailableSlots(
     const venueBookingsForDate = allBookingsForVenueByDate[date] ?? [];
 
     const available = candidates.filter((slot) => {
+      // Filter out past slots for today
+      if (todayDate && date === todayDate && nowMinutes !== null) {
+        if (timeToMinutes(slot.startTime) < nowMinutes) {
+          return false;
+        }
+      }
+
       // Check blockout overlap
       for (const blockout of dateBlockouts) {
         if (timeRangesOverlap(slot.startTime, slot.endTime, blockout.startTime, blockout.endTime)) {

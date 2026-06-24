@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { computeAvailableSlots } from "../lib/slots";
-import { generateDateRange, todayInTimezone } from "../lib/time";
+import { generateDateRange, todayInTimezone, nowTimeInTimezone } from "../lib/time";
 
 export const getSlots = query({
   args: {
@@ -28,6 +28,7 @@ export const getSlots = query({
     }
 
     const today = todayInTimezone(venue.timezone);
+    const nowTime = nowTimeInTimezone(venue.timezone);
     const dates = generateDateRange(today, schedule.availabilityHorizonDays);
     const startDate = dates[0];
     const endDate = dates[dates.length - 1];
@@ -80,6 +81,8 @@ export const getSlots = query({
       bookings: therapistBookings.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime, status: b.status })),
       venueCapacity: venue.capacity,
       allBookingsForVenueByDate,
+      todayDate: today,
+      nowTime,
     });
   },
 });
@@ -116,6 +119,7 @@ export const getSlotsForAllTherapists = query({
 
     const maxHorizon = Math.max(...schedules.map((s) => s.availabilityHorizonDays));
     const today = todayInTimezone(venue.timezone);
+    const nowTime = nowTimeInTimezone(venue.timezone);
     const dates = generateDateRange(today, Math.min(maxHorizon, 31));
     const startDate = dates[0];
     const endDate = dates[dates.length - 1];
@@ -175,6 +179,8 @@ export const getSlotsForAllTherapists = query({
         bookings: therapistBookings.map((b) => ({ date: b.date, startTime: b.startTime, endTime: b.endTime, status: b.status })),
         venueCapacity: venue.capacity,
         allBookingsForVenueByDate,
+        todayDate: today,
+        nowTime,
       });
     }
 

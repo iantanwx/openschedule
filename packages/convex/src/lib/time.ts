@@ -57,3 +57,10 @@ export function todayInTimezone(timezone: string): string {
   const zonedNow = toZonedTime(now, timezone);
   return format(zonedNow, "yyyy-MM-dd");
 }
+
+/** Get current time as "HH:MM" in a given IANA timezone */
+export function nowTimeInTimezone(timezone: string): string {
+  const now = new Date();
+  const zonedNow = toZonedTime(now, timezone);
+  return format(zonedNow, "HH:mm");
+}
