@@ -7,29 +7,8 @@ import { Button } from "@openschedule/ui/components/button";
 import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@openschedule/ui/components/select";
 import { Plus } from "lucide-react";
-
-const TIMEZONES = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "America/Toronto",
-  "Europe/London",
-  "Europe/Paris",
-  "Europe/Berlin",
-  "Asia/Tokyo",
-  "Asia/Singapore",
-  "Australia/Sydney",
-  "Pacific/Auckland",
-];
+import { TimezoneCombobox } from "./timezone-combobox";
 
 function slugify(text: string): string {
   return text
@@ -127,18 +106,11 @@ export function CreateVenueCard({ orgId }: CreateVenueCardProps) {
           </div>
           <div className="space-y-1">
             <Label htmlFor="create-venue-tz">Timezone</Label>
-            <Select value={timezone} onValueChange={setTimezone}>
-              <SelectTrigger id="create-venue-tz">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TIMEZONES.map((tz) => (
-                  <SelectItem key={tz} value={tz}>
-                    {tz}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <TimezoneCombobox
+              id="create-venue-tz"
+              value={timezone}
+              onValueChange={setTimezone}
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="create-venue-cap">Capacity</Label>

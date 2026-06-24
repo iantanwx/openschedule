@@ -9,29 +9,8 @@ import { Label } from "@openschedule/ui/components/label";
 import { Textarea } from "@openschedule/ui/components/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
 import { Spinner } from "@openschedule/ui/components/spinner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@openschedule/ui/components/select";
 import { AddressAutocomplete } from "./address-autocomplete";
-
-const TIMEZONES = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "America/Toronto",
-  "Europe/London",
-  "Europe/Paris",
-  "Europe/Berlin",
-  "Asia/Tokyo",
-  "Asia/Singapore",
-  "Australia/Sydney",
-  "Pacific/Auckland",
-];
+import { TimezoneCombobox } from "./timezone-combobox";
 
 interface VenueSettingsPageProps {
   orgSlug: string;
@@ -181,18 +160,11 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
 
           <div className="space-y-1">
             <Label htmlFor="venue-tz">Timezone</Label>
-            <Select value={timezone} onValueChange={setTimezone}>
-              <SelectTrigger id="venue-tz">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TIMEZONES.map((tz) => (
-                  <SelectItem key={tz} value={tz}>
-                    {tz}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <TimezoneCombobox
+              id="venue-tz"
+              value={timezone}
+              onValueChange={setTimezone}
+            />
           </div>
 
           <div className="space-y-1">

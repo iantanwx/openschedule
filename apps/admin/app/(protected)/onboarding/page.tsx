@@ -6,32 +6,11 @@ import { useMutation } from "convex/react";
 import { authClient } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
+import { TimezoneCombobox } from "@/components/timezone-combobox";
 import { Button } from "@openschedule/ui/components/button";
 import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@openschedule/ui/components/select";
 import { ArrowLeft } from "lucide-react";
-
-const TIMEZONES = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "America/Toronto",
-  "Europe/London",
-  "Europe/Paris",
-  "Europe/Berlin",
-  "Asia/Tokyo",
-  "Asia/Singapore",
-  "Australia/Sydney",
-  "Pacific/Auckland",
-];
 
 function slugify(text: string): string {
   return text
@@ -42,12 +21,10 @@ function slugify(text: string): string {
 
 function getBrowserTimezone(): string {
   try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (TIMEZONES.includes(tz)) return tz;
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
   } catch {
-    // fallback below
+    return "America/New_York";
   }
-  return "America/New_York";
 }
 
 export default function OnboardingPage() {
@@ -245,18 +222,11 @@ export default function OnboardingPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="venue-tz">Timezone</Label>
-                <Select value={timezone} onValueChange={setTimezone}>
-                  <SelectTrigger id="venue-tz">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIMEZONES.map((tz) => (
-                      <SelectItem key={tz} value={tz}>
-                        {tz}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <TimezoneCombobox
+                  id="venue-tz"
+                  value={timezone}
+                  onValueChange={setTimezone}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="venue-address">Address</Label>
