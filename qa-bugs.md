@@ -41,3 +41,5 @@
 - [x] 39. Feed in mobile view (org home) should show 3 notifications, and expand to 5 with a down arrow icon (like vercel).
 - [ ] 40. No way to dismiss notification toast. Toast is white bg, very weird.
 - [ ] 41. Home view is very awkward. I see venues, then the overview, then the feed. We should do Overview first (add a header too), then feed, then venues. And all should have headers, for better separation visually.
+- [ ] 42. No Google login. This was deferred, we can add it now.
+- [ ] 43. In Venue screen, the venue picker isn't working.

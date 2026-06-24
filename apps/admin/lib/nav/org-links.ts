@@ -1,4 +1,4 @@
-import { MapPin, Users, Layers, Settings } from "lucide-react";
+import { Home, Users, Layers, Settings } from "lucide-react";
 import type { ComponentType } from "react";
 
 export interface OrgNavLink {
@@ -13,8 +13,8 @@ export interface OrgNavLink {
 
 export const ORG_NAV_LINKS: OrgNavLink[] = [
   {
-    label: "Venues",
-    icon: MapPin,
+    label: "Overview",
+    icon: Home,
     ownerOnly: false,
     href: (orgSlug) => `/${orgSlug}`,
     isActive: (pathname, orgSlug) =>
