@@ -31,6 +31,7 @@ export const update = mutation({
     id: v.id("organizations"),
     name: v.optional(v.string()),
     slug: v.optional(v.string()),
+    description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
@@ -56,6 +57,7 @@ export const update = mutation({
     const patch: Record<string, string> = {};
     if (fields.name !== undefined) patch.name = fields.name;
     if (fields.slug !== undefined) patch.slug = fields.slug;
+    if (fields.description !== undefined) patch.description = fields.description;
     await ctx.db.patch(id, patch);
   },
 });
