@@ -10,6 +10,7 @@ import { BookingCard } from "./booking-card";
 import { BookingDetailModal } from "./booking-detail-modal";
 import { Fab } from "./fab";
 import { ViewToggle } from "./view-toggle";
+import { Spinner } from "@openschedule/ui/components/spinner";
 
 interface BookingsPageProps {
   orgSlug: string;
@@ -68,7 +69,7 @@ export function BookingsPage({ orgSlug, venueSlug }: BookingsPageProps) {
   if (!org || !venue) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner />
       </div>
     );
   }

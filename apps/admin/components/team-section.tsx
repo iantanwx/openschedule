@@ -9,6 +9,7 @@ import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
 import { Badge } from "@openschedule/ui/components/badge";
+import { Spinner } from "@openschedule/ui/components/spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -165,7 +166,7 @@ export function TeamSection() {
           <CardTitle>Team</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <Spinner size="sm" />
         </CardContent>
       </Card>
     );

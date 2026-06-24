@@ -8,6 +8,7 @@ import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
 import { Textarea } from "@openschedule/ui/components/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
+import { Spinner } from "@openschedule/ui/components/spinner";
 import {
   Select,
   SelectContent,
@@ -85,7 +86,7 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
   if (!venue) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner />
       </div>
     );
   }

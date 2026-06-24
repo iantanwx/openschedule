@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { useEffect } from "react";
 import { NotificationToast } from "@/components/notification-toast";
+import { Spinner } from "@openschedule/ui/components/spinner";
 
 export default function ProtectedLayout({
   children,
@@ -22,7 +23,7 @@ export default function ProtectedLayout({
   if (isPending) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner size="lg" />
       </div>
     );
   }

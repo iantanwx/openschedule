@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { authClient, useSession } from "@/lib/auth-client";
 import { Button } from "@openschedule/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
+import { Spinner } from "@openschedule/ui/components/spinner";
 
 export function InvitePage({ token }: { token: string }) {
   const router = useRouter();
@@ -42,7 +43,7 @@ export function InvitePage({ token }: { token: string }) {
   if (isPending || !session) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner size="lg" />
       </div>
     );
   }

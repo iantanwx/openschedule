@@ -6,6 +6,7 @@ import { OrgSettingsForm } from "./org-settings-form";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Button } from "@openschedule/ui/components/button";
+import { Spinner } from "@openschedule/ui/components/spinner";
 import {
   Card,
   CardContent,
@@ -27,7 +28,7 @@ export function OrgSettingsWrapper({ orgSlug }: OrgSettingsWrapperProps) {
   if (!org) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner />
       </div>
     );
   }

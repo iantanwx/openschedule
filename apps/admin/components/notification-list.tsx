@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { formatNotification } from "@/lib/format-notification";
 import { Button } from "@openschedule/ui/components/button";
+import { Spinner } from "@openschedule/ui/components/spinner";
 
 function relativeTime(timestamp: number): string {
   const diff = Date.now() - timestamp;
@@ -23,8 +24,8 @@ export function NotificationList() {
 
   if (notifications === undefined) {
     return (
-      <div className="p-4 text-center text-sm text-muted-foreground">
-        Loading...
+      <div className="flex items-center justify-center p-4">
+        <Spinner size="sm" />
       </div>
     );
   }

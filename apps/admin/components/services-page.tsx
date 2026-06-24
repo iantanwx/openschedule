@@ -6,6 +6,7 @@ import { convexApi } from "@/lib/convex-api";
 import { Button } from "@openschedule/ui/components/button";
 import { Card, CardContent } from "@openschedule/ui/components/card";
 import { ServiceForm } from "./service-form";
+import { Spinner } from "@openschedule/ui/components/spinner";
 
 interface ServicesPageProps {
   orgSlug: string;
@@ -26,7 +27,7 @@ export function ServicesPage({ orgSlug }: ServicesPageProps) {
   const unarchiveService = useMutation(convexApi.mutations.services.unarchive);
 
   if (!org || services === undefined) {
-    return <div className="p-4"><p className="text-muted-foreground">Loading...</p></div>;
+    return <div className="flex items-center justify-center p-4"><Spinner /></div>;
   }
 
   const activeServices = (services ?? []).filter((s) => s.status === "active");

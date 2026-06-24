@@ -9,6 +9,7 @@ import { BlockoutList } from "./blockout-list";
 import { BlockoutForm } from "./blockout-form";
 import { Button } from "@openschedule/ui/components/button";
 import { Separator } from "@openschedule/ui/components/separator";
+import { Spinner } from "@openschedule/ui/components/spinner";
 import {
   Select,
   SelectContent,
@@ -54,7 +55,7 @@ export function SchedulePage({ orgSlug, venueSlug }: SchedulePageProps) {
   if (!org || !venue) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner />
       </div>
     );
   }

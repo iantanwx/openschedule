@@ -6,6 +6,7 @@ import { convexApi } from "@/lib/convex-api";
 import { Card, CardContent } from "@openschedule/ui/components/card";
 import { formatNotification } from "@/lib/format-notification";
 import { CalendarCheck, Clock, DollarSign, Calendar } from "lucide-react";
+import { Spinner } from "@openschedule/ui/components/spinner";
 
 interface OrgDashboardPageProps {
   orgSlug: string;
@@ -28,7 +29,7 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
   if (!org) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner />
       </div>
     );
   }
@@ -65,7 +66,7 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
       <div>
         <h2 className="mb-3 text-sm font-medium text-muted-foreground">Recent Activity</h2>
         {activity === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <Spinner size="sm" />
         ) : activity.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             No activity yet

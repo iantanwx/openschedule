@@ -9,6 +9,7 @@ import { Label } from "@openschedule/ui/components/label";
 import { Textarea } from "@openschedule/ui/components/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
 import { Switch } from "@openschedule/ui/components/switch";
+import { Spinner } from "@openschedule/ui/components/spinner";
 
 interface OrgSettingsFormProps {
   orgId: string;
@@ -125,7 +126,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
           <CardTitle>Organization Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <Spinner size="sm" />
         </CardContent>
       </Card>
     );
