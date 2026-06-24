@@ -6,6 +6,7 @@ import { convexApi } from "@/lib/convex-api";
 import { Button } from "@openschedule/ui/components/button";
 import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
+import { Textarea } from "@openschedule/ui/components/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
 import { Switch } from "@openschedule/ui/components/switch";
 
@@ -21,6 +22,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
   const [businessName, setBusinessName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [orgDescription, setOrgDescription] = useState("");
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(false);
   const [logoStorageId, setLogoStorageId] = useState<string | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
@@ -30,6 +32,9 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const updateOrg = useMutation(convexApi.mutations.organizations.update);
+  const org = useQuery(convexApi.queries.organizations.get, { id: orgId });
+
   // Initialize form when settings load
   if (settings !== undefined && !isInitialized) {
     if (settings) {
@@ -38,6 +43,9 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
       setContactPhone(settings.contactPhone ?? "");
       setEmailNotificationsEnabled(settings.emailNotificationsEnabled);
       setLogoStorageId(settings.logoStorageId);
+      if (org) {
+        setOrgDescription(org.description ?? "");
+      }
     }
     setIsInitialized(true);
   }
@@ -55,6 +63,10 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
           logoStorageId: logoStorageId as any,
           emailNotificationsEnabled,
         },
+      });
+      await updateOrg({
+        id: orgId as any,
+        description: orgDescription || undefined,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save settings");
@@ -159,6 +171,21 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
               onChange={(e) => setContactPhone(e.target.value)}
               placeholder="+65 9123 4567"
             />
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="org-description">Description</Label>
+            <Textarea
+              id="org-description"
+              value={orgDescription}
+              onChange={(e) => setOrgDescription(e.target.value)}
+              placeholder="Short description of your business (max 200 characters)"
+              maxLength={200}
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              {orgDescription.length}/200
+            </p>
           </div>
 
           {/* Logo upload */}
