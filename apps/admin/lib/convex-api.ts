@@ -15,12 +15,14 @@ export const convexApi = api as unknown as {
         _creationTime: number;
         name: string;
         slug: string;
+        description?: string;
       } | null>;
       get: FunctionReference<"query", "public", { id: string }, {
         _id: string;
         _creationTime: number;
         name: string;
         slug: string;
+        description?: string;
       } | null>;
     };
     venues: {
@@ -65,6 +67,8 @@ export const convexApi = api as unknown as {
         address?: string;
         coordinates?: { lat: number; lng: number };
         placeId?: string;
+        description?: string;
+        coverImageId?: string;
       } | null>;
     };
     bookings: {
@@ -332,6 +336,8 @@ export const convexApi = api as unknown as {
         address?: string;
         coordinates?: { lat: number; lng: number };
         placeId?: string;
+        description?: string;
+        coverImageId?: string;
       }, string>;
       update: FunctionReference<"mutation", "public", {
         id: string;
@@ -344,6 +350,8 @@ export const convexApi = api as unknown as {
         address?: string;
         coordinates?: { lat: number; lng: number };
         placeId?: string;
+        description?: string;
+        coverImageId?: string;
       }, void>;
       archive: FunctionReference<"mutation", "public", { id: string }, void>;
       unarchive: FunctionReference<"mutation", "public", { id: string }, void>;
@@ -418,6 +426,14 @@ export const convexApi = api as unknown as {
     };
     generateUploadUrl: {
       generateUploadUrl: FunctionReference<"mutation", "public", Record<string, never>, string>;
+    };
+    organizations: {
+      update: FunctionReference<"mutation", "public", {
+        id: string;
+        name?: string;
+        slug?: string;
+        description?: string;
+      }, void>;
     };
   };
 };

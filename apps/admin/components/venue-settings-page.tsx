@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { Button } from "@openschedule/ui/components/button";
 import { Input } from "@openschedule/ui/components/input";
 import { Label } from "@openschedule/ui/components/label";
+import { Textarea } from "@openschedule/ui/components/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
 import {
   Select,
@@ -52,11 +53,17 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
   const [address, setAddress] = useState("");
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [placeId, setPlaceId] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [coverImageId, setCoverImageId] = useState<string | null>(null);
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const updateVenue = useMutation(convexApi.mutations.venues.update);
   const archiveVenue = useMutation(convexApi.mutations.venues.archive);
+  const generateUploadUrl = useMutation(convexApi.mutations.generateUploadUrl.generateUploadUrl);
 
   const isOwner = currentUser?.roles.includes("owner") ?? false;
 
@@ -70,6 +77,8 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
     setAddress(venue.address ?? "");
     setCoordinates(venue.coordinates ?? null);
     setPlaceId(venue.placeId ?? null);
+    setDescription(venue.description ?? "");
+    setCoverImageId(venue.coverImageId ?? null);
     setIsInitialized(true);
   }
 
@@ -103,6 +112,8 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
         address: address || undefined,
         coordinates: coordinates || undefined,
         placeId: placeId || undefined,
+        description: description || undefined,
+        coverImageId: coverImageId || undefined,
       });
     } finally {
       setIsSaving(false);
@@ -113,6 +124,37 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
     if (!venue) return;
     if (!confirm("Archive this venue? All future bookings will be cancelled.")) return;
     await archiveVenue({ id: venue._id });
+  }
+
+  async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const uploadUrl = await generateUploadUrl({});
+      const result = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!result.ok) throw new Error("Upload failed");
+      const { storageId } = await result.json();
+      setCoverImageId(storageId);
+      setCoverPreviewUrl(URL.createObjectURL(file));
+    } catch {
+      // Upload error — silently ignore, user can retry
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  function handleRemoveCover() {
+    setCoverImageId(null);
+    setCoverPreviewUrl(null);
+    if (coverInputRef.current) {
+      coverInputRef.current.value = "";
+    }
   }
 
   return (
@@ -196,6 +238,49 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
               }}
               placeholder="Start typing an address..."
             />
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="venue-description">Description</Label>
+            <Textarea
+              id="venue-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Short venue description (max 200 characters)"
+              maxLength={200}
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              {description.length}/200
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Cover Image</Label>
+            {(coverPreviewUrl || coverImageId) && (
+              <div className="flex items-center gap-3">
+                <div className="h-16 w-28 overflow-hidden rounded-md border bg-muted">
+                  {coverPreviewUrl ? (
+                    <img src={coverPreviewUrl} alt="Cover preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                      Cover
+                    </div>
+                  )}
+                </div>
+                <Button variant="ghost" size="sm" className="text-destructive" onClick={handleRemoveCover}>
+                  Remove
+                </Button>
+              </div>
+            )}
+            <Input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleCoverUpload}
+              disabled={isUploading}
+            />
+            {isUploading && <p className="text-xs text-muted-foreground">Uploading...</p>}
           </div>
 
           <div className="flex items-center gap-2 pt-2">

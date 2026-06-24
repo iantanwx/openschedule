@@ -10,8 +10,8 @@ export const listByOrg = query({
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
     const activeVenues = venues.filter((v) => v.status === "active");
-    return activeVenues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates, placeId }) => ({
-      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates, placeId,
+    return activeVenues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates, placeId, description, coverImageId }) => ({
+      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates, placeId, description, coverImageId,
     }));
   },
 });
@@ -24,7 +24,7 @@ export const listByOrgPublic = query({
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
     const activeVenues = venues.filter((v) => v.status === "active");
-    return activeVenues.map(({ _id, name, slug, timezone, address, coordinates, placeId }) => ({ _id, name, slug, timezone, address, coordinates, placeId }));
+    return activeVenues.map(({ _id, name, slug, timezone, address, coordinates, placeId, description, coverImageId }) => ({ _id, name, slug, timezone, address, coordinates, placeId, description, coverImageId }));
   },
 });
 
@@ -38,7 +38,7 @@ export const getBySlug = query({
       )
       .unique();
     if (!venue || venue.status !== "active") return null;
-    return { _id: venue._id, name: venue.name, slug: venue.slug, timezone: venue.timezone, address: venue.address, coordinates: venue.coordinates, placeId: venue.placeId };
+    return { _id: venue._id, name: venue.name, slug: venue.slug, timezone: venue.timezone, address: venue.address, coordinates: venue.coordinates, placeId: venue.placeId, description: venue.description, coverImageId: venue.coverImageId };
   },
 });
 
@@ -57,6 +57,7 @@ export const getBySlugFull = query({
       name: venue.name, slug: venue.slug, timezone: venue.timezone,
       capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
       status: venue.status, address: venue.address, coordinates: venue.coordinates, placeId: venue.placeId,
+      description: venue.description, coverImageId: venue.coverImageId,
     };
   },
 });
@@ -71,6 +72,7 @@ export const get = query({
       name: venue.name, slug: venue.slug, timezone: venue.timezone,
       capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
       status: venue.status, address: venue.address, coordinates: venue.coordinates, placeId: venue.placeId,
+      description: venue.description, coverImageId: venue.coverImageId,
     };
   },
 });
