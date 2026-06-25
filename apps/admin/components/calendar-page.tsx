@@ -727,6 +727,14 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
           bookingId={selectedBookingId}
           venueId={venue._id}
           readOnly={isReadOnly}
+          customerName={(() => {
+            const b = displayedBookings.find((bk) => bk._id === selectedBookingId)
+            return b ? customerMap.get(b.customerId) : undefined
+          })()}
+          therapistName={(() => {
+            const b = displayedBookings.find((bk) => bk._id === selectedBookingId)
+            return b ? therapistMap.get(b.therapistId) : undefined
+          })()}
           onClose={() => setSelectedBookingId(null)}
         />
       )}

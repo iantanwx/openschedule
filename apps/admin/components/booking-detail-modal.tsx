@@ -18,6 +18,8 @@ interface BookingDetailModalProps {
   bookingId: string;
   venueId: string;
   readOnly?: boolean;
+  customerName?: string;
+  therapistName?: string;
   onClose: () => void;
 }
 
@@ -27,18 +29,21 @@ const STATUS_BADGE_VARIANT = {
   cancelled: "outline" as const,
 };
 
-export function BookingDetailModal({ bookingId, venueId, readOnly = false, onClose }: BookingDetailModalProps) {
+export function BookingDetailModal({ bookingId, venueId, readOnly = false, customerName, therapistName, onClose }: BookingDetailModalProps) {
   const [showReschedule, setShowReschedule] = useState(false);
 
   const booking = useQuery(convexApi.queries.bookings.get, { id: bookingId });
   const customer = useQuery(
     convexApi.queries.customers.get,
-    booking ? { id: booking.customerId } : "skip",
+    booking && !customerName ? { id: booking.customerId } : "skip",
   );
   const therapist = useQuery(
     convexApi.queries.users.getPublic,
-    booking ? { id: booking.therapistId } : "skip",
+    booking && !therapistName ? { id: booking.therapistId } : "skip",
   );
+
+  const resolvedCustomerName = customerName ?? customer?.name ?? "Loading...";
+  const resolvedTherapistName = therapistName ?? therapist?.name ?? "Loading...";
 
   const confirmMutation = useMutation(convexApi.mutations.bookings.confirm);
   const cancelMutation = useMutation(convexApi.mutations.bookings.cancel);
@@ -107,14 +112,14 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, onClo
             </p>
             <p>
               <span className="text-muted-foreground">Therapist:</span>{" "}
-              {therapist?.name ?? "Loading..."}
+              {resolvedTherapistName}
             </p>
           </div>
 
           {/* Customer info */}
           <div className="space-y-1 text-sm">
             <p className="font-medium">Customer</p>
-            <p>{customer?.name ?? "Loading..."}</p>
+            <p>{resolvedCustomerName}</p>
             {customer?.email && <p className="text-muted-foreground">{customer.email}</p>}
             {customer?.phone && <p className="text-muted-foreground">{customer.phone}</p>}
           </div>
