@@ -355,44 +355,52 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // -------------------------------------------------------------------------
   // Schedule-x calendar app (created ONCE, never re-created)
+  // Stabilize ALL config values so useNextCalendarApp doesn't see new references
   // -------------------------------------------------------------------------
 
+  const [views] = useState(() => [createViewDay(), createViewWeek(), createViewMonthGrid()])
+  const [plugins] = useState(() => [eventsService, calendarControls])
+  const [calendars] = useState(() => ({
+    booking: {
+      colorName: "booking",
+      lightColors: { main: "#10b981", container: "#ecfdf5", onContainer: "#065f46" },
+      darkColors: { main: "#34d399", container: "#064e3b", onContainer: "#a7f3d0" },
+    },
+    ooo: {
+      colorName: "ooo",
+      lightColors: { main: "#6366f1", container: "#eef2ff", onContainer: "#3730a3" },
+      darkColors: { main: "#818cf8", container: "#312e81", onContainer: "#c7d2fe" },
+    },
+  }))
+  const [weekOptions] = useState(() => ({
+    nDays: 7,
+    gridHeight: 800,
+    eventWidth: 95,
+    timeAxisFormatOptions: { hour: "numeric" as const, minute: "2-digit" as const },
+  }))
+  const [dayBoundaries] = useState(() => ({ start: "06:00", end: "22:00" }))
+  const [callbacks] = useState(() => ({
+    onEventClick: (event: CalendarEvent) => {
+      const type = (event as Record<string, unknown>)._type
+      if (type === "booking") {
+        setSelectedBookingId(event.id as string)
+      }
+    },
+  }))
+
   const calendarApp = useNextCalendarApp({
-    views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
+    views,
     events: [],
     selectedDate: Temporal.Now.plainDateISO(),
     defaultView: "week",
-    plugins: [eventsService, calendarControls],
+    plugins,
     theme: "shadcn",
     isDark: false,
-    dayBoundaries: { start: "06:00", end: "22:00" },
+    dayBoundaries,
     skipAnimations: true,
-    weekOptions: {
-      nDays: 7,
-      gridHeight: 800,
-      eventWidth: 95,
-      timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
-    },
-    calendars: {
-      booking: {
-        colorName: "booking",
-        lightColors: { main: "#10b981", container: "#ecfdf5", onContainer: "#065f46" },
-        darkColors: { main: "#34d399", container: "#064e3b", onContainer: "#a7f3d0" },
-      },
-      ooo: {
-        colorName: "ooo",
-        lightColors: { main: "#6366f1", container: "#eef2ff", onContainer: "#3730a3" },
-        darkColors: { main: "#818cf8", container: "#312e81", onContainer: "#c7d2fe" },
-      },
-    },
-    callbacks: {
-      onEventClick: (event: CalendarEvent) => {
-        const type = (event as Record<string, unknown>)._type
-        if (type === "booking") {
-          setSelectedBookingId(event.id as string)
-        }
-      },
-    },
+    weekOptions,
+    calendars,
+    callbacks,
   })
 
   // Toggle dark mode programmatically (avoids config re-init tearing down the wrapper)
