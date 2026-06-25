@@ -379,6 +379,11 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     timeAxisFormatOptions: { hour: "numeric" as const, minute: "2-digit" as const },
   }))
   const [dayBoundaries] = useState(() => ({ start: "06:00", end: "22:00" }))
+  const [customComponents] = useState(() => ({
+    timeGridEvent: CalendarBookingEvent,
+    dateGridEvent: CalendarBookingEvent,
+    monthGridEvent: CalendarBookingEvent,
+  }))
   const [callbacks] = useState(() => ({
     onEventClick: (event: CalendarEvent) => {
       const type = (event as Record<string, unknown>)._type
@@ -648,11 +653,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
           calendarApp ? (
             <ScheduleXCalendar
               calendarApp={calendarApp}
-              customComponents={{
-                timeGridEvent: CalendarBookingEvent,
-                dateGridEvent: CalendarBookingEvent,
-                monthGridEvent: CalendarBookingEvent,
-              }}
+              customComponents={customComponents}
             />
           ) : (
             <div className="flex h-64 items-center justify-center">
