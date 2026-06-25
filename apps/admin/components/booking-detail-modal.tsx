@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
+import { capitalize } from "@openschedule/lib/strings";
 import { RescheduleView } from "./reschedule-view";
 import { useState } from "react";
 import { Button } from "@openschedule/ui/components/button";
@@ -88,7 +89,7 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, onClo
           {/* Status */}
           <div className="flex items-center gap-2">
             <Badge variant={STATUS_BADGE_VARIANT[booking.status]}>
-              {booking.status}
+              {capitalize(booking.status)}
             </Badge>
             <span className="text-sm text-muted-foreground">
               Created by {booking.createdBy}
