@@ -447,6 +447,20 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   }, [calendarApp, resolvedTheme])
 
   // -------------------------------------------------------------------------
+  // Name maps (must be defined before effects that use them)
+  // -------------------------------------------------------------------------
+
+  const customerMap = useMemo(() => {
+    const map = new Map<string, string>()
+    if (customers) {
+      for (const c of customers) {
+        map.set(c._id, c.name)
+      }
+    }
+    return map
+  }, [customers])
+
+  // -------------------------------------------------------------------------
   // Sync state to calendar app via controls plugin (imperative updates)
   // -------------------------------------------------------------------------
 
@@ -607,16 +621,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     }
     return map
   }, [therapists])
-
-  const customerMap = useMemo(() => {
-    const map = new Map<string, string>()
-    if (customers) {
-      for (const c of customers) {
-        map.set(c._id, c.name)
-      }
-    }
-    return map
-  }, [customers])
 
   // -------------------------------------------------------------------------
   // Track whether we've ever received booking data (to avoid spinner on subsequent navigations)
