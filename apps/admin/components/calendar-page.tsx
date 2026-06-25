@@ -443,50 +443,50 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync events when data arrives (separate from date navigation)
   const prevEventsSigRef = useRef("")
-  // ISOLATION STEP 0: commented out
-  // useEffect(() => {
-  //   if (!calendarApp) return
-  //   if (bookings === undefined) return
-  //
-  //   const tz = venue?.timezone ?? "UTC"
-  //   calendarControls.setTimezone(tz)
-  //
-  //   const therapistNames = new Map<string, string>()
-  //   if (therapists) {
-  //     for (const t of therapists) {
-  //       therapistNames.set(t._id, t.name)
-  //     }
-  //   }
-  //
-  //   const events: CalendarEvent[] = []
-  //   if (displayedBookings) {
-  //     for (const b of displayedBookings) {
-  //       if (b.status === "cancelled") continue
-  //       events.push(
-  //         bookingToEvent(
-  //           b,
-  //           therapistNames.get(b.therapistId) ?? "Therapist",
-  //           "Customer",
-  //           tz
-  //         )
-  //       )
-  //     }
-  //   }
-  //   if (oooEntries) {
-  //     for (const ooo of oooEntries) {
-  //       if (ooo.status !== "active") continue
-  //       events.push(
-  //         oooToEvent(ooo, therapistNames.get(ooo.therapistId) ?? "Therapist", tz)
-  //       )
-  //     }
-  //   }
-  //
-  //   const sig = events.map((e) => e.id).join(",")
-  //   if (sig !== prevEventsSigRef.current) {
-  //     prevEventsSigRef.current = sig
-  //     eventsService.set(events)
-  //   }
-  // }, [calendarApp, calendarControls, eventsService, bookings, displayedBookings, oooEntries, therapists, venue])
+  // ISOLATION STEP 2: events sync enabled
+  useEffect(() => {
+    if (!calendarApp) return
+    if (bookings === undefined) return
+
+    const tz = venue?.timezone ?? "UTC"
+    calendarControls.setTimezone(tz)
+
+    const therapistNames = new Map<string, string>()
+    if (therapists) {
+      for (const t of therapists) {
+        therapistNames.set(t._id, t.name)
+      }
+    }
+
+    const events: CalendarEvent[] = []
+    if (displayedBookings) {
+      for (const b of displayedBookings) {
+        if (b.status === "cancelled") continue
+        events.push(
+          bookingToEvent(
+            b,
+            therapistNames.get(b.therapistId) ?? "Therapist",
+            "Customer",
+            tz
+          )
+        )
+      }
+    }
+    if (oooEntries) {
+      for (const ooo of oooEntries) {
+        if (ooo.status !== "active") continue
+        events.push(
+          oooToEvent(ooo, therapistNames.get(ooo.therapistId) ?? "Therapist", tz)
+        )
+      }
+    }
+
+    const sig = events.map((e) => e.id).join(",")
+    if (sig !== prevEventsSigRef.current) {
+      prevEventsSigRef.current = sig
+      eventsService.set(events)
+    }
+  }, [calendarApp, calendarControls, eventsService, bookings, displayedBookings, oooEntries, therapists, venue])
 
 
 
