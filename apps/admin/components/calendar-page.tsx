@@ -429,7 +429,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     events: [],
     selectedDate: Temporal.Now.plainDateISO(),
     defaultView: "week",
-    plugins: [eventsService],
+    plugins: [eventsService, calendarControls],
     calendars: {
       booking: {
         colorName: "booking",
