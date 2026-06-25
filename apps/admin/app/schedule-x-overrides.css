@@ -9,11 +9,15 @@
   display: none !important;
 }
 
-/* Month view: equal-height rows, scroll if events overflow */
+/* Month view: equal-height rows, invisible scroll */
 .sx__month-grid-week {
   min-height: 100px !important;
   max-height: 100px !important;
   overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+}
+.sx__month-grid-week::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 
