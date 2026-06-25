@@ -19,6 +19,7 @@
     "@schedule-x/calendar": "^4.6.0",
     "@schedule-x/react": "^4.1.0",
     "@schedule-x/theme-default": "^4.6.0",
+    "@schedule-x/theme-shadcn": "^4.6.0",
     "@vis.gl/react-google-maps": "^1.8.3",
     "better-auth": "^1.6.0",
     "convex": "^1.21.0",

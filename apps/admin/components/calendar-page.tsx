@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 import {
   format,
   parseISO,
@@ -22,7 +23,7 @@ import {
   createViewMonthGrid,
 } from "@schedule-x/calendar";
 import type { CalendarEvent } from "@schedule-x/calendar";
-import "@schedule-x/theme-default/dist/index.css";
+import "@schedule-x/theme-shadcn/dist/index.css";
 import "@/app/schedule-x-overrides.css";
 
 import { convexApi } from "@/lib/convex-api";
@@ -258,6 +259,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { resolvedTheme } = useTheme();
 
   // URL state
   const viewParam = searchParams.get("view");
@@ -408,6 +410,8 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   const calendarApp = useNextCalendarApp({
     views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
     events: calendarEvents,
+    theme: "shadcn",
+    isDark: resolvedTheme === "dark",
     selectedDate: Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")),
     defaultView: currentView === "month" ? "month-grid" : currentView === "3day" ? "week" : currentView === "schedule" ? "week" : currentView,
     calendars: {

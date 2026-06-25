@@ -1,57 +1,12 @@
 /* Schedule-x overrides
  *
- * This project uses oklch() color values in CSS variables (e.g. --border: oklch(0.922 0 0)).
- * We reference them directly via var(--X) — NOT wrapped in hsl().
- *
- * We also hide schedule-x's built-in header since we render our own CalendarToolbar.
+ * Using @schedule-x/theme-shadcn which handles light/dark automatically.
+ * We just need to hide the built-in header and style custom event renderers.
  */
 
 /* Hide the built-in schedule-x header (we use CalendarToolbar instead) */
 .sx__calendar-header {
   display: none !important;
-}
-
-/* Light mode — transparent backgrounds so the page bg shows through */
-.sx__calendar {
-  --sx-color-surface: transparent;
-  --sx-color-surface-dim: transparent;
-  --sx-color-surface-container: transparent;
-  --sx-color-surface-container-low: transparent;
-  --sx-color-background: transparent;
-  --sx-color-outline: var(--border);
-  --sx-color-outline-variant: var(--border);
-  --sx-color-neutral: var(--border);
-  --sx-color-neutral-variant: var(--border);
-  --sx-color-on-surface: var(--foreground);
-  --sx-color-on-background: var(--foreground);
-  --sx-internal-color-text: var(--foreground);
-  --sx-internal-color-light-gray: var(--muted);
-  --sx-internal-color-gray-ripple-background: var(--muted);
-}
-
-/* Dark mode — use .dark (Tailwind) since our app doesn't add .is-dark */
-.dark .sx__calendar {
-  --sx-color-surface: transparent;
-  --sx-color-surface-dim: transparent;
-  --sx-color-surface-bright: var(--muted);
-  --sx-color-surface-container: transparent;
-  --sx-color-surface-container-low: transparent;
-  --sx-color-surface-container-high: var(--muted);
-  --sx-color-background: transparent;
-  --sx-color-on-surface: var(--foreground);
-  --sx-color-on-background: var(--foreground);
-  --sx-color-outline: var(--border);
-  --sx-color-outline-variant: var(--border);
-  --sx-color-neutral: var(--border);
-  --sx-color-neutral-variant: var(--border);
-  --sx-color-primary: var(--primary);
-  --sx-color-on-primary: var(--primary-foreground);
-  --sx-color-primary-container: var(--primary);
-  --sx-color-on-primary-container: var(--primary);
-  --sx-internal-color-text: var(--foreground);
-  --sx-internal-color-light-gray: var(--muted);
-  --sx-internal-color-gray-ripple-background: var(--muted);
-  --sx-color-shadow: transparent;
 }
 
 /* Hide schedule-x's default event styling since we use custom renderers */
@@ -60,13 +15,4 @@
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
-}
-
-/* Ensure time grid lines use our border token */
-.sx__time-grid-day__row {
-  border-color: var(--border);
-}
-
-.dark .sx__time-grid-day__row {
-  border-color: var(--border);
 }
