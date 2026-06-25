@@ -9,9 +9,10 @@
   display: none !important;
 }
 
-/* Remove border on overlapping/concurrent events */
+/* Remove default border on events, add spacing between concurrent events */
 .sx__event {
   border: none !important;
+  margin: 1px !important;
 }
 
 /* Month view: fixed-height rows, per-cell scroll */
