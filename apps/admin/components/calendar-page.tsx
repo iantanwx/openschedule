@@ -356,71 +356,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   }, [filteredByScope, therapistFilter])
 
   // -------------------------------------------------------------------------
-  // Name maps
-  // -------------------------------------------------------------------------
-
-  const therapistMap = useMemo(() => {
-    const map = new Map<string, string>()
-    if (therapists) {
-      for (const t of therapists) {
-        map.set(t._id, t.name)
-      }
-    }
-    return map
-  }, [therapists])
-
-  const customerMap = useMemo(() => {
-    const map = new Map<string, string>()
-    if (displayedBookings) {
-      for (const b of displayedBookings) {
-        if (!map.has(b.customerId)) {
-          map.set(b.customerId, "Customer")
-        }
-      }
-    }
-    return map
-  }, [displayedBookings])
-
-  // -------------------------------------------------------------------------
-  // Schedule-x events
-  // -------------------------------------------------------------------------
-
-  const timezone = venue?.timezone ?? "UTC"
-
-  const calendarEvents = useMemo((): CalendarEvent[] => {
-    const events: CalendarEvent[] = []
-
-    if (displayedBookings) {
-      for (const b of displayedBookings) {
-        if (b.status === "cancelled") continue // don't show cancelled on calendar
-        events.push(
-          bookingToEvent(
-            b,
-            therapistMap.get(b.therapistId) ?? "Therapist",
-            customerMap.get(b.customerId) ?? "Customer",
-            timezone
-          )
-        )
-      }
-    }
-
-    if (oooEntries) {
-      for (const ooo of oooEntries) {
-        if (ooo.status !== "active") continue
-        events.push(
-          oooToEvent(
-            ooo,
-            therapistMap.get(ooo.therapistId) ?? "Therapist",
-            timezone
-          )
-        )
-      }
-    }
-
-    return events
-  }, [displayedBookings, oooEntries, therapistMap, customerMap, timezone])
-
-  // -------------------------------------------------------------------------
   // Schedule-x calendar app (created ONCE, never re-created)
   // -------------------------------------------------------------------------
 
@@ -465,35 +400,87 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // Sync state to calendar app via controls plugin (imperative updates)
   // -------------------------------------------------------------------------
 
-  // Sync events via eventsService plugin
+  // Sync events + date together (single update to avoid double flash)
+  const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
   useEffect(() => {
-    if (bookings === undefined) return
-    console.log("[calendar:events] setting", calendarEvents.length, "events")
-    eventsService.set(calendarEvents)
-  }, [calendarEvents, bookings, eventsService])
+    if (!calendarApp) return
+    if (bookings === undefined) return // wait for data before updating anything
 
-  // Sync timezone from venue
+    const dateStr = format(currentDate, "yyyy-MM-dd")
+    const dateChanged = prevDateRef.current !== dateStr
+
+    if (dateChanged) {
+      prevDateRef.current = dateStr
+      console.log("[calendar:sync] setDate + events", dateStr, displayedBookings?.length ?? 0)
+
+      // For 3-day, update firstDayOfWeek
+      if (currentView === "3day") {
+        const jsDay = currentDate.getDay()
+        const sxDay = jsDay === 0 ? 7 : jsDay
+        calendarControls.setFirstDayOfWeek(sxDay)
+      }
+
+      calendarControls.setDate(Temporal.PlainDate.from(dateStr))
+    } else {
+      console.log("[calendar:sync] events only", displayedBookings?.length ?? 0)
+    }
+
+    // Build events inline
+    const tz = venue?.timezone ?? "UTC"
+    const therapistNames = new Map<string, string>()
+    if (therapists) {
+      for (const t of therapists) {
+        therapistNames.set(t._id, t.name)
+      }
+    }
+
+    const events: CalendarEvent[] = []
+    if (displayedBookings) {
+      for (const b of displayedBookings) {
+        if (b.status === "cancelled") continue
+        events.push(
+          bookingToEvent(
+            b,
+            therapistNames.get(b.therapistId) ?? "Therapist",
+            "Customer",
+            tz
+          )
+        )
+      }
+    }
+    if (oooEntries) {
+      for (const ooo of oooEntries) {
+        if (ooo.status !== "active") continue
+        events.push(
+          oooToEvent(ooo, therapistNames.get(ooo.therapistId) ?? "Therapist", tz)
+        )
+      }
+    }
+
+    eventsService.set(events)
+  }, [calendarApp, calendarControls, eventsService, currentDate, currentView, bookings, displayedBookings, oooEntries, therapists, venue])
+
+  // Sync timezone from venue (only fires when timezone string changes)
+  const prevTzRef = useRef("")
   useEffect(() => {
-    if (!timezone || timezone === "UTC") return
-    console.log("[calendar:tz] setTimezone", timezone)
-    calendarControls.setTimezone(timezone)
-  }, [timezone, calendarControls])
+    const tz = venue?.timezone ?? ""
+    if (!tz || tz === prevTzRef.current) return
+    prevTzRef.current = tz
+    calendarControls.setTimezone(tz)
+  }, [venue, calendarControls])
 
-  // Sync view changes
+  // Sync view changes (only fires on view switch)
   const prevViewRef = useRef(currentView)
   useEffect(() => {
     if (!calendarApp) return
     if (prevViewRef.current === currentView) return
     prevViewRef.current = currentView
-    console.log("[calendar:view] setView", currentView, "->", toSxViewName(currentView))
 
     const sxView = toSxViewName(currentView)
 
-    // For 3-day: set firstDayOfWeek to the current date's weekday so the grid starts from today
-    // WeekDay enum: MONDAY=1...SUNDAY=7. JS getDay(): 0=Sun,1=Mon...6=Sat
     if (currentView === "3day") {
       const jsDay = currentDate.getDay()
-      const sxDay = jsDay === 0 ? 7 : jsDay // convert to schedule-x WeekDay
+      const sxDay = jsDay === 0 ? 7 : jsDay
       calendarControls.setFirstDayOfWeek(sxDay)
       calendarControls.setWeekOptions({
         nDays: 3,
@@ -504,7 +491,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
         gridStep: 60,
       })
     } else if (currentView === "week") {
-      calendarControls.setFirstDayOfWeek(1) // Monday
+      calendarControls.setFirstDayOfWeek(1)
       calendarControls.setWeekOptions({
         nDays: 7,
         gridHeight: 800,
@@ -518,25 +505,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     calendarControls.setView(sxView)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calendarApp, calendarControls, currentView])
-
-  // Sync date changes
-  const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
-  useEffect(() => {
-    if (!calendarApp) return
-    const dateStr = format(currentDate, "yyyy-MM-dd")
-    if (prevDateRef.current === dateStr) return
-    prevDateRef.current = dateStr
-    console.log("[calendar:date] setDate", dateStr)
-
-    // For 3-day, update firstDayOfWeek to match the new date
-    if (currentView === "3day") {
-      const jsDay = currentDate.getDay()
-      const sxDay = jsDay === 0 ? 7 : jsDay
-      calendarControls.setFirstDayOfWeek(sxDay)
-    }
-
-    calendarControls.setDate(Temporal.PlainDate.from(dateStr))
-  }, [calendarApp, calendarControls, currentDate, currentView])
 
   // -------------------------------------------------------------------------
   // Navigation (local state, no URL changes = no remount)
