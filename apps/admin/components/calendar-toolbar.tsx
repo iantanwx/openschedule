@@ -31,7 +31,7 @@ const VIEW_LABELS: Record<CalendarView, string> = {
 };
 
 const VIEWS: CalendarView[] = ["day", "3day", "week", "month", "schedule"];
-const MOBILE_VIEWS: CalendarView[] = ["day", "3day", "week", "schedule"];
+const MOBILE_VIEWS: CalendarView[] = ["day", "3day", "schedule"];
 
 function formatDateRange(date: Date, view: CalendarView): string {
   switch (view) {
