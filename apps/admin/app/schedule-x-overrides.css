@@ -8,3 +8,9 @@
 .sx__calendar-header {
   display: none !important;
 }
+
+/* Month view: equal-height rows with overflow indicator */
+.sx__month-grid-week {
+  max-height: 120px;
+  overflow: hidden;
+}
