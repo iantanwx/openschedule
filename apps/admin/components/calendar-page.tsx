@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { useQuery } from "convex/react";
-import { useTheme } from "next-themes";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react"
+import { useQuery } from "convex/react"
+import { useTheme } from "next-themes"
 import {
   format,
   addDays,
@@ -11,123 +11,137 @@ import {
   startOfMonth,
   endOfMonth,
   parseISO,
-} from "date-fns";
-import "temporal-polyfill/global";
-import { useNextCalendarApp, ScheduleXCalendar } from "@schedule-x/react";
+} from "date-fns"
+import "temporal-polyfill/global"
+import { useNextCalendarApp, ScheduleXCalendar } from "@schedule-x/react"
 import {
   createViewDay,
   createViewWeek,
   createViewMonthGrid,
-} from "@schedule-x/calendar";
-import type { CalendarEvent } from "@schedule-x/calendar";
-import { createCalendarControlsPlugin } from "@schedule-x/calendar-controls";
-import { createEventsServicePlugin } from "@schedule-x/events-service";
-import "@schedule-x/theme-shadcn/dist/index.css";
-import "@/app/schedule-x-overrides.css";
+} from "@schedule-x/calendar"
+import type { CalendarEvent } from "@schedule-x/calendar"
+import { createCalendarControlsPlugin } from "@schedule-x/calendar-controls"
+import { createEventsServicePlugin } from "@schedule-x/events-service"
+import "@schedule-x/theme-shadcn/dist/index.css"
+import "@/app/schedule-x-overrides.css"
 
-import { convexApi } from "@/lib/convex-api";
-import { useViewScope } from "@/lib/hooks/use-view-scope";
-import { CalendarToolbar, type CalendarView } from "./calendar-toolbar";
-import { CalendarBookingEvent } from "./calendar-booking-event";
-import { CalendarOooEvent } from "./calendar-ooo-event";
-import { BookingDetailModal } from "./booking-detail-modal";
-import { Fab } from "./fab";
-import { ViewToggle } from "./view-toggle";
-import { Badge } from "@openschedule/ui/components/badge";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { convexApi } from "@/lib/convex-api"
+import { useViewScope } from "@/lib/hooks/use-view-scope"
+import { CalendarToolbar, type CalendarView } from "./calendar-toolbar"
+import { CalendarBookingEvent } from "./calendar-booking-event"
+import { CalendarOooEvent } from "./calendar-ooo-event"
+import { BookingDetailModal } from "./booking-detail-modal"
+import { Fab } from "./fab"
+import { ViewToggle } from "./view-toggle"
+import { Badge } from "@openschedule/ui/components/badge"
+import { Spinner } from "@openschedule/ui/components/spinner"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@openschedule/ui/components/select";
+} from "@openschedule/ui/components/select"
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 interface CalendarPageProps {
-  orgSlug: string;
-  venueSlug: string;
+  orgSlug: string
+  venueSlug: string
 }
 
 type BookingRecord = {
-  _id: string;
-  therapistId: string;
-  customerId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  status: "pending" | "confirmed" | "cancelled";
-};
+  _id: string
+  therapistId: string
+  customerId: string
+  date: string
+  startTime: string
+  endTime: string
+  status: "pending" | "confirmed" | "cancelled"
+}
 
 type OooRecord = {
-  _id: string;
-  therapistId: string;
-  startDate: string;
-  startTime: string;
-  endDate: string;
-  endTime: string;
-  reason?: string;
-  status: "active" | "inactive";
-};
+  _id: string
+  therapistId: string
+  startDate: string
+  startTime: string
+  endDate: string
+  endTime: string
+  reason?: string
+  status: "active" | "inactive"
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-const VALID_VIEWS: CalendarView[] = ["day", "3day", "week", "month", "schedule"];
+const VALID_VIEWS: CalendarView[] = ["day", "3day", "week", "month", "schedule"]
 
 function isCalendarView(v: string | null): v is CalendarView {
-  return v !== null && (VALID_VIEWS as string[]).includes(v);
+  return v !== null && (VALID_VIEWS as string[]).includes(v)
 }
 
 /** Map our CalendarView to schedule-x view name */
 function toSxViewName(view: CalendarView): string {
   switch (view) {
-    case "day": return "day";
-    case "3day": return "week"; // week view with nDays=3
-    case "week": return "week";
-    case "month": return "month-grid";
-    case "schedule": return "week"; // agenda is custom, but sx stays on week
+    case "day":
+      return "day"
+    case "3day":
+      return "week" // week view with nDays=3
+    case "week":
+      return "week"
+    case "month":
+      return "month-grid"
+    case "schedule":
+      return "week" // agenda is custom, but sx stays on week
   }
 }
 
 /** Compute the date range to query given the current view and date */
-function getDateRange(date: Date, view: CalendarView): { startDate: string; endDate: string } {
+function getDateRange(
+  date: Date,
+  view: CalendarView
+): { startDate: string; endDate: string } {
   switch (view) {
     case "day":
       return {
         startDate: format(date, "yyyy-MM-dd"),
         endDate: format(date, "yyyy-MM-dd"),
-      };
+      }
     case "3day":
       return {
         startDate: format(date, "yyyy-MM-dd"),
         endDate: format(addDays(date, 2), "yyyy-MM-dd"),
-      };
+      }
     case "week":
       return {
         startDate: format(startOfWeek(date, { weekStartsOn: 1 }), "yyyy-MM-dd"),
         endDate: format(endOfWeek(date, { weekStartsOn: 1 }), "yyyy-MM-dd"),
-      };
+      }
     case "month":
       return {
         startDate: format(startOfMonth(date), "yyyy-MM-dd"),
         endDate: format(endOfMonth(date), "yyyy-MM-dd"),
-      };
+      }
     case "schedule":
       return {
         startDate: format(date, "yyyy-MM-dd"),
         endDate: format(addDays(date, 13), "yyyy-MM-dd"),
-      };
+      }
   }
 }
 
 /** Convert a date string + time string to Temporal.ZonedDateTime */
-function toZonedDateTime(date: string, time: string, timezone: string): Temporal.ZonedDateTime {
-  return Temporal.PlainDateTime.from(`${date}T${time}`).toZonedDateTime(timezone);
+function toZonedDateTime(
+  date: string,
+  time: string,
+  timezone: string
+): Temporal.ZonedDateTime {
+  return Temporal.PlainDateTime.from(`${date}T${time}`).toZonedDateTime(
+    timezone
+  )
 }
 
 /** Map a booking to a schedule-x CalendarEvent */
@@ -135,7 +149,7 @@ function bookingToEvent(
   booking: BookingRecord,
   therapistName: string,
   customerName: string,
-  timezone: string,
+  timezone: string
 ): CalendarEvent {
   return {
     id: booking._id,
@@ -149,14 +163,14 @@ function bookingToEvent(
     _status: booking.status,
     _startTime: booking.startTime.slice(0, 5),
     _endTime: booking.endTime.slice(0, 5),
-  };
+  }
 }
 
 /** Map an OoO entry to a schedule-x CalendarEvent */
 function oooToEvent(
   ooo: OooRecord,
   therapistName: string,
-  timezone: string,
+  timezone: string
 ): CalendarEvent {
   return {
     id: `ooo-${ooo._id}`,
@@ -167,7 +181,7 @@ function oooToEvent(
     _type: "ooo",
     _therapistName: therapistName,
     _reason: ooo.reason,
-  };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -175,32 +189,37 @@ function oooToEvent(
 // ---------------------------------------------------------------------------
 
 interface AgendaViewProps {
-  bookings: BookingRecord[];
-  therapistMap: Map<string, string>;
-  customerMap: Map<string, string>;
-  onEventClick: (bookingId: string) => void;
+  bookings: BookingRecord[]
+  therapistMap: Map<string, string>
+  customerMap: Map<string, string>
+  onEventClick: (bookingId: string) => void
 }
 
-function AgendaView({ bookings, therapistMap, customerMap, onEventClick }: AgendaViewProps) {
+function AgendaView({
+  bookings,
+  therapistMap,
+  customerMap,
+  onEventClick,
+}: AgendaViewProps) {
   const grouped = useMemo(() => {
-    const map = new Map<string, BookingRecord[]>();
+    const map = new Map<string, BookingRecord[]>()
     for (const b of bookings) {
-      const existing = map.get(b.date);
+      const existing = map.get(b.date)
       if (existing) {
-        existing.push(b);
+        existing.push(b)
       } else {
-        map.set(b.date, [b]);
+        map.set(b.date, [b])
       }
     }
-    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
-  }, [bookings]);
+    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
+  }, [bookings])
 
   if (grouped.length === 0) {
     return (
       <div className="flex items-center justify-center py-16 text-muted-foreground">
         No bookings in this range
       </div>
-    );
+    )
   }
 
   return (
@@ -247,7 +266,7 @@ function AgendaView({ bookings, therapistMap, customerMap, onEventClick }: Agend
         </div>
       ))}
     </div>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -255,135 +274,151 @@ function AgendaView({ bookings, therapistMap, customerMap, onEventClick }: Agend
 // ---------------------------------------------------------------------------
 
 export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme } = useTheme()
 
   // Local state for view and date (NOT URL params — avoids Next.js remount)
-  const [currentView, setCurrentView] = useState<CalendarView>("week");
-  const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
+  const [currentView, setCurrentView] = useState<CalendarView>("week")
+  const [currentDate, setCurrentDate] = useState<Date>(() => new Date())
 
   // Modal state
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-  const [therapistFilter, setTherapistFilter] = useState<string | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null
+  )
+  const [therapistFilter, setTherapistFilter] = useState<string | null>(null)
 
   // -------------------------------------------------------------------------
   // Calendar controls plugin (created once, stable reference)
   // -------------------------------------------------------------------------
 
-  const calendarControlsRef = useRef(createCalendarControlsPlugin());
-  const calendarControls = calendarControlsRef.current;
+  const calendarControlsRef = useRef(createCalendarControlsPlugin())
+  const calendarControls = calendarControlsRef.current
 
-  const [eventsService] = useState(() => createEventsServicePlugin());
+  const [eventsService] = useState(() => createEventsServicePlugin())
 
   // -------------------------------------------------------------------------
   // Convex queries
   // -------------------------------------------------------------------------
 
-  const currentUser = useQuery(convexApi.queries.users.getSelf);
-  const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
+  const currentUser = useQuery(convexApi.queries.users.getSelf)
+  const org = useQuery(convexApi.queries.organizations.getBySlug, {
+    slug: orgSlug,
+  })
   const venue = useQuery(
     convexApi.queries.venues.getBySlugFull,
-    org ? { orgId: org._id, slug: venueSlug } : "skip",
-  );
+    org ? { orgId: org._id, slug: venueSlug } : "skip"
+  )
 
   const { startDate, endDate } = useMemo(
     () => getDateRange(currentDate, currentView),
-    [currentDate, currentView],
-  );
+    [currentDate, currentView]
+  )
 
-  const isSingleDay = currentView === "day";
+  const isSingleDay = currentView === "day"
   const bookingsSingleDay = useQuery(
     convexApi.queries.bookings.listByVenueAndDate,
-    venue && isSingleDay ? { venueId: venue._id, date: startDate } : "skip",
-  );
+    venue && isSingleDay ? { venueId: venue._id, date: startDate } : "skip"
+  )
   const bookingsRange = useQuery(
     convexApi.queries.bookings.listByVenueDateRange,
-    venue && !isSingleDay ? { venueId: venue._id, startDate, endDate } : "skip",
-  );
-  const bookings = isSingleDay ? bookingsSingleDay : bookingsRange;
+    venue && !isSingleDay ? { venueId: venue._id, startDate, endDate } : "skip"
+  )
+  const bookings = isSingleDay ? bookingsSingleDay : bookingsRange
 
   const therapists = useQuery(
     convexApi.queries.users.listByVenue,
-    venue ? { venueId: venue._id } : "skip",
-  );
+    venue ? { venueId: venue._id } : "skip"
+  )
 
-  const primaryTherapistId = currentUser?._id ?? null;
+  const primaryTherapistId = currentUser?._id ?? null
   const oooEntries = useQuery(
     convexApi.queries.ooo.listByTherapistAndDateRange,
-    primaryTherapistId ? { therapistId: primaryTherapistId, startDate, endDate } : "skip",
-  );
+    primaryTherapistId
+      ? { therapistId: primaryTherapistId, startDate, endDate }
+      : "skip"
+  )
 
   // -------------------------------------------------------------------------
   // View scope (My/All toggle)
   // -------------------------------------------------------------------------
 
-  const { viewScope, setViewScope, showToggle, showTherapistFilter, isReadOnly, filteredByScope } =
-    useViewScope({ currentUser, bookings });
+  const {
+    viewScope,
+    setViewScope,
+    showToggle,
+    showTherapistFilter,
+    isReadOnly,
+    filteredByScope,
+  } = useViewScope({ currentUser, bookings })
 
   const displayedBookings = useMemo(() => {
-    if (!therapistFilter) return filteredByScope;
-    return filteredByScope.filter((b) => b.therapistId === therapistFilter);
-  }, [filteredByScope, therapistFilter]);
+    if (!therapistFilter) return filteredByScope
+    return filteredByScope.filter((b) => b.therapistId === therapistFilter)
+  }, [filteredByScope, therapistFilter])
 
   // -------------------------------------------------------------------------
   // Name maps
   // -------------------------------------------------------------------------
 
   const therapistMap = useMemo(() => {
-    const map = new Map<string, string>();
+    const map = new Map<string, string>()
     if (therapists) {
       for (const t of therapists) {
-        map.set(t._id, t.name);
+        map.set(t._id, t.name)
       }
     }
-    return map;
-  }, [therapists]);
+    return map
+  }, [therapists])
 
   const customerMap = useMemo(() => {
-    const map = new Map<string, string>();
+    const map = new Map<string, string>()
     if (displayedBookings) {
       for (const b of displayedBookings) {
         if (!map.has(b.customerId)) {
-          map.set(b.customerId, "Customer");
+          map.set(b.customerId, "Customer")
         }
       }
     }
-    return map;
-  }, [displayedBookings]);
+    return map
+  }, [displayedBookings])
 
   // -------------------------------------------------------------------------
   // Schedule-x events
   // -------------------------------------------------------------------------
 
-  const timezone = venue?.timezone ?? "UTC";
+  const timezone = venue?.timezone ?? "UTC"
 
   const calendarEvents = useMemo((): CalendarEvent[] => {
-    const events: CalendarEvent[] = [];
+    const events: CalendarEvent[] = []
 
     if (displayedBookings) {
       for (const b of displayedBookings) {
-        if (b.status === "cancelled") continue; // don't show cancelled on calendar
+        if (b.status === "cancelled") continue // don't show cancelled on calendar
         events.push(
           bookingToEvent(
             b,
             therapistMap.get(b.therapistId) ?? "Therapist",
             customerMap.get(b.customerId) ?? "Customer",
-            timezone,
-          ),
-        );
+            timezone
+          )
+        )
       }
     }
 
     if (oooEntries) {
       for (const ooo of oooEntries) {
-        if (ooo.status !== "active") continue;
+        if (ooo.status !== "active") continue
         events.push(
-          oooToEvent(ooo, therapistMap.get(ooo.therapistId) ?? "Therapist", timezone),
-        );
+          oooToEvent(
+            ooo,
+            therapistMap.get(ooo.therapistId) ?? "Therapist",
+            timezone
+          )
+        )
       }
     }
 
-    return events;
-  }, [displayedBookings, oooEntries, therapistMap, customerMap, timezone]);
+    return events
+  }, [displayedBookings, oooEntries, therapistMap, customerMap, timezone])
 
   // -------------------------------------------------------------------------
   // Schedule-x calendar app (created ONCE, never re-created)
@@ -391,7 +426,15 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   const calendarApp = useNextCalendarApp({
     views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
-    events: [],
+    events: [
+      {
+        id: "test-1",
+        title: "Test Event",
+        start: Temporal.ZonedDateTime.from("2025-06-25T09:00:00+08:00[Asia/Singapore]"),
+        end: Temporal.ZonedDateTime.from("2025-06-25T10:30:00+08:00[Asia/Singapore]"),
+        calendarId: "booking",
+      },
+    ],
     theme: "shadcn",
     isDark: resolvedTheme === "dark",
     selectedDate: Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")),
@@ -399,20 +442,36 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     calendars: {
       booking: {
         colorName: "booking",
-        lightColors: { main: "#10b981", container: "#ecfdf5", onContainer: "#064e3b" },
-        darkColors: { main: "#34d399", container: "#064e3b", onContainer: "#d1fae5" },
+        lightColors: {
+          main: "#10b981",
+          container: "#ecfdf5",
+          onContainer: "#064e3b",
+        },
+        darkColors: {
+          main: "#34d399",
+          container: "#064e3b",
+          onContainer: "#d1fae5",
+        },
       },
       ooo: {
         colorName: "ooo",
-        lightColors: { main: "#6366f1", container: "#eef2ff", onContainer: "#3730a3" },
-        darkColors: { main: "#818cf8", container: "#1e1b4b", onContainer: "#c7d2fe" },
+        lightColors: {
+          main: "#6366f1",
+          container: "#eef2ff",
+          onContainer: "#3730a3",
+        },
+        darkColors: {
+          main: "#818cf8",
+          container: "#1e1b4b",
+          onContainer: "#c7d2fe",
+        },
       },
     },
     callbacks: {
       onEventClick(event) {
-        const id = String(event.id);
+        const id = String(event.id)
         if (!id.startsWith("ooo-")) {
-          setSelectedBookingId(id);
+          setSelectedBookingId(id)
         }
       },
     },
@@ -428,7 +487,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       ? { start: venue.dayStart, end: venue.dayEnd }
       : { start: "07:00", end: "21:00" },
     plugins: [eventsService, calendarControls],
-  });
+  })
 
   // -------------------------------------------------------------------------
   // Sync state to calendar app via controls plugin (imperative updates)
@@ -436,88 +495,104 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync events via eventsService plugin (the documented API for updating events after render)
   useEffect(() => {
-    if (calendarEvents.length > 0 || (bookings !== undefined && bookings.length === 0)) {
-      eventsService.set(calendarEvents);
+    if (
+      calendarEvents.length > 0 ||
+      (bookings !== undefined && bookings.length === 0)
+    ) {
+      console.log("Setting events", calendarEvents)
+      console.log("Bookings", bookings)
+      eventsService.set(calendarEvents)
     }
-  }, [calendarEvents, bookings, eventsService]);
+  }, [calendarEvents, bookings, eventsService])
 
   // Sync view changes
-  const prevViewRef = useRef(currentView);
+  const prevViewRef = useRef(currentView)
   useEffect(() => {
-    if (!calendarApp) return;
-    if (prevViewRef.current === currentView) return;
-    prevViewRef.current = currentView;
+    if (!calendarApp) return
+    if (prevViewRef.current === currentView) return
+    prevViewRef.current = currentView
 
-    const sxView = toSxViewName(currentView);
+    const sxView = toSxViewName(currentView)
 
     // For 3-day: set firstDayOfWeek to the current date's weekday so the grid starts from today
     // WeekDay enum: MONDAY=1...SUNDAY=7. JS getDay(): 0=Sun,1=Mon...6=Sat
     if (currentView === "3day") {
-      const jsDay = currentDate.getDay();
-      const sxDay = jsDay === 0 ? 7 : jsDay; // convert to schedule-x WeekDay
-      calendarControls.setFirstDayOfWeek(sxDay);
-      calendarControls.setWeekOptions({ nDays: 3, gridHeight: 800, eventWidth: 95, timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" }, eventOverlap: true, gridStep: 60 });
+      const jsDay = currentDate.getDay()
+      const sxDay = jsDay === 0 ? 7 : jsDay // convert to schedule-x WeekDay
+      calendarControls.setFirstDayOfWeek(sxDay)
+      calendarControls.setWeekOptions({
+        nDays: 3,
+        gridHeight: 800,
+        eventWidth: 95,
+        timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
+        eventOverlap: true,
+        gridStep: 60,
+      })
     } else if (currentView === "week") {
-      calendarControls.setFirstDayOfWeek(1); // Monday
-      calendarControls.setWeekOptions({ nDays: 7, gridHeight: 800, eventWidth: 95, timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" }, eventOverlap: true, gridStep: 60 });
+      calendarControls.setFirstDayOfWeek(1) // Monday
+      calendarControls.setWeekOptions({
+        nDays: 7,
+        gridHeight: 800,
+        eventWidth: 95,
+        timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
+        eventOverlap: true,
+        gridStep: 60,
+      })
     }
 
-    calendarControls.setView(sxView);
-    calendarControls.setDate(Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")));
-  }, [calendarApp, calendarControls, currentView, currentDate]);
+    calendarControls.setView(sxView)
+    calendarControls.setDate(
+      Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd"))
+    )
+  }, [calendarApp, calendarControls, currentView, currentDate])
 
   // Sync date changes
-  const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"));
+  const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
   useEffect(() => {
-    if (!calendarApp) return;
-    const dateStr = format(currentDate, "yyyy-MM-dd");
-    if (prevDateRef.current === dateStr) return;
-    prevDateRef.current = dateStr;
+    if (!calendarApp) return
+    const dateStr = format(currentDate, "yyyy-MM-dd")
+    if (prevDateRef.current === dateStr) return
+    prevDateRef.current = dateStr
 
     // For 3-day, update firstDayOfWeek to match the new date
     if (currentView === "3day") {
-      const jsDay = currentDate.getDay();
-      const sxDay = jsDay === 0 ? 7 : jsDay;
-      calendarControls.setFirstDayOfWeek(sxDay);
+      const jsDay = currentDate.getDay()
+      const sxDay = jsDay === 0 ? 7 : jsDay
+      calendarControls.setFirstDayOfWeek(sxDay)
     }
 
-    calendarControls.setDate(Temporal.PlainDate.from(dateStr));
-  }, [calendarApp, calendarControls, currentDate, currentView]);
+    calendarControls.setDate(Temporal.PlainDate.from(dateStr))
+  }, [calendarApp, calendarControls, currentDate, currentView])
 
   // -------------------------------------------------------------------------
   // Navigation (local state, no URL changes = no remount)
   // -------------------------------------------------------------------------
 
-  const handleViewChange = useCallback(
-    (view: CalendarView) => {
-      setCurrentView(view);
-    },
-    [],
-  );
+  const handleViewChange = useCallback((view: CalendarView) => {
+    setCurrentView(view)
+  }, [])
 
-  const handleDateChange = useCallback(
-    (date: Date) => {
-      setCurrentDate(date);
-    },
-    [],
-  );
+  const handleDateChange = useCallback((date: Date) => {
+    setCurrentDate(date)
+  }, [])
 
   const handleToday = useCallback(() => {
-    setCurrentDate(new Date());
-  }, []);
+    setCurrentDate(new Date())
+  }, [])
 
   // -------------------------------------------------------------------------
   // Stats badges
   // -------------------------------------------------------------------------
 
   const stats = useMemo(() => {
-    if (!displayedBookings) return { total: 0, confirmed: 0, pending: 0 };
+    if (!displayedBookings) return { total: 0, confirmed: 0, pending: 0 }
     return {
       total: displayedBookings.filter((b) => b.status !== "cancelled").length,
-      confirmed: displayedBookings.filter((b) => b.status === "confirmed").length,
+      confirmed: displayedBookings.filter((b) => b.status === "confirmed")
+        .length,
       pending: displayedBookings.filter((b) => b.status === "pending").length,
-    };
-  }, [displayedBookings]);
+    }
+  }, [displayedBookings])
 
   // -------------------------------------------------------------------------
   // Loading state
@@ -528,14 +603,14 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       <div className="flex h-64 items-center justify-center">
         <Spinner className="h-6 w-6" />
       </div>
-    );
+    )
   }
 
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
 
-  const showScheduleX = currentView !== "schedule";
+  const showScheduleX = currentView !== "schedule"
 
   return (
     <div className="flex h-full flex-col">
@@ -550,14 +625,14 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
       {/* Sub-toolbar: toggle + filter + stats */}
       <div className="flex flex-wrap items-center gap-2 border-b px-4 pb-2">
-        {showToggle && (
-          <ViewToggle value={viewScope} onChange={setViewScope} />
-        )}
+        {showToggle && <ViewToggle value={viewScope} onChange={setViewScope} />}
 
         {showTherapistFilter && therapists && (
           <Select
             value={therapistFilter ?? "all"}
-            onValueChange={(val) => setTherapistFilter(val === "all" ? null : val)}
+            onValueChange={(val) =>
+              setTherapistFilter(val === "all" ? null : val)
+            }
           >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="All therapists" />
@@ -629,5 +704,5 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
         />
       )}
     </div>
-  );
+  )
 }
