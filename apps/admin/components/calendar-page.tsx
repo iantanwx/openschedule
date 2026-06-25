@@ -433,6 +433,18 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     dayBoundaries: venue
       ? { start: venue.dayStart, end: venue.dayEnd }
       : { start: "08:00", end: "18:00" },
+    calendars: {
+      booking: {
+        colorName: "booking",
+        lightColors: { main: "#10b981", container: "#ecfdf5", onContainer: "#065f46" },
+        darkColors: { main: "#34d399", container: "#064e3b", onContainer: "#a7f3d0" },
+      },
+      ooo: {
+        colorName: "ooo",
+        lightColors: { main: "#6366f1", container: "#eef2ff", onContainer: "#3730a3" },
+        darkColors: { main: "#818cf8", container: "#312e81", onContainer: "#c7d2fe" },
+      },
+    },
   })
 
   // -------------------------------------------------------------------------
