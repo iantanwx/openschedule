@@ -17,7 +17,7 @@ interface Tab {
 function buildTabs(base: string): Tab[] {
   return [
     {
-      label: "Today",
+      label: "Calendar",
       href: base,
       icon: Calendar,
       match: (pathname, b) => pathname === b || pathname === `${b}/`,
@@ -65,10 +65,10 @@ export function TabBar({ className }: TabBarProps) {
 
   const visibleTabs = tabs.filter((tab) => !tab.ownerOnly || isOwner);
 
-  function handleTodayClick(e: React.MouseEvent, tab: Tab) {
-    if (tab.label === "Today" && tab.match(pathname, base)) {
+  function handleCalendarClick(e: React.MouseEvent, tab: Tab) {
+    if (tab.label === "Calendar" && tab.match(pathname, base)) {
       e.preventDefault();
-      // Already on Today — navigate to base (no ?date), triggering scroll-to-top + reset
+      // Already on Calendar — navigate to base (no params), triggering scroll-to-top + reset
       router.push(base);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -84,7 +84,7 @@ export function TabBar({ className }: TabBarProps) {
             <li key={tab.label}>
               <Link
                 href={tab.href}
-                onClick={(e) => handleTodayClick(e, tab)}
+                onClick={(e) => handleCalendarClick(e, tab)}
                 className={`flex flex-col items-center gap-1 px-3 py-2 text-xs transition-colors ${
                   isActive
                     ? "text-foreground"

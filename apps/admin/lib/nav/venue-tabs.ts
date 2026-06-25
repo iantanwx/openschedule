@@ -5,15 +5,13 @@ export interface VenueTabLink {
   label: string;
   icon: ComponentType<{ className?: string }>;
   ownerOnly: boolean;
-  /** Returns the href given the venue base path */
   href: (base: string) => string;
-  /** Returns true if this tab is active */
   isActive: (pathname: string, base: string) => boolean;
 }
 
 export const VENUE_TAB_LINKS: VenueTabLink[] = [
   {
-    label: "Today",
+    label: "Calendar",
     icon: Calendar,
     ownerOnly: false,
     href: (base) => base,
