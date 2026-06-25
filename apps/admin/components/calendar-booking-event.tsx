@@ -1,22 +1,22 @@
-"use client";
+"use client"
 
-import { cn } from "@openschedule/ui/lib/utils";
+import { cn } from "@openschedule/ui/lib/utils"
 
 interface CalendarBookingEventProps {
   calendarEvent: {
-    id: string;
-    title: string;
-    start: string;
-    end: string;
-    _type?: string;
-    _customerName?: string;
-    _therapistName?: string;
-    _status?: "pending" | "confirmed" | "cancelled";
-    _startTime?: string;
-    _endTime?: string;
-    _reason?: string;
-    [key: string]: unknown;
-  };
+    id: string
+    title: string
+    start: string
+    end: string
+    _type?: string
+    _customerName?: string
+    _therapistName?: string
+    _status?: "pending" | "confirmed" | "cancelled"
+    _startTime?: string
+    _endTime?: string
+    _reason?: string
+    [key: string]: unknown
+  }
 }
 
 const STATUS_CONFIG = {
@@ -35,9 +35,11 @@ const STATUS_CONFIG = {
     bg: "bg-muted/50",
     label: "Cancelled",
   },
-} as const;
+} as const
 
-export function CalendarBookingEvent({ calendarEvent }: CalendarBookingEventProps) {
+export function CalendarBookingEvent({
+  calendarEvent,
+}: CalendarBookingEventProps) {
   // OoO event
   if (calendarEvent._type === "ooo") {
     return (
@@ -51,16 +53,16 @@ export function CalendarBookingEvent({ calendarEvent }: CalendarBookingEventProp
           </p>
         )}
       </div>
-    );
+    )
   }
 
   // Booking event
   if (calendarEvent._type !== "booking") {
-    return <div className="text-xs">{calendarEvent.title}</div>;
+    return <div className="text-xs">{calendarEvent.title}</div>
   }
 
-  const status = calendarEvent._status ?? "confirmed";
-  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.confirmed;
+  const status = calendarEvent._status ?? "confirmed"
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.confirmed
 
   return (
     <div
@@ -80,5 +82,5 @@ export function CalendarBookingEvent({ calendarEvent }: CalendarBookingEventProp
         {config.label}
       </p>
     </div>
-  );
+  )
 }
