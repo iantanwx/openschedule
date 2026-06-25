@@ -189,7 +189,7 @@ export function BookingForm({
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-             placeholder="Phone number (optional)"
+             placeholder="Phone number"
           />
           {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
         </div>

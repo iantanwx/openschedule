@@ -239,7 +239,7 @@ export function NewBookingSheet({ orgSlug, venueId, onClose }: NewBookingSheetPr
                   type="tel"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                   placeholder="Phone number (optional)"
+                   placeholder="Phone number"
                 />
               </div>
             </div>
