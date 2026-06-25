@@ -8,3 +8,9 @@
 .sx__calendar-header {
   display: none !important;
 }
+
+/* Prevent white flash during transitions — inherit page background */
+.sx__calendar,
+.sx__calendar-app {
+  background: var(--background) !important;
+}
