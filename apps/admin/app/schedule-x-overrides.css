@@ -1,18 +1,10 @@
 /* Schedule-x overrides
  *
  * Using @schedule-x/theme-shadcn which handles light/dark automatically.
- * We just need to hide the built-in header and style custom event renderers.
+ * We just need to hide the built-in header.
  */
 
 /* Hide the built-in schedule-x header (we use CalendarToolbar instead) */
 .sx__calendar-header {
   display: none !important;
-}
-
-/* Hide schedule-x's default event styling since we use custom renderers */
-.sx__event {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
 }
