@@ -290,9 +290,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // Calendar controls plugin (created once, stable reference)
   // -------------------------------------------------------------------------
 
-  const calendarControlsRef = useRef(createCalendarControlsPlugin())
-  const calendarControls = calendarControlsRef.current
-
+  const [calendarControls] = useState(() => createCalendarControlsPlugin())
   const [eventsService] = useState(() => createEventsServicePlugin())
 
   // -------------------------------------------------------------------------
@@ -411,8 +409,9 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     const dateStr = format(currentDate, "yyyy-MM-dd")
     const dateChanged = prevDateRef.current !== dateStr
 
-    // Build events inline
+    // Ensure timezone is set (idempotent, venue guaranteed non-null by loading guard)
     const tz = venue?.timezone ?? "UTC"
+    calendarControls.setTimezone(tz)
     const therapistNames = new Map<string, string>()
     if (therapists) {
       for (const t of therapists) {
@@ -465,14 +464,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     }
   }, [calendarApp, calendarControls, eventsService, currentDate, currentView, bookings, displayedBookings, oooEntries, therapists, venue])
 
-  // Sync timezone from venue (only fires when timezone string changes)
-  const prevTzRef = useRef("")
-  useEffect(() => {
-    const tz = venue?.timezone ?? ""
-    if (!tz || tz === prevTzRef.current) return
-    prevTzRef.current = tz
-    calendarControls.setTimezone(tz)
-  }, [venue, calendarControls])
+
 
   // Sync view changes (only fires on view switch)
   const prevViewRef = useRef(currentView)
