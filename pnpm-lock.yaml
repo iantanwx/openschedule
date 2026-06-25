@@ -41,6 +41,9 @@ importers:
       '@schedule-x/calendar-controls':
         specifier: ^4.6.0
         version: 4.6.0
+      '@schedule-x/events-service':
+        specifier: ^4.6.0
+        version: 4.6.0
       '@schedule-x/react':
         specifier: ^4.1.0
         version: 4.1.0(@schedule-x/calendar@4.6.0(@preact/signals@2.9.2(preact@10.29.2))(preact@10.29.2)(temporal-polyfill@1.0.1))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -2693,6 +2696,9 @@ packages:
       '@preact/signals': ^2.0.2
       preact: ^10.19.2
       temporal-polyfill: 0.3.0
+
+  '@schedule-x/events-service@4.6.0':
+    resolution: {integrity: sha512-czUSPdanESNYgckCxId3weoL3omSG6FKuJMYMefCyzx/NFBxJM83b6PKQQ+pJeRnPuyax+KNKFc/DQFCC05YLA==}
 
   '@schedule-x/react@4.1.0':
     resolution: {integrity: sha512-l2hn1kdTModk4Lbt+nEr/VAcuNMA+w+hAAtgz8VLOj5UeieM7PWoK+cDapzPHCjUKisCSPd8QZfAX966Ma82kQ==}
@@ -6693,6 +6699,8 @@ snapshots:
       '@preact/signals': 2.9.2(preact@10.29.2)
       preact: 10.29.2
       temporal-polyfill: 1.0.1
+
+  '@schedule-x/events-service@4.6.0': {}
 
   '@schedule-x/react@4.1.0(@schedule-x/calendar@4.6.0(@preact/signals@2.9.2(preact@10.29.2))(preact@10.29.2)(temporal-polyfill@1.0.1))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:

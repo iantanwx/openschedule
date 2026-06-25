@@ -21,6 +21,7 @@ import {
 } from "@schedule-x/calendar";
 import type { CalendarEvent } from "@schedule-x/calendar";
 import { createCalendarControlsPlugin } from "@schedule-x/calendar-controls";
+import { createEventsServicePlugin } from "@schedule-x/events-service";
 import "@schedule-x/theme-shadcn/dist/index.css";
 import "@/app/schedule-x-overrides.css";
 
@@ -271,6 +272,8 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   const calendarControlsRef = useRef(createCalendarControlsPlugin());
   const calendarControls = calendarControlsRef.current;
 
+  const [eventsService] = useState(() => createEventsServicePlugin());
+
   // -------------------------------------------------------------------------
   // Convex queries
   // -------------------------------------------------------------------------
@@ -424,21 +427,19 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     dayBoundaries: venue
       ? { start: venue.dayStart, end: venue.dayEnd }
       : { start: "07:00", end: "21:00" },
-  }, [calendarControls]);
+    plugins: [eventsService, calendarControls],
+  });
 
   // -------------------------------------------------------------------------
   // Sync state to calendar app via controls plugin (imperative updates)
   // -------------------------------------------------------------------------
 
-  // Sync events (only when we have actual data — keep previous events during loading)
-  const prevEventsRef = useRef<CalendarEvent[]>([]);
+  // Sync events via eventsService plugin (the documented API for updating events after render)
   useEffect(() => {
-    if (!calendarApp) return;
     if (calendarEvents.length > 0 || (bookings !== undefined && bookings.length === 0)) {
-      prevEventsRef.current = calendarEvents;
-      calendarApp.events.set(calendarEvents);
+      eventsService.set(calendarEvents);
     }
-  }, [calendarApp, calendarEvents, bookings]);
+  }, [calendarEvents, bookings, eventsService]);
 
   // Sync view changes
   const prevViewRef = useRef(currentView);
