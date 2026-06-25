@@ -438,17 +438,11 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync events via eventsService plugin
   useEffect(() => {
-    console.log("[calendar] syncing events:", calendarEvents.length, "bookings:", bookings?.length, "ooo:", oooEntries?.length)
-    if (calendarEvents.length > 0) {
-      console.log("[calendar] first event:", JSON.stringify(calendarEvents[0], (key, value) => {
-        if (value && typeof value === "object" && value[Symbol.toStringTag] === "Temporal.ZonedDateTime") {
-          return value.toString()
-        }
-        return value
-      }))
-    }
+    // Only set events when we have actual data loaded (don't clear with empty array during loading)
+    if (bookings === undefined) return
+    console.log("[calendar] syncing events:", calendarEvents.length)
     eventsService.set(calendarEvents)
-  }, [calendarEvents, eventsService])
+  }, [calendarEvents, bookings, eventsService])
 
   // Sync view changes
   const prevViewRef = useRef(currentView)
