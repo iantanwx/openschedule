@@ -452,7 +452,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     // Then navigate to the new date
     if (dateChanged) {
       prevDateRef.current = dateStr
-      console.log("[calendar:sync] setDate", dateStr, "events:", events.length)
 
       if (currentView === "3day") {
         const jsDay = currentDate.getDay()
