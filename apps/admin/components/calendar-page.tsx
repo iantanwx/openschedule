@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { useQuery } from "convex/react"
 import { useTheme } from "next-themes"
+import { useIsMobile } from "@openschedule/ui/hooks/use-mobile"
 import {
   format,
   addDays,
@@ -276,12 +277,22 @@ function AgendaView({
 export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   const { resolvedTheme } = useTheme()
 
+  const isMobile = useIsMobile()
+
   // Local state for view and date (NOT URL params — avoids Next.js remount)
-  const [currentView, setCurrentView] = useState<CalendarView>(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 640) return "day"
-    return "week"
-  })
+  const [currentView, setCurrentView] = useState<CalendarView>("week")
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date())
+
+  // Switch to day view on mobile once detected
+  const hasSyncedMobileRef = useRef(false)
+  useEffect(() => {
+    if (isMobile === undefined) return
+    if (hasSyncedMobileRef.current) return
+    hasSyncedMobileRef.current = true
+    if (isMobile) {
+      setCurrentView("day")
+    }
+  }, [isMobile])
 
   // Modal state
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
