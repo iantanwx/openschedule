@@ -277,7 +277,10 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   const { resolvedTheme } = useTheme()
 
   // Local state for view and date (NOT URL params — avoids Next.js remount)
-  const [currentView, setCurrentView] = useState<CalendarView>("week")
+  const [currentView, setCurrentView] = useState<CalendarView>(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 640) return "day"
+    return "week"
+  })
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date())
 
   // Modal state
