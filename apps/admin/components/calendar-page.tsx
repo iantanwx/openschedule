@@ -468,12 +468,14 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // Sync events via eventsService plugin
   useEffect(() => {
     if (bookings === undefined) return
+    console.log("[calendar:events] setting", calendarEvents.length, "events")
     eventsService.set(calendarEvents)
   }, [calendarEvents, bookings, eventsService])
 
   // Sync timezone from venue
   useEffect(() => {
     if (!venue) return
+    console.log("[calendar:tz] setTimezone", venue.timezone)
     calendarControls.setTimezone(venue.timezone)
   }, [venue, calendarControls])
 
@@ -483,6 +485,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     if (!calendarApp) return
     if (prevViewRef.current === currentView) return
     prevViewRef.current = currentView
+    console.log("[calendar:view] setView", currentView, "->", toSxViewName(currentView))
 
     const sxView = toSxViewName(currentView)
 
@@ -525,6 +528,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     const dateStr = format(currentDate, "yyyy-MM-dd")
     if (prevDateRef.current === dateStr) return
     prevDateRef.current = dateStr
+    console.log("[calendar:date] setDate", dateStr)
 
     // For 3-day, update firstDayOfWeek to match the new date
     if (currentView === "3day") {
