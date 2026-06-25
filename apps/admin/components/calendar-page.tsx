@@ -426,18 +426,23 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   const calendarApp = useNextCalendarApp({
     views: [createViewWeek()],
-    events: [
-      {
-        id: "test-1",
-        title: "Test Event",
-        start: Temporal.ZonedDateTime.from("2025-06-25T09:00:00+08:00[Asia/Singapore]"),
-        end: Temporal.ZonedDateTime.from("2025-06-25T10:30:00+08:00[Asia/Singapore]"),
-      },
-    ],
+    events: [],
     selectedDate: Temporal.PlainDate.from("2025-06-25"),
     defaultView: "week",
     plugins: [eventsService],
   })
+
+  // Test: set events via eventsService after render
+  useEffect(() => {
+    eventsService.set([
+      {
+        id: "test-1",
+        title: "Test Event via Service",
+        start: Temporal.ZonedDateTime.from("2025-06-25T09:00:00+08:00[Asia/Singapore]"),
+        end: Temporal.ZonedDateTime.from("2025-06-25T10:30:00+08:00[Asia/Singapore]"),
+      },
+    ]);
+  }, [eventsService]);
 
   // -------------------------------------------------------------------------
   // Sync state to calendar app via controls plugin (imperative updates)
