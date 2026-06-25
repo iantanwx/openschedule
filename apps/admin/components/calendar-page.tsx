@@ -368,6 +368,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     theme: "shadcn",
     isDark: resolvedTheme === "dark",
     dayBoundaries: { start: "06:00", end: "22:00" },
+    skipAnimations: true,
     weekOptions: {
       nDays: 7,
       gridHeight: 800,
@@ -410,20 +411,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     const dateStr = format(currentDate, "yyyy-MM-dd")
     const dateChanged = prevDateRef.current !== dateStr
 
-    if (dateChanged) {
-      prevDateRef.current = dateStr
-      console.log("[calendar:sync] setDate + events", dateStr, displayedBookings?.length ?? 0)
-
-      // For 3-day, update firstDayOfWeek
-      if (currentView === "3day") {
-        const jsDay = currentDate.getDay()
-        const sxDay = jsDay === 0 ? 7 : jsDay
-        calendarControls.setFirstDayOfWeek(sxDay)
-      }
-
-      calendarControls.setDate(Temporal.PlainDate.from(dateStr))
-    }
-
     // Build events inline
     const tz = venue?.timezone ?? "UTC"
     const therapistNames = new Map<string, string>()
@@ -456,13 +443,26 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       }
     }
 
-    // Skip if events haven't changed (prevents redundant re-renders from multiple Convex queries resolving)
+    // Set events FIRST (before date change) so grid slides into pre-populated events
     const sig = `${dateStr}|${events.map((e) => e.id).join(",")}`
-    if (!dateChanged && sig === prevEventsSigRef.current) return
-    prevEventsSigRef.current = sig
-    console.log("[calendar:sync] events", events.length, dateChanged ? "(+ date)" : "")
+    if (dateChanged || sig !== prevEventsSigRef.current) {
+      prevEventsSigRef.current = sig
+      eventsService.set(events)
+    }
 
-    eventsService.set(events)
+    // Then navigate to the new date
+    if (dateChanged) {
+      prevDateRef.current = dateStr
+      console.log("[calendar:sync] setDate", dateStr, "events:", events.length)
+
+      if (currentView === "3day") {
+        const jsDay = currentDate.getDay()
+        const sxDay = jsDay === 0 ? 7 : jsDay
+        calendarControls.setFirstDayOfWeek(sxDay)
+      }
+
+      calendarControls.setDate(Temporal.PlainDate.from(dateStr))
+    }
   }, [calendarApp, calendarControls, eventsService, currentDate, currentView, bookings, displayedBookings, oooEntries, therapists, venue])
 
   // Sync timezone from venue (only fires when timezone string changes)
