@@ -69,9 +69,6 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
       return false;
     }
 
-    const responseBody = await response.json();
-    console.log(`[EMAIL] Sent successfully to ${payload.to.join(", ")} — id: ${responseBody.id ?? "unknown"}`);
-
     return true;
   } catch (error) {
     console.error("[EMAIL ERROR] Failed to send email:", error);
