@@ -396,9 +396,13 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   })
 
   // Toggle dark mode programmatically (avoids config re-init tearing down the wrapper)
+  const prevThemeRef = useRef<string | null>(null)
   useEffect(() => {
     if (!calendarApp) return
-    calendarApp.setTheme(resolvedTheme === "dark" ? "dark" : "light")
+    const theme = resolvedTheme === "dark" ? "dark" : "light"
+    if (prevThemeRef.current === theme) return
+    prevThemeRef.current = theme
+    calendarApp.setTheme(theme)
   }, [calendarApp, resolvedTheme])
 
   // -------------------------------------------------------------------------
