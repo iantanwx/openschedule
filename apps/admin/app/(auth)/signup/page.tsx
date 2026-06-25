@@ -19,6 +19,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -31,8 +32,27 @@ export default function SignupPage() {
     if (result.error) {
       setError(result.error.message ?? "Signup failed");
     } else {
-      router.push(nextPath);
+      setShowVerification(true);
     }
+  }
+
+  if (showVerification) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="w-full max-w-sm space-y-4 p-6 text-center">
+          <h1 className="text-2xl font-bold">Check your email</h1>
+          <p className="text-muted-foreground text-sm">
+            We sent a verification link to <span className="font-medium text-foreground">{email}</span>.
+            Click the link to verify your account, then sign in.
+          </p>
+          <Link href={nextPath !== "/onboarding" ? `/login?next=${encodeURIComponent(nextPath)}` : "/login"}>
+            <Button variant="outline" className="mt-4 w-full">
+              Go to sign in
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
