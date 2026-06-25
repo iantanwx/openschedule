@@ -727,6 +727,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
           bookingId={selectedBookingId}
           venueId={venue._id}
           readOnly={isReadOnly}
+          initialBooking={displayedBookings.find((bk) => bk._id === selectedBookingId)}
           customerName={(() => {
             const b = displayedBookings.find((bk) => bk._id === selectedBookingId)
             return b ? customerMap.get(b.customerId) : undefined

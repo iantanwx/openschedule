@@ -14,12 +14,25 @@ import {
   DialogTitle,
 } from "@openschedule/ui/components/dialog";
 
+interface BookingData {
+  _id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: "pending" | "confirmed" | "cancelled";
+  createdBy: string;
+  therapistId: string;
+  customerId: string;
+  serviceId?: string;
+}
+
 interface BookingDetailModalProps {
   bookingId: string;
   venueId: string;
   readOnly?: boolean;
   customerName?: string;
   therapistName?: string;
+  initialBooking?: BookingData;
   onClose: () => void;
 }
 
@@ -29,10 +42,15 @@ const STATUS_BADGE_VARIANT = {
   cancelled: "outline" as const,
 };
 
-export function BookingDetailModal({ bookingId, venueId, readOnly = false, customerName, therapistName, onClose }: BookingDetailModalProps) {
+export function BookingDetailModal({ bookingId, venueId, readOnly = false, customerName, therapistName, initialBooking, onClose }: BookingDetailModalProps) {
   const [showReschedule, setShowReschedule] = useState(false);
 
-  const booking = useQuery(convexApi.queries.bookings.get, { id: bookingId });
+  const fetchedBooking = useQuery(
+    convexApi.queries.bookings.get,
+    initialBooking ? "skip" : { id: bookingId },
+  );
+  const booking = initialBooking ?? fetchedBooking;
+
   const customer = useQuery(
     convexApi.queries.customers.get,
     booking && !customerName ? { id: booking.customerId } : "skip",
