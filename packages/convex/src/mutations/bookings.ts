@@ -132,36 +132,23 @@ export const create = mutation({
     };
 
     // Determine if creator should be excluded (admin-created bookings)
-    let excludeUserId: typeof args.therapistId | undefined;
-    if (args.createdBy === "owner" || args.createdBy === "therapist") {
-      const identity = await ctx.auth.getUserIdentity();
-      if (identity) {
-        const actorUser = await ctx.db
-          .query("users")
-          .withIndex("by_authId", (q) => q.eq("authId", identity.subject))
-          .unique();
-        if (actorUser) {
-          excludeUserId = actorUser._id;
-        }
-      }
-    }
+    // Note: we always notify everyone including self; exclusion only prevents duplicates
+    // when therapist is also an owner
 
-    // Notify the assigned therapist (unless they created it themselves)
-    if (args.therapistId !== excludeUserId) {
-      await createNotification(ctx, {
-        recipientId: args.therapistId,
-        type: "booking_created",
-        orgId: venue.orgId,
-        payload: notifPayload,
-      });
-    }
+    // Notify the assigned therapist (always)
+    await createNotification(ctx, {
+      recipientId: args.therapistId,
+      type: "booking_created",
+      orgId: venue.orgId,
+      payload: notifPayload,
+    });
 
-    // Notify all owners
+    // Notify all owners (exclude therapist to prevent duplicate if they're also an owner)
     await createNotificationsForOwners(ctx, {
       orgId: venue.orgId,
       type: "booking_created",
       payload: notifPayload,
-      excludeUserId,
+      excludeUserId: args.therapistId,
     });
 
     return bookingId;
@@ -234,19 +221,19 @@ export const cancel = mutation({
         startTime: cancelledBooking.startTime,
       };
       if (cancelVenue) {
-        if (cancelledBooking.therapistId !== user._id) {
-          await createNotification(ctx, {
-            recipientId: cancelledBooking.therapistId,
-            type: "booking_cancelled",
-            orgId: cancelVenue.orgId,
-            payload: cancelPayload,
-          });
-        }
+        // Always notify the therapist
+        await createNotification(ctx, {
+          recipientId: cancelledBooking.therapistId,
+          type: "booking_cancelled",
+          orgId: cancelVenue.orgId,
+          payload: cancelPayload,
+        });
+        // Notify all owners (exclude therapist to prevent duplicate)
         await createNotificationsForOwners(ctx, {
           orgId: cancelVenue.orgId,
           type: "booking_cancelled",
           payload: cancelPayload,
-          excludeUserId: user._id,
+          excludeUserId: cancelledBooking.therapistId,
         });
       }
     }
@@ -286,10 +273,12 @@ export const cancelWithToken = mutation({
           orgId: tokenVenue.orgId,
           payload: tokenPayload,
         });
+        // Notify owners, excluding therapist who was already notified
         await createNotificationsForOwners(ctx, {
           orgId: tokenVenue.orgId,
           type: "booking_cancelled",
           payload: tokenPayload,
+          excludeUserId: tokenCancelledBooking.therapistId,
         });
       }
     }
@@ -400,20 +389,19 @@ export const reschedule = mutation({
         newStartTime: args.newStartTime,
         rescheduledBy: user.name,
       };
-      // Notify the assigned therapist only if actor is different
-      if (rescheduledBooking.therapistId !== user._id) {
-        await createNotification(ctx, {
-          recipientId: rescheduledBooking.therapistId,
-          type: "booking_rescheduled",
-          orgId: venue.orgId,
-          payload: reschPayload,
-        });
-      }
+      // Notify the assigned therapist (always)
+      await createNotification(ctx, {
+        recipientId: rescheduledBooking.therapistId,
+        type: "booking_rescheduled",
+        orgId: venue.orgId,
+        payload: reschPayload,
+      });
+      // Notify all owners (exclude therapist to prevent duplicate)
       await createNotificationsForOwners(ctx, {
         orgId: venue.orgId,
         type: "booking_rescheduled",
         payload: reschPayload,
-        excludeUserId: user._id,
+        excludeUserId: rescheduledBooking.therapistId,
       });
     }
   },
