@@ -12,7 +12,7 @@ import {
   endOfMonth,
   parseISO,
 } from "date-fns";
-import { Temporal } from "temporal-polyfill";
+import "temporal-polyfill/global";
 import { useNextCalendarApp, ScheduleXCalendar } from "@schedule-x/react";
 import {
   createViewDay,
