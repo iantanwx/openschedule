@@ -474,10 +474,10 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync timezone from venue
   useEffect(() => {
-    if (!venue) return
-    console.log("[calendar:tz] setTimezone", venue.timezone)
-    calendarControls.setTimezone(venue.timezone)
-  }, [venue, calendarControls])
+    if (!timezone || timezone === "UTC") return
+    console.log("[calendar:tz] setTimezone", timezone)
+    calendarControls.setTimezone(timezone)
+  }, [timezone, calendarControls])
 
   // Sync view changes
   const prevViewRef = useRef(currentView)
@@ -516,10 +516,8 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     }
 
     calendarControls.setView(sxView)
-    calendarControls.setDate(
-      Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd"))
-    )
-  }, [calendarApp, calendarControls, currentView, currentDate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calendarApp, calendarControls, currentView])
 
   // Sync date changes
   const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
