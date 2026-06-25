@@ -439,6 +439,14 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // Sync events via eventsService plugin
   useEffect(() => {
     console.log("[calendar] syncing events:", calendarEvents.length, "bookings:", bookings?.length, "ooo:", oooEntries?.length)
+    if (calendarEvents.length > 0) {
+      console.log("[calendar] first event:", JSON.stringify(calendarEvents[0], (key, value) => {
+        if (value && typeof value === "object" && value[Symbol.toStringTag] === "Temporal.ZonedDateTime") {
+          return value.toString()
+        }
+        return value
+      }))
+    }
     eventsService.set(calendarEvents)
   }, [calendarEvents, eventsService])
 
