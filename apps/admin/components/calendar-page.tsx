@@ -467,9 +467,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync events via eventsService plugin
   useEffect(() => {
-    // Only set events when we have actual data loaded (don't clear with empty array during loading)
     if (bookings === undefined) return
-    console.log("[calendar] syncing events:", calendarEvents.length)
     eventsService.set(calendarEvents)
   }, [calendarEvents, bookings, eventsService])
 
