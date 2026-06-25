@@ -436,6 +436,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     ],
     selectedDate: Temporal.PlainDate.from("2025-06-25"),
     defaultView: "week",
+    plugins: [eventsService],
   })
 
   // -------------------------------------------------------------------------
