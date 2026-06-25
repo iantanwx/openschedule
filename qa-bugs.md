@@ -39,7 +39,11 @@
 - [x] 37. New booking notification doesn't show which therapist and which venue.
 - [x] 38. In mobile view, org home doesn't provide a way to select a venue. There should be a venue picker, or venue cards (like vercel), just below the feed.
 - [x] 39. Feed in mobile view (org home) should show 3 notifications, and expand to 5 with a down arrow icon (like vercel).
-- [ ] 40. No way to dismiss notification toast. Toast is white bg, very weird.
-- [ ] 41. Home view is very awkward. I see venues, then the overview, then the feed. We should do Overview first (add a header too), then feed, then venues. And all should have headers, for better separation visually.
-- [ ] 42. No Google login. This was deferred, we can add it now.
-- [ ] 43. No way to add more venues -- "add new venue" shold be in the venue selector dropdown.
+- [x] 40. No way to dismiss notification toast. Toast is white bg, very weird.
+- [x] 41. Home view is very awkward. I see venues, then the overview, then the feed. We should do Overview first (add a header too), then feed, then venues. And all should have headers, for better separation visually.
+- [x] 42. No Google login. This was deferred, we can add it now.
+- [x] 43. No way to add more venues -- "add new venue" shold be in the venue selector dropdown.
+- [x] 44. Regression: emails not being sent out on new booking and cancellation.
+- [x] 45. Booking for still has placeholder that marks phone number as optional.
+- [x] 46. Duplicate notifications are being created for new bookings.
+- [x] 47. Warning: Querying without an index on table "member". This can cause performance issues, and may hit the document read limit. To fix, add an index that begins with the following fields in order: [organizationId, userId]
