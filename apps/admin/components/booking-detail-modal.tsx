@@ -63,6 +63,11 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
   const resolvedCustomerName = customerName ?? customer?.name ?? "Loading...";
   const resolvedTherapistName = therapistName ?? therapist?.name ?? "Loading...";
 
+  const venue = useQuery(
+    convexApi.queries.venues.get,
+    booking ? { id: booking.venueId } : "skip",
+  );
+
   const confirmMutation = useMutation(convexApi.mutations.bookings.confirm);
   const cancelMutation = useMutation(convexApi.mutations.bookings.cancel);
 
@@ -132,6 +137,12 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
               <span className="text-muted-foreground">Therapist:</span>{" "}
               {resolvedTherapistName}
             </p>
+            {venue && (
+              <p>
+                <span className="text-muted-foreground">Venue:</span>{" "}
+                {venue.name}
+              </p>
+            )}
           </div>
 
           {/* Customer info */}
