@@ -438,13 +438,9 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync events via eventsService plugin
   useEffect(() => {
-    if (
-      calendarEvents.length > 0 ||
-      (bookings !== undefined && bookings.length === 0)
-    ) {
-      eventsService.set(calendarEvents)
-    }
-  }, [calendarEvents, bookings, eventsService])
+    console.log("[calendar] syncing events:", calendarEvents.length, "bookings:", bookings?.length, "ooo:", oooEntries?.length)
+    eventsService.set(calendarEvents)
+  }, [calendarEvents, eventsService])
 
   // Sync view changes
   const prevViewRef = useRef(currentView)
