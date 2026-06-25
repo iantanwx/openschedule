@@ -142,14 +142,12 @@ function bookingToEvent(
     end: toZonedDateTime(booking.date, booking.endTime, timezone),
     title: customerName,
     calendarId: "booking",
-    _customContent: {
-      type: "booking",
-      customerName,
-      therapistName,
-      status: booking.status,
-      startTime: booking.startTime.slice(0, 5),
-      endTime: booking.endTime.slice(0, 5),
-    },
+    _type: "booking",
+    _customerName: customerName,
+    _therapistName: therapistName,
+    _status: booking.status,
+    _startTime: booking.startTime.slice(0, 5),
+    _endTime: booking.endTime.slice(0, 5),
   };
 }
 
@@ -165,11 +163,9 @@ function oooToEvent(
     end: toZonedDateTime(ooo.endDate, ooo.endTime, timezone),
     title: `${therapistName} — OoO`,
     calendarId: "ooo",
-    _customContent: {
-      type: "ooo",
-      therapistName,
-      reason: ooo.reason,
-    },
+    _type: "ooo",
+    _therapistName: therapistName,
+    _reason: ooo.reason,
   };
 }
 
@@ -400,13 +396,13 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     calendars: {
       booking: {
         colorName: "booking",
-        lightColors: { main: "transparent", container: "transparent", onContainer: "#000" },
-        darkColors: { main: "transparent", container: "transparent", onContainer: "#fff" },
+        lightColors: { main: "#10b981", container: "#ecfdf5", onContainer: "#064e3b" },
+        darkColors: { main: "#34d399", container: "#064e3b", onContainer: "#d1fae5" },
       },
       ooo: {
         colorName: "ooo",
-        lightColors: { main: "transparent", container: "transparent", onContainer: "#4f46e5" },
-        darkColors: { main: "transparent", container: "transparent", onContainer: "#a5b4fc" },
+        lightColors: { main: "#6366f1", container: "#eef2ff", onContainer: "#3730a3" },
+        darkColors: { main: "#818cf8", container: "#1e1b4b", onContainer: "#c7d2fe" },
       },
     },
     callbacks: {
@@ -434,12 +430,15 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // Sync state to calendar app via controls plugin (imperative updates)
   // -------------------------------------------------------------------------
 
-  // Sync events
+  // Sync events (only when we have actual data — keep previous events during loading)
+  const prevEventsRef = useRef<CalendarEvent[]>([]);
   useEffect(() => {
-    if (calendarApp) {
+    if (!calendarApp) return;
+    if (calendarEvents.length > 0 || (bookings !== undefined && bookings.length === 0)) {
+      prevEventsRef.current = calendarEvents;
       calendarApp.events.set(calendarEvents);
     }
-  }, [calendarApp, calendarEvents]);
+  }, [calendarApp, calendarEvents, bookings]);
 
   // Sync view changes
   const prevViewRef = useRef(currentView);

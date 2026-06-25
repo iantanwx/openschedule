@@ -8,16 +8,15 @@ interface CalendarBookingEventProps {
     title: string;
     start: string;
     end: string;
-    _customContent?: {
-      type: string;
-      customerName: string;
-      therapistName: string;
-      status: "pending" | "confirmed" | "cancelled";
-      startTime: string;
-      endTime: string;
-    };
+    _type?: string;
+    _customerName?: string;
+    _therapistName?: string;
+    _status?: "pending" | "confirmed" | "cancelled";
+    _startTime?: string;
+    _endTime?: string;
+    _reason?: string;
+    [key: string]: unknown;
   };
-  hasStartDate?: boolean;
 }
 
 const STATUS_CONFIG = {
@@ -39,29 +38,29 @@ const STATUS_CONFIG = {
 } as const;
 
 export function CalendarBookingEvent({ calendarEvent }: CalendarBookingEventProps) {
-  const content = calendarEvent._customContent;
-
-  // If this is an OoO event rendered through this component, delegate styling
-  if (content?.type === "ooo") {
+  // OoO event
+  if (calendarEvent._type === "ooo") {
     return (
       <div className="h-full w-full overflow-hidden rounded-sm border border-dashed border-indigo-400 bg-indigo-50/50 px-1.5 py-0.5 dark:border-indigo-500 dark:bg-indigo-950/30">
         <p className="truncate text-xs font-medium text-indigo-700 dark:text-indigo-300">
-          {(content as unknown as { therapistName: string }).therapistName} — OoO
+          {(calendarEvent._therapistName as string) ?? ""} — OoO
         </p>
-        {(content as unknown as { reason?: string }).reason && (
+        {calendarEvent._reason && (
           <p className="truncate text-[10px] text-indigo-600/70 dark:text-indigo-400/70">
-            {(content as unknown as { reason?: string }).reason}
+            {calendarEvent._reason as string}
           </p>
         )}
       </div>
     );
   }
 
-  if (!content || content.type !== "booking") {
+  // Booking event
+  if (calendarEvent._type !== "booking") {
     return <div className="text-xs">{calendarEvent.title}</div>;
   }
 
-  const config = STATUS_CONFIG[content.status] ?? STATUS_CONFIG.confirmed;
+  const status = calendarEvent._status ?? "confirmed";
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.confirmed;
 
   return (
     <div
@@ -72,10 +71,10 @@ export function CalendarBookingEvent({ calendarEvent }: CalendarBookingEventProp
       )}
     >
       <p className="truncate text-xs font-medium text-foreground">
-        {content.customerName}
+        {calendarEvent._customerName ?? calendarEvent.title}
       </p>
       <p className="truncate text-[10px] text-muted-foreground">
-        {content.startTime}–{content.endTime} · {content.therapistName}
+        {calendarEvent._startTime}–{calendarEvent._endTime} · {calendarEvent._therapistName}
       </p>
       <p className="truncate text-[10px] font-medium text-muted-foreground">
         {config.label}
