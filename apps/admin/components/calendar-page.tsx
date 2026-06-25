@@ -427,7 +427,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   const calendarApp = useNextCalendarApp({
     views: [createViewWeek()],
     events: [],
-    selectedDate: Temporal.PlainDate.from("2025-06-25"),
+    selectedDate: Temporal.Now.plainDateISO(),
     defaultView: "week",
     plugins: [eventsService],
   })
