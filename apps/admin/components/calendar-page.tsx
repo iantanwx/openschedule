@@ -534,6 +534,22 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   }, [displayedBookings])
 
   // -------------------------------------------------------------------------
+  // Maps for AgendaView
+  // -------------------------------------------------------------------------
+
+  const therapistMap = useMemo(() => {
+    const map = new Map<string, string>()
+    if (therapists) {
+      for (const t of therapists) {
+        map.set(t._id, t.name)
+      }
+    }
+    return map
+  }, [therapists])
+
+  const customerMap = useMemo(() => new Map<string, string>(), [])
+
+  // -------------------------------------------------------------------------
   // Track whether we've ever received booking data (to avoid spinner on subsequent navigations)
   const hasLoadedRef = useRef(false)
   if (bookings !== undefined) hasLoadedRef.current = true
