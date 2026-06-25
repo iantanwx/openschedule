@@ -22,16 +22,19 @@ interface CalendarBookingEventProps {
 const STATUS_CONFIG = {
   confirmed: {
     border: "border-l-emerald-500",
+    ring: "border-emerald-300 dark:border-emerald-700",
     bg: "bg-emerald-50 dark:bg-emerald-950/40",
     label: "Confirmed",
   },
   pending: {
     border: "border-l-amber-500",
+    ring: "border-amber-300 dark:border-amber-700",
     bg: "bg-amber-50 dark:bg-amber-950/40",
     label: "Pending",
   },
   cancelled: {
     border: "border-l-gray-400",
+    ring: "border-gray-300 dark:border-gray-600",
     bg: "bg-muted/50",
     label: "Cancelled",
   },
@@ -67,8 +70,9 @@ export function CalendarBookingEvent({
   return (
     <div
       className={cn(
-        "h-full w-full overflow-hidden rounded-r-sm border-l-[3px] px-1.5 py-0.5",
+        "h-full w-full overflow-hidden rounded-r-sm border border-l-[3px] px-1.5 py-0.5",
         config.border,
+        config.ring,
         config.bg,
       )}
     >
