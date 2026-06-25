@@ -9,6 +9,11 @@
   display: none !important;
 }
 
+/* Remove border on overlapping/concurrent events */
+.sx__event {
+  border: none !important;
+}
+
 /* Month view: fixed-height rows, per-cell scroll */
 .sx__month-grid-week {
   min-height: 100px !important;
