@@ -193,6 +193,14 @@ export const convexApi = api as unknown as {
         name: string;
         phone?: string;
       } | null>;
+      listByOrg: FunctionReference<"query", "public", { orgId: string }, Array<{
+        _id: string;
+        _creationTime: number;
+        orgId: string;
+        email: string;
+        name: string;
+        phone?: string;
+      }>>;
     };
     availability: {
       getSlots: FunctionReference<"query", "public", { venueId: string; therapistId: string; serviceId: string }, Record<string, Array<{ startTime: string; endTime: string }>>>;

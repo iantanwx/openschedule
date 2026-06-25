@@ -335,6 +335,11 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       : "skip"
   )
 
+  const customers = useQuery(
+    convexApi.queries.customers.listByOrg,
+    org ? { orgId: org._id } : "skip"
+  )
+
   // -------------------------------------------------------------------------
   // View scope (My/All toggle)
   // -------------------------------------------------------------------------
@@ -358,25 +363,48 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // Stabilize ALL config values so useNextCalendarApp doesn't see new references
   // -------------------------------------------------------------------------
 
-  const [views] = useState(() => [createViewDay(), createViewWeek(), createViewMonthGrid()])
+  const [views] = useState(() => [
+    createViewDay(),
+    createViewWeek(),
+    createViewMonthGrid(),
+  ])
   const [plugins] = useState(() => [eventsService, calendarControls])
   const [calendars] = useState(() => ({
     booking: {
       colorName: "booking",
-      lightColors: { main: "#10b981", container: "#ecfdf5", onContainer: "#065f46" },
-      darkColors: { main: "#34d399", container: "#064e3b", onContainer: "#a7f3d0" },
+      lightColors: {
+        main: "#10b981",
+        container: "#ecfdf5",
+        onContainer: "#065f46",
+      },
+      darkColors: {
+        main: "#34d399",
+        container: "#064e3b",
+        onContainer: "#a7f3d0",
+      },
     },
     ooo: {
       colorName: "ooo",
-      lightColors: { main: "#6366f1", container: "#eef2ff", onContainer: "#3730a3" },
-      darkColors: { main: "#818cf8", container: "#312e81", onContainer: "#c7d2fe" },
+      lightColors: {
+        main: "#6366f1",
+        container: "#eef2ff",
+        onContainer: "#3730a3",
+      },
+      darkColors: {
+        main: "#818cf8",
+        container: "#312e81",
+        onContainer: "#c7d2fe",
+      },
     },
   }))
   const [weekOptions] = useState(() => ({
     nDays: 7,
     gridHeight: 800,
     eventWidth: 95,
-    timeAxisFormatOptions: { hour: "numeric" as const, minute: "2-digit" as const },
+    timeAxisFormatOptions: {
+      hour: "numeric" as const,
+      minute: "2-digit" as const,
+    },
   }))
   const [dayBoundaries] = useState(() => ({ start: "06:00", end: "22:00" }))
   const [customComponents] = useState(() => ({
@@ -463,7 +491,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
           bookingToEvent(
             b,
             therapistNames.get(b.therapistId) ?? "Therapist",
-            "Customer",
+            customerMap.get(b.customerId) ?? "Customer",
             tz
           )
         )
@@ -473,7 +501,11 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       for (const ooo of oooEntries) {
         if (ooo.status !== "active") continue
         events.push(
-          oooToEvent(ooo, therapistNames.get(ooo.therapistId) ?? "Therapist", tz)
+          oooToEvent(
+            ooo,
+            therapistNames.get(ooo.therapistId) ?? "Therapist",
+            tz
+          )
         )
       }
     }
@@ -483,9 +515,17 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       prevEventsSigRef.current = sig
       eventsService.set(events)
     }
-  }, [calendarApp, calendarControls, eventsService, bookings, displayedBookings, oooEntries, therapists, venue])
-
-
+  }, [
+    calendarApp,
+    calendarControls,
+    eventsService,
+    bookings,
+    displayedBookings,
+    oooEntries,
+    therapists,
+    customerMap,
+    venue,
+  ])
 
   // Sync view changes (only fires on view switch)
   const prevViewRef = useRef(currentView)
@@ -568,7 +608,15 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     return map
   }, [therapists])
 
-  const customerMap = useMemo(() => new Map<string, string>(), [])
+  const customerMap = useMemo(() => {
+    const map = new Map<string, string>()
+    if (customers) {
+      for (const c of customers) {
+        map.set(c._id, c.name)
+      }
+    }
+    return map
+  }, [customers])
 
   // -------------------------------------------------------------------------
   // Track whether we've ever received booking data (to avoid spinner on subsequent navigations)
