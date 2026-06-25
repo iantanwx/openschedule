@@ -109,11 +109,8 @@ describe("notification invariants", () => {
   // Helper to count notifications for a user
   async function getNotifications(t: ReturnType<typeof convexTest>, recipientId: string) {
     return await t.run(async (ctx) => {
-      const all = await ctx.db
-        .query("notifications")
-        .withIndex("by_recipientId_and_createdAt", (q) => q.eq("recipientId", recipientId as any))
-        .collect();
-      return all;
+      const all = await ctx.db.query("notifications").collect();
+      return all.filter((n) => n.recipientId === recipientId);
     });
   }
 
@@ -314,7 +311,8 @@ describe("notification invariants", () => {
       // Seed a cancel token
       const cancelToken = await t.run(async (ctx) => {
         const booking = await ctx.db.get(bookingId);
-        return booking?.cancelToken as string;
+        if (booking && "cancelToken" in booking) return booking.cancelToken as string;
+        return "";
       });
 
       // Clear create notifications
@@ -355,7 +353,8 @@ describe("notification invariants", () => {
 
       const cancelToken = await t.run(async (ctx) => {
         const booking = await ctx.db.get(bookingId);
-        return booking?.cancelToken as string;
+        if (booking && "cancelToken" in booking) return booking.cancelToken as string;
+        return "";
       });
 
       // Clear create notifications

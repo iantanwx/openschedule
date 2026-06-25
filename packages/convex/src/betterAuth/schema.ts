@@ -90,7 +90,8 @@ export const tables = {
   })
     .index("organizationId", ["organizationId"])
     .index("userId", ["userId"])
-    .index("role", ["role"]),
+    .index("role", ["role"])
+    .index("by_organizationId_and_userId", ["organizationId", "userId"]),
   invitation: defineTable({
     organizationId: v.string(),
     email: v.string(),
