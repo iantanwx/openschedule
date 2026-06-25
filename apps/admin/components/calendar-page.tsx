@@ -524,7 +524,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       }
     }
 
-    const sig = events.map((e) => e.id).join(",")
+    const sig = events.map((e) => `${e.id}:${e.title}`).join(",")
     if (sig !== prevEventsSigRef.current) {
       prevEventsSigRef.current = sig
       eventsService.set(events)
