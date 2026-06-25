@@ -456,6 +456,12 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     eventsService.set(calendarEvents)
   }, [calendarEvents, bookings, eventsService])
 
+  // Sync timezone from venue
+  useEffect(() => {
+    if (!venue) return
+    calendarControls.setTimezone(venue.timezone)
+  }, [venue, calendarControls])
+
   // Sync view changes
   const prevViewRef = useRef(currentView)
   useEffect(() => {
