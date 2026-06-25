@@ -364,7 +364,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     defaultView: "week",
     plugins: [eventsService, calendarControls],
     theme: "shadcn",
-    isDark: resolvedTheme === "dark",
+    isDark: false,
     dayBoundaries: { start: "06:00", end: "22:00" },
     skipAnimations: true,
     weekOptions: {
@@ -394,6 +394,12 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       },
     },
   })
+
+  // Toggle dark mode programmatically (avoids config re-init tearing down the wrapper)
+  useEffect(() => {
+    if (!calendarApp) return
+    calendarApp.setTheme(resolvedTheme === "dark" ? "dark" : "light")
+  }, [calendarApp, resolvedTheme])
 
   // -------------------------------------------------------------------------
   // Sync state to calendar app via controls plugin (imperative updates)

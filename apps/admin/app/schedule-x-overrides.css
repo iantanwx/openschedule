@@ -1,49 +1,10 @@
 /* Schedule-x overrides
  *
  * Using @schedule-x/theme-shadcn which handles light/dark automatically.
- * We hide the built-in header and stabilize dark mode variables so they
- * don't flash when schedule-x briefly drops .is-dark/.is-shadcn during
- * internal re-renders on date navigation.
+ * We just need to hide the built-in header (we use CalendarToolbar instead).
  */
 
-/* Hide the built-in schedule-x header (we use CalendarToolbar instead) */
+/* Hide the built-in schedule-x header */
 .sx__calendar-header {
   display: none !important;
-}
-
-/* Prevent white flash during transitions — inherit page background */
-.sx__calendar,
-.sx__calendar-app {
-  background: var(--background) !important;
-}
-
-/*
- * Stable dark mode variables — keyed off html.dark (next-themes) instead of
- * the schedule-x .is-dark class which briefly disappears during navigation.
- */
-.dark .sx__calendar-wrapper {
-  --sx-color-primary: #d0bcff;
-  --sx-color-on-primary: #371e73;
-  --sx-color-primary-container: #fff;
-  --sx-color-on-primary-container: #000;
-  --sx-color-on-primary: #000;
-  --sx-color-secondary: #ccc2dc;
-  --sx-color-on-secondary: #332d41;
-  --sx-color-secondary-container: #4a4458;
-  --sx-color-on-secondary-container: #e8def8;
-  --sx-color-surface: #141218;
-  --sx-color-surface-dim: #141218;
-  --sx-color-surface-bright: #3b383e;
-  --sx-color-on-surface: #e6e1e5;
-  --sx-color-surface-container: #211f26;
-  --sx-color-surface-container-low: #1d1b20;
-  --sx-color-surface-container-high: #2b2930;
-  --sx-color-background: #141218;
-  --sx-color-on-background: #e6e1e5;
-  --sx-color-outline: #938f99;
-  --sx-color-outline-variant: #444746;
-  --sx-color-surface-tint: #d0bcff;
-  --sx-internal-color-text: #fff;
-  --sx-border: 1px solid hsl(240deg 3.7% 15.9%);
-  --sx-color-popup-border: hsl(240deg 3.7% 15.9%);
 }
