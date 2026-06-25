@@ -31,6 +31,7 @@ const VIEW_LABELS: Record<CalendarView, string> = {
 };
 
 const VIEWS: CalendarView[] = ["day", "3day", "week", "month", "schedule"];
+const MOBILE_VIEWS: CalendarView[] = ["day", "3day", "week", "schedule"];
 
 function formatDateRange(date: Date, view: CalendarView): string {
   switch (view) {
@@ -177,7 +178,7 @@ export function CalendarToolbar({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {VIEWS.map((view) => (
+            {MOBILE_VIEWS.map((view) => (
               <SelectItem key={view} value={view}>
                 {VIEW_LABELS[view]}
               </SelectItem>
