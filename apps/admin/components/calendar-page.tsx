@@ -23,6 +23,7 @@ import {
 } from "@schedule-x/calendar";
 import type { CalendarEvent } from "@schedule-x/calendar";
 import "@schedule-x/theme-default/dist/index.css";
+import "@/app/schedule-x-overrides.css";
 
 import { convexApi } from "@/lib/convex-api";
 import { useViewScope } from "@/lib/hooks/use-view-scope";
