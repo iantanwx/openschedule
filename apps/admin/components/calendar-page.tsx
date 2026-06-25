@@ -479,41 +479,41 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync view changes (only fires on view switch)
   const prevViewRef = useRef(currentView)
-  // ISOLATION STEP 0: commented out
-  // useEffect(() => {
-  //   if (!calendarApp) return
-  //   if (prevViewRef.current === currentView) return
-  //   prevViewRef.current = currentView
-  //
-  //   const sxView = toSxViewName(currentView)
-  //
-  //   if (currentView === "3day") {
-  //     const jsDay = currentDate.getDay()
-  //     const sxDay = jsDay === 0 ? 7 : jsDay
-  //     calendarControls.setFirstDayOfWeek(sxDay)
-  //     calendarControls.setWeekOptions({
-  //       nDays: 3,
-  //       gridHeight: 800,
-  //       eventWidth: 95,
-  //       timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
-  //       eventOverlap: true,
-  //       gridStep: 60,
-  //     })
-  //   } else if (currentView === "week") {
-  //     calendarControls.setFirstDayOfWeek(1)
-  //     calendarControls.setWeekOptions({
-  //       nDays: 7,
-  //       gridHeight: 800,
-  //       eventWidth: 95,
-  //       timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
-  //       eventOverlap: true,
-  //       gridStep: 60,
-  //     })
-  //   }
-  //
-  //   calendarControls.setView(sxView)
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [calendarApp, calendarControls, currentView])
+  // ISOLATION STEP 3: view sync enabled
+  useEffect(() => {
+    if (!calendarApp) return
+    if (prevViewRef.current === currentView) return
+    prevViewRef.current = currentView
+
+    const sxView = toSxViewName(currentView)
+
+    if (currentView === "3day") {
+      const jsDay = currentDate.getDay()
+      const sxDay = jsDay === 0 ? 7 : jsDay
+      calendarControls.setFirstDayOfWeek(sxDay)
+      calendarControls.setWeekOptions({
+        nDays: 3,
+        gridHeight: 800,
+        eventWidth: 95,
+        timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
+        eventOverlap: true,
+        gridStep: 60,
+      })
+    } else if (currentView === "week") {
+      calendarControls.setFirstDayOfWeek(1)
+      calendarControls.setWeekOptions({
+        nDays: 7,
+        gridHeight: 800,
+        eventWidth: 95,
+        timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
+        eventOverlap: true,
+        gridStep: 60,
+      })
+    }
+
+    calendarControls.setView(sxView)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calendarApp, calendarControls, currentView])
 
   // -------------------------------------------------------------------------
   // Navigation (local state, no URL changes = no remount)
