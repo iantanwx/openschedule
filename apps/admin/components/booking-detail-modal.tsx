@@ -28,7 +28,7 @@ interface BookingData {
 
 interface BookingDetailModalProps {
   bookingId: string;
-  venueId: string;
+  venueId?: string;
   readOnly?: boolean;
   customerName?: string;
   therapistName?: string;
@@ -88,7 +88,7 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
           <RescheduleView
             bookingId={bookingId}
             therapistId={booking.therapistId}
-            venueId={venueId}
+            venueId={venueId ?? booking.venueId}
             serviceId={booking.serviceId ?? null}
             onDone={() => {
               setShowReschedule(false);

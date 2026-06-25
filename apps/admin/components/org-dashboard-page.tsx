@@ -10,6 +10,7 @@ import { CalendarCheck, Clock, DollarSign, Calendar, ChevronDown } from "lucide-
 import { Spinner } from "@openschedule/ui/components/spinner";
 import { VenueCard } from "./venue-card";
 import { Button } from "@openschedule/ui/components/button";
+import { BookingDetailModal } from "./booking-detail-modal";
 
 interface OrgDashboardPageProps {
   orgSlug: string;
@@ -20,6 +21,7 @@ const FEED_EXPANDED_COUNT = 10;
 
 export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
   const [feedExpanded, setFeedExpanded] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -95,10 +97,16 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
             {feedItems.map((item) => {
               const formatted = formatNotification(item.type, item.payload as Record<string, unknown>);
               const Icon = formatted.icon;
+              const payload = item.payload as Record<string, unknown>;
+              const bookingId = payload.bookingId as string | undefined;
+              const isClickable = !!bookingId;
               return (
-                <div
+                <button
                   key={item._id}
-                  className="flex items-start gap-3 rounded-md px-3 py-2 hover:bg-muted/50"
+                  type="button"
+                  disabled={!isClickable}
+                  onClick={() => { if (bookingId) setSelectedBookingId(bookingId); }}
+                  className={`flex w-full items-start gap-3 rounded-md px-3 py-2 text-left hover:bg-muted/50 ${isClickable ? "cursor-pointer" : "cursor-default"}`}
                 >
                   <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                   <div className="flex-1 min-w-0">
@@ -107,7 +115,7 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
                       {formatRelativeTime(item.createdAt)}
                     </p>
                   </div>
-                </div>
+                </button>
               );
             })}
             {hasMoreFeed && !feedExpanded && (
@@ -135,6 +143,14 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Booking detail modal */}
+      {selectedBookingId && (
+        <BookingDetailModal
+          bookingId={selectedBookingId}
+          onClose={() => setSelectedBookingId(null)}
+        />
       )}
     </div>
   );
