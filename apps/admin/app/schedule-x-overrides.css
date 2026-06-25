@@ -1,9 +1,15 @@
-/* Schedule-x dark mode overrides
+/* Schedule-x overrides
  *
- * The default theme uses .is-dark; our app uses Tailwind's .dark class.
- * We remap schedule-x CSS variables to our design tokens so the calendar
- * inherits the app's background and uses readable text/border colors.
+ * This project uses oklch() color values in CSS variables (e.g. --border: oklch(0.922 0 0)).
+ * We reference them directly via var(--X) — NOT wrapped in hsl().
+ *
+ * We also hide schedule-x's built-in header since we render our own CalendarToolbar.
  */
+
+/* Hide the built-in schedule-x header (we use CalendarToolbar instead) */
+.sx__calendar-header {
+  display: none !important;
+}
 
 /* Light mode — transparent backgrounds so the page bg shows through */
 .sx__calendar {
@@ -12,39 +18,39 @@
   --sx-color-surface-container: transparent;
   --sx-color-surface-container-low: transparent;
   --sx-color-background: transparent;
-  --sx-color-outline: hsl(var(--border));
-  --sx-color-outline-variant: hsl(var(--border));
-  --sx-color-neutral: hsl(var(--border));
-  --sx-color-neutral-variant: hsl(var(--border));
-  --sx-color-on-surface: hsl(var(--foreground));
-  --sx-color-on-background: hsl(var(--foreground));
-  --sx-internal-color-text: hsl(var(--foreground));
-  --sx-internal-color-light-gray: hsl(var(--muted));
-  --sx-internal-color-gray-ripple-background: hsl(var(--muted));
+  --sx-color-outline: var(--border);
+  --sx-color-outline-variant: var(--border);
+  --sx-color-neutral: var(--border);
+  --sx-color-neutral-variant: var(--border);
+  --sx-color-on-surface: var(--foreground);
+  --sx-color-on-background: var(--foreground);
+  --sx-internal-color-text: var(--foreground);
+  --sx-internal-color-light-gray: var(--muted);
+  --sx-internal-color-gray-ripple-background: var(--muted);
 }
 
 /* Dark mode — use .dark (Tailwind) since our app doesn't add .is-dark */
 .dark .sx__calendar {
   --sx-color-surface: transparent;
   --sx-color-surface-dim: transparent;
-  --sx-color-surface-bright: hsl(var(--muted));
+  --sx-color-surface-bright: var(--muted);
   --sx-color-surface-container: transparent;
   --sx-color-surface-container-low: transparent;
-  --sx-color-surface-container-high: hsl(var(--muted));
+  --sx-color-surface-container-high: var(--muted);
   --sx-color-background: transparent;
-  --sx-color-on-surface: hsl(var(--foreground));
-  --sx-color-on-background: hsl(var(--foreground));
-  --sx-color-outline: hsl(var(--border));
-  --sx-color-outline-variant: hsl(var(--border));
-  --sx-color-neutral: hsl(var(--border));
-  --sx-color-neutral-variant: hsl(var(--border));
-  --sx-color-primary: hsl(var(--primary));
-  --sx-color-on-primary: hsl(var(--primary-foreground));
-  --sx-color-primary-container: hsl(var(--primary) / 0.15);
-  --sx-color-on-primary-container: hsl(var(--primary));
-  --sx-internal-color-text: hsl(var(--foreground));
-  --sx-internal-color-light-gray: hsl(var(--muted));
-  --sx-internal-color-gray-ripple-background: hsl(var(--muted));
+  --sx-color-on-surface: var(--foreground);
+  --sx-color-on-background: var(--foreground);
+  --sx-color-outline: var(--border);
+  --sx-color-outline-variant: var(--border);
+  --sx-color-neutral: var(--border);
+  --sx-color-neutral-variant: var(--border);
+  --sx-color-primary: var(--primary);
+  --sx-color-on-primary: var(--primary-foreground);
+  --sx-color-primary-container: var(--primary);
+  --sx-color-on-primary-container: var(--primary);
+  --sx-internal-color-text: var(--foreground);
+  --sx-internal-color-light-gray: var(--muted);
+  --sx-internal-color-gray-ripple-background: var(--muted);
   --sx-color-shadow: transparent;
 }
 
@@ -58,9 +64,9 @@
 
 /* Ensure time grid lines use our border token */
 .sx__time-grid-day__row {
-  border-color: hsl(var(--border));
+  border-color: var(--border);
 }
 
 .dark .sx__time-grid-day__row {
-  border-color: hsl(var(--border));
+  border-color: var(--border);
 }
