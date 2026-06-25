@@ -9,15 +9,18 @@
   display: none !important;
 }
 
-/* Month view: equal-height rows, invisible scroll */
+/* Month view: fixed-height rows, per-cell scroll */
 .sx__month-grid-week {
   min-height: 100px !important;
   max-height: 100px !important;
-  overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
+  overflow: hidden;
 }
-.sx__month-grid-week::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+.sx__month-grid-day {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.sx__month-grid-day::-webkit-scrollbar {
+  display: none;
 }
 
 
