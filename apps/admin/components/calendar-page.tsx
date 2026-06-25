@@ -430,9 +430,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     selectedDate: Temporal.Now.plainDateISO(),
     defaultView: "week",
     plugins: [eventsService],
-    dayBoundaries: venue
-      ? { start: venue.dayStart, end: venue.dayEnd }
-      : { start: "08:00", end: "18:00" },
     calendars: {
       booking: {
         colorName: "booking",
