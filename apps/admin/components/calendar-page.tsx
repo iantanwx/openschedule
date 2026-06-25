@@ -425,68 +425,17 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // -------------------------------------------------------------------------
 
   const calendarApp = useNextCalendarApp({
-    views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
+    views: [createViewWeek()],
     events: [
       {
         id: "test-1",
         title: "Test Event",
         start: Temporal.ZonedDateTime.from("2025-06-25T09:00:00+08:00[Asia/Singapore]"),
         end: Temporal.ZonedDateTime.from("2025-06-25T10:30:00+08:00[Asia/Singapore]"),
-        calendarId: "booking",
       },
     ],
-    theme: "shadcn",
-    isDark: resolvedTheme === "dark",
-    selectedDate: Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")),
-    defaultView: toSxViewName(currentView),
-    calendars: {
-      booking: {
-        colorName: "booking",
-        lightColors: {
-          main: "#10b981",
-          container: "#ecfdf5",
-          onContainer: "#064e3b",
-        },
-        darkColors: {
-          main: "#34d399",
-          container: "#064e3b",
-          onContainer: "#d1fae5",
-        },
-      },
-      ooo: {
-        colorName: "ooo",
-        lightColors: {
-          main: "#6366f1",
-          container: "#eef2ff",
-          onContainer: "#3730a3",
-        },
-        darkColors: {
-          main: "#818cf8",
-          container: "#1e1b4b",
-          onContainer: "#c7d2fe",
-        },
-      },
-    },
-    callbacks: {
-      onEventClick(event) {
-        const id = String(event.id)
-        if (!id.startsWith("ooo-")) {
-          setSelectedBookingId(id)
-        }
-      },
-    },
-    weekOptions: {
-      gridHeight: 800,
-      nDays: currentView === "3day" ? 3 : 7,
-      eventWidth: 95,
-      timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
-      eventOverlap: true,
-      gridStep: 60,
-    },
-    dayBoundaries: venue
-      ? { start: venue.dayStart, end: venue.dayEnd }
-      : { start: "07:00", end: "21:00" },
-    plugins: [eventsService, calendarControls],
+    selectedDate: Temporal.PlainDate.from("2025-06-25"),
+    defaultView: "week",
   })
 
   // -------------------------------------------------------------------------
@@ -501,7 +450,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     ) {
       console.log("Setting events", calendarEvents)
       console.log("Bookings", bookings)
-      eventsService.set(calendarEvents)
+      // eventsService.set(calendarEvents)
     }
   }, [calendarEvents, bookings, eventsService])
 
