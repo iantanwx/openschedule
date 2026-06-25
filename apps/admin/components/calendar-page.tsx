@@ -410,7 +410,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Toggle dark mode programmatically (avoids config re-init tearing down the wrapper)
   const prevThemeRef = useRef<string | null>(null)
-  // ISOLATION STEP 4: theme sync enabled (all effects now active)
   useEffect(() => {
     if (!calendarApp) return
     const theme = resolvedTheme === "dark" ? "dark" : "light"
@@ -425,7 +424,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync date IMMEDIATELY (so grid moves without waiting for data)
   const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
-  // ISOLATION STEP 1: date sync only
   useEffect(() => {
     if (!calendarApp) return
     const dateStr = format(currentDate, "yyyy-MM-dd")
@@ -443,7 +441,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync events when data arrives (separate from date navigation)
   const prevEventsSigRef = useRef("")
-  // ISOLATION STEP 2: events sync enabled
   useEffect(() => {
     if (!calendarApp) return
     if (bookings === undefined) return
@@ -492,7 +489,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync view changes (only fires on view switch)
   const prevViewRef = useRef(currentView)
-  // ISOLATION STEP 3: view sync enabled
   useEffect(() => {
     if (!calendarApp) return
     if (prevViewRef.current === currentView) return
