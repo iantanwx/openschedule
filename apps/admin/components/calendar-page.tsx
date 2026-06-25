@@ -2,16 +2,15 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "convex/react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
   format,
-  parseISO,
   addDays,
   startOfWeek,
   endOfWeek,
   startOfMonth,
   endOfMonth,
+  parseISO,
 } from "date-fns";
 import { Temporal } from "temporal-polyfill";
 import { useNextCalendarApp, ScheduleXCalendar } from "@schedule-x/react";
@@ -259,23 +258,11 @@ function AgendaView({ bookings, therapistMap, customerMap, onEventClick }: Agend
 // ---------------------------------------------------------------------------
 
 export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { resolvedTheme } = useTheme();
 
-  // URL state
-  const viewParam = searchParams.get("view");
-  const dateParam = searchParams.get("date");
-
-  const currentView: CalendarView = isCalendarView(viewParam) ? viewParam : "week";
-  const currentDate = useMemo(() => {
-    if (dateParam) {
-      const parsed = parseISO(dateParam);
-      if (!isNaN(parsed.getTime())) return parsed;
-    }
-    return new Date();
-  }, [dateParam]);
+  // Local state for view and date (NOT URL params — avoids Next.js remount)
+  const [currentView, setCurrentView] = useState<CalendarView>("week");
+  const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
 
   // Modal state
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
@@ -464,13 +451,17 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     const sxView = toSxViewName(currentView);
     calendarControls.setView(sxView);
 
+    // Always set date to current selection when switching views
+    // This ensures 3-day shows today instead of week start
+    calendarControls.setDate(Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")));
+
     // For 3-day vs week, update nDays
     if (currentView === "3day") {
       calendarControls.setWeekOptions({ nDays: 3, gridHeight: 800, eventWidth: 95, timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" }, eventOverlap: true, gridStep: 60 });
     } else if (currentView === "week") {
       calendarControls.setWeekOptions({ nDays: 7, gridHeight: 800, eventWidth: 95, timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" }, eventOverlap: true, gridStep: 60 });
     }
-  }, [calendarApp, calendarControls, currentView]);
+  }, [calendarApp, calendarControls, currentView, currentDate]);
 
   // Sync date changes
   const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"));
@@ -483,36 +474,26 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   }, [calendarApp, calendarControls, currentDate]);
 
   // -------------------------------------------------------------------------
-  // Navigation (updates URL, which triggers the sync effects above)
+  // Navigation (local state, no URL changes = no remount)
   // -------------------------------------------------------------------------
-
-  const updateUrl = useCallback(
-    (view: CalendarView, date: Date) => {
-      const params = new URLSearchParams();
-      params.set("view", view);
-      params.set("date", format(date, "yyyy-MM-dd"));
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [router, pathname],
-  );
 
   const handleViewChange = useCallback(
     (view: CalendarView) => {
-      updateUrl(view, currentDate);
+      setCurrentView(view);
     },
-    [currentDate, updateUrl],
+    [],
   );
 
   const handleDateChange = useCallback(
     (date: Date) => {
-      updateUrl(currentView, date);
+      setCurrentDate(date);
     },
-    [currentView, updateUrl],
+    [],
   );
 
   const handleToday = useCallback(() => {
-    updateUrl(currentView, new Date());
-  }, [currentView, updateUrl]);
+    setCurrentDate(new Date());
+  }, []);
 
   // -------------------------------------------------------------------------
   // Stats badges
