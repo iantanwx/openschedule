@@ -405,19 +405,32 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // Sync state to calendar app via controls plugin (imperative updates)
   // -------------------------------------------------------------------------
 
-  // Sync events + date together (single update to avoid double flash)
+  // Sync date IMMEDIATELY (so grid moves without waiting for data)
   const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
+  useEffect(() => {
+    if (!calendarApp) return
+    const dateStr = format(currentDate, "yyyy-MM-dd")
+    if (prevDateRef.current === dateStr) return
+    prevDateRef.current = dateStr
+
+    if (currentView === "3day") {
+      const jsDay = currentDate.getDay()
+      const sxDay = jsDay === 0 ? 7 : jsDay
+      calendarControls.setFirstDayOfWeek(sxDay)
+    }
+
+    calendarControls.setDate(Temporal.PlainDate.from(dateStr))
+  }, [calendarApp, calendarControls, currentDate, currentView])
+
+  // Sync events when data arrives (separate from date navigation)
   const prevEventsSigRef = useRef("")
   useEffect(() => {
     if (!calendarApp) return
-    if (bookings === undefined) return // wait for data before updating anything
+    if (bookings === undefined) return // keep previous events visible until new data arrives
 
-    const dateStr = format(currentDate, "yyyy-MM-dd")
-    const dateChanged = prevDateRef.current !== dateStr
-
-    // Ensure timezone is set (idempotent, venue guaranteed non-null by loading guard)
     const tz = venue?.timezone ?? "UTC"
     calendarControls.setTimezone(tz)
+
     const therapistNames = new Map<string, string>()
     if (therapists) {
       for (const t of therapists) {
@@ -448,26 +461,12 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       }
     }
 
-    // Set events FIRST (before date change) so grid slides into pre-populated events
-    const sig = `${dateStr}|${events.map((e) => e.id).join(",")}`
-    if (dateChanged || sig !== prevEventsSigRef.current) {
+    const sig = events.map((e) => e.id).join(",")
+    if (sig !== prevEventsSigRef.current) {
       prevEventsSigRef.current = sig
       eventsService.set(events)
     }
-
-    // Then navigate to the new date
-    if (dateChanged) {
-      prevDateRef.current = dateStr
-
-      if (currentView === "3day") {
-        const jsDay = currentDate.getDay()
-        const sxDay = jsDay === 0 ? 7 : jsDay
-        calendarControls.setFirstDayOfWeek(sxDay)
-      }
-
-      calendarControls.setDate(Temporal.PlainDate.from(dateStr))
-    }
-  }, [calendarApp, calendarControls, eventsService, currentDate, currentView, bookings, displayedBookings, oooEntries, therapists, venue])
+  }, [calendarApp, calendarControls, eventsService, bookings, displayedBookings, oooEntries, therapists, venue])
 
 
 
