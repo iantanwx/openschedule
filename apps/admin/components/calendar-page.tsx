@@ -412,21 +412,21 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync date IMMEDIATELY (so grid moves without waiting for data)
   const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
-  // ISOLATION STEP 1: date sync only
-  useEffect(() => {
-    if (!calendarApp) return
-    const dateStr = format(currentDate, "yyyy-MM-dd")
-    if (prevDateRef.current === dateStr) return
-    prevDateRef.current = dateStr
-
-    if (currentView === "3day") {
-      const jsDay = currentDate.getDay()
-      const sxDay = jsDay === 0 ? 7 : jsDay
-      calendarControls.setFirstDayOfWeek(sxDay)
-    }
-
-    calendarControls.setDate(Temporal.PlainDate.from(dateStr))
-  }, [calendarApp, calendarControls, currentDate, currentView])
+  // ISOLATION STEP 0: commented out
+  // useEffect(() => {
+  //   if (!calendarApp) return
+  //   const dateStr = format(currentDate, "yyyy-MM-dd")
+  //   if (prevDateRef.current === dateStr) return
+  //   prevDateRef.current = dateStr
+  //
+  //   if (currentView === "3day") {
+  //     const jsDay = currentDate.getDay()
+  //     const sxDay = jsDay === 0 ? 7 : jsDay
+  //     calendarControls.setFirstDayOfWeek(sxDay)
+  //   }
+  //
+  //   calendarControls.setDate(Temporal.PlainDate.from(dateStr))
+  // }, [calendarApp, calendarControls, currentDate, currentView])
 
   // Sync events when data arrives (separate from date navigation)
   const prevEventsSigRef = useRef("")
