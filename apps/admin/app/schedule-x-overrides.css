@@ -9,8 +9,10 @@
   display: none !important;
 }
 
-/* Month view: equal-height rows */
+/* Month view: force equal-height rows */
 .sx__month-grid-week {
-  height: 100px;
+  min-height: 100px !important;
+  max-height: 100px !important;
+  height: 100px !important;
   overflow: hidden;
 }
