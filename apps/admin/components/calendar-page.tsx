@@ -449,18 +449,21 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     prevViewRef.current = currentView;
 
     const sxView = toSxViewName(currentView);
-    calendarControls.setView(sxView);
 
-    // Always set date to current selection when switching views
-    // This ensures 3-day shows today instead of week start
-    calendarControls.setDate(Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")));
-
-    // For 3-day vs week, update nDays
+    // For 3-day: set firstDayOfWeek to the current date's weekday so the grid starts from today
+    // WeekDay enum: MONDAY=1...SUNDAY=7. JS getDay(): 0=Sun,1=Mon...6=Sat
     if (currentView === "3day") {
+      const jsDay = currentDate.getDay();
+      const sxDay = jsDay === 0 ? 7 : jsDay; // convert to schedule-x WeekDay
+      calendarControls.setFirstDayOfWeek(sxDay);
       calendarControls.setWeekOptions({ nDays: 3, gridHeight: 800, eventWidth: 95, timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" }, eventOverlap: true, gridStep: 60 });
     } else if (currentView === "week") {
+      calendarControls.setFirstDayOfWeek(1); // Monday
       calendarControls.setWeekOptions({ nDays: 7, gridHeight: 800, eventWidth: 95, timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" }, eventOverlap: true, gridStep: 60 });
     }
+
+    calendarControls.setView(sxView);
+    calendarControls.setDate(Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")));
   }, [calendarApp, calendarControls, currentView, currentDate]);
 
   // Sync date changes
@@ -470,8 +473,16 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     const dateStr = format(currentDate, "yyyy-MM-dd");
     if (prevDateRef.current === dateStr) return;
     prevDateRef.current = dateStr;
+
+    // For 3-day, update firstDayOfWeek to match the new date
+    if (currentView === "3day") {
+      const jsDay = currentDate.getDay();
+      const sxDay = jsDay === 0 ? 7 : jsDay;
+      calendarControls.setFirstDayOfWeek(sxDay);
+    }
+
     calendarControls.setDate(Temporal.PlainDate.from(dateStr));
-  }, [calendarApp, calendarControls, currentDate]);
+  }, [calendarApp, calendarControls, currentDate, currentView]);
 
   // -------------------------------------------------------------------------
   // Navigation (local state, no URL changes = no remount)
