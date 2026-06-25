@@ -29,7 +29,7 @@ export function NotificationBell() {
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0">
+      <PopoverContent align="end" className="z-50 w-80 p-0">
         <NotificationList />
       </PopoverContent>
     </Popover>

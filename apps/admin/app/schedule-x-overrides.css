@@ -15,6 +15,12 @@
   margin: 1px !important;
 }
 
+/* Keep calendar below popovers/modals */
+.sx__calendar-wrapper {
+  z-index: 0 !important;
+  position: relative;
+}
+
 /* Month view: fixed-height rows, per-cell scroll */
 .sx__month-grid-week {
   min-height: 100px !important;
