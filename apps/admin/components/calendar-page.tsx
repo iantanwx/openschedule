@@ -425,11 +425,20 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   // -------------------------------------------------------------------------
 
   const calendarApp = useNextCalendarApp({
-    views: [createViewWeek()],
+    views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
     events: [],
     selectedDate: Temporal.Now.plainDateISO(),
     defaultView: "week",
     plugins: [eventsService, calendarControls],
+    theme: "shadcn",
+    isDark: resolvedTheme === "dark",
+    dayBoundaries: { start: "06:00", end: "22:00" },
+    weekOptions: {
+      nDays: 7,
+      gridHeight: 800,
+      eventWidth: 95,
+      timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
+    },
     calendars: {
       booking: {
         colorName: "booking",
@@ -440,6 +449,14 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
         colorName: "ooo",
         lightColors: { main: "#6366f1", container: "#eef2ff", onContainer: "#3730a3" },
         darkColors: { main: "#818cf8", container: "#312e81", onContainer: "#c7d2fe" },
+      },
+    },
+    callbacks: {
+      onEventClick: (event: CalendarEvent) => {
+        const type = (event as Record<string, unknown>)._type
+        if (type === "booking") {
+          setSelectedBookingId(event.id as string)
+        }
       },
     },
   })
