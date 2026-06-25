@@ -541,8 +541,8 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     venue,
   ])
 
-  // Sync view changes (only fires on view switch)
-  const prevViewRef = useRef(currentView)
+  // Sync view changes (fires on mount + view switch)
+  const prevViewRef = useRef<CalendarView | null>(null)
   useEffect(() => {
     if (!calendarApp) return
     if (prevViewRef.current === currentView) return
