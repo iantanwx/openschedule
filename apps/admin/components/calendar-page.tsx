@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "convex/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -8,8 +8,6 @@ import {
   format,
   parseISO,
   addDays,
-  addWeeks,
-  addMonths,
   startOfWeek,
   endOfWeek,
   startOfMonth,
@@ -23,6 +21,7 @@ import {
   createViewMonthGrid,
 } from "@schedule-x/calendar";
 import type { CalendarEvent } from "@schedule-x/calendar";
+import { createCalendarControlsPlugin } from "@schedule-x/calendar-controls";
 import "@schedule-x/theme-shadcn/dist/index.css";
 import "@/app/schedule-x-overrides.css";
 
@@ -84,6 +83,17 @@ function isCalendarView(v: string | null): v is CalendarView {
   return v !== null && (VALID_VIEWS as string[]).includes(v);
 }
 
+/** Map our CalendarView to schedule-x view name */
+function toSxViewName(view: CalendarView): string {
+  switch (view) {
+    case "day": return "day";
+    case "3day": return "week"; // week view with nDays=3
+    case "week": return "week";
+    case "month": return "month-grid";
+    case "schedule": return "week"; // agenda is custom, but sx stays on week
+  }
+}
+
 /** Compute the date range to query given the current view and date */
 function getDateRange(date: Date, view: CalendarView): { startDate: string; endDate: string } {
   switch (view) {
@@ -108,7 +118,6 @@ function getDateRange(date: Date, view: CalendarView): { startDate: string; endD
         endDate: format(endOfMonth(date), "yyyy-MM-dd"),
       };
     case "schedule":
-      // Schedule view shows 14 days
       return {
         startDate: format(date, "yyyy-MM-dd"),
         endDate: format(addDays(date, 13), "yyyy-MM-dd"),
@@ -135,9 +144,7 @@ function bookingToEvent(
     title: customerName,
     calendarId: "booking",
     _customContent: {
-      timeGrid: "booking",
-      dateGrid: "booking",
-      monthGrid: "booking",
+      type: "booking",
       customerName,
       therapistName,
       status: booking.status,
@@ -160,9 +167,7 @@ function oooToEvent(
     title: `${therapistName} — OoO`,
     calendarId: "ooo",
     _customContent: {
-      timeGrid: "ooo",
-      dateGrid: "ooo",
-      monthGrid: "ooo",
+      type: "ooo",
       therapistName,
       reason: ooo.reason,
     },
@@ -181,7 +186,6 @@ interface AgendaViewProps {
 }
 
 function AgendaView({ bookings, therapistMap, customerMap, onEventClick }: AgendaViewProps) {
-  // Group bookings by date
   const grouped = useMemo(() => {
     const map = new Map<string, BookingRecord[]>();
     for (const b of bookings) {
@@ -192,7 +196,6 @@ function AgendaView({ bookings, therapistMap, customerMap, onEventClick }: Agend
         map.set(b.date, [b]);
       }
     }
-    // Sort dates
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [bookings]);
 
@@ -279,6 +282,13 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   const [therapistFilter, setTherapistFilter] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
+  // Calendar controls plugin (created once, stable reference)
+  // -------------------------------------------------------------------------
+
+  const calendarControlsRef = useRef(createCalendarControlsPlugin());
+  const calendarControls = calendarControlsRef.current;
+
+  // -------------------------------------------------------------------------
   // Convex queries
   // -------------------------------------------------------------------------
 
@@ -294,7 +304,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     [currentDate, currentView],
   );
 
-  // Use single-day query for day view, range query otherwise
   const isSingleDay = currentView === "day";
   const bookingsSingleDay = useQuery(
     convexApi.queries.bookings.listByVenueAndDate,
@@ -311,17 +320,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     venue ? { venueId: venue._id } : "skip",
   );
 
-  // Query OoO for all therapists in range
-  // We query for each therapist — for simplicity use the first therapist to detect loading
-  // In practice, we fetch all therapists' OoO in parallel via individual queries
-  // For now, we'll use a single query approach: query OoO for each visible therapist
-  const therapistIds = useMemo(() => {
-    if (!therapists) return [];
-    return therapists.map((t) => t._id);
-  }, [therapists]);
-
-  // Query OoO for the current user (if therapist) or first few therapists
-  // schedule-x doesn't need all OoO at once — we'll query per-user after scope filtering
   const primaryTherapistId = currentUser?._id ?? null;
   const oooEntries = useQuery(
     convexApi.queries.ooo.listByTherapistAndDateRange,
@@ -354,11 +352,8 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     return map;
   }, [therapists]);
 
-  // Build a simple customer ID → name map from bookings
-  // We don't have a bulk customer query, so use placeholder for now
   const customerMap = useMemo(() => {
     const map = new Map<string, string>();
-    // We'll just show "Customer" — actual names come from the detail modal
     if (displayedBookings) {
       for (const b of displayedBookings) {
         if (!map.has(b.customerId)) {
@@ -380,6 +375,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
     if (displayedBookings) {
       for (const b of displayedBookings) {
+        if (b.status === "cancelled") continue; // don't show cancelled on calendar
         events.push(
           bookingToEvent(
             b,
@@ -404,16 +400,16 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   }, [displayedBookings, oooEntries, therapistMap, customerMap, timezone]);
 
   // -------------------------------------------------------------------------
-  // Schedule-x calendar app
+  // Schedule-x calendar app (created ONCE, never re-created)
   // -------------------------------------------------------------------------
 
   const calendarApp = useNextCalendarApp({
     views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
-    events: calendarEvents,
+    events: [],
     theme: "shadcn",
     isDark: resolvedTheme === "dark",
     selectedDate: Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")),
-    defaultView: currentView === "month" ? "month-grid" : currentView === "3day" ? "week" : currentView === "schedule" ? "week" : currentView,
+    defaultView: toSxViewName(currentView),
     calendars: {
       booking: {
         colorName: "booking",
@@ -428,7 +424,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     },
     callbacks: {
       onEventClick(event) {
-        // Only open modal for bookings, not OoO events
         const id = String(event.id);
         if (!id.startsWith("ooo-")) {
           setSelectedBookingId(id);
@@ -446,17 +441,49 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
     dayBoundaries: venue
       ? { start: venue.dayStart, end: venue.dayEnd }
       : { start: "07:00", end: "21:00" },
-  });
+  }, [calendarControls]);
 
-  // Sync events to calendar app when they change
+  // -------------------------------------------------------------------------
+  // Sync state to calendar app via controls plugin (imperative updates)
+  // -------------------------------------------------------------------------
+
+  // Sync events
   useEffect(() => {
     if (calendarApp) {
       calendarApp.events.set(calendarEvents);
     }
   }, [calendarApp, calendarEvents]);
 
+  // Sync view changes
+  const prevViewRef = useRef(currentView);
+  useEffect(() => {
+    if (!calendarApp) return;
+    if (prevViewRef.current === currentView) return;
+    prevViewRef.current = currentView;
+
+    const sxView = toSxViewName(currentView);
+    calendarControls.setView(sxView);
+
+    // For 3-day vs week, update nDays
+    if (currentView === "3day") {
+      calendarControls.setWeekOptions({ nDays: 3, gridHeight: 800, eventWidth: 95, timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" }, eventOverlap: true, gridStep: 60 });
+    } else if (currentView === "week") {
+      calendarControls.setWeekOptions({ nDays: 7, gridHeight: 800, eventWidth: 95, timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" }, eventOverlap: true, gridStep: 60 });
+    }
+  }, [calendarApp, calendarControls, currentView]);
+
+  // Sync date changes
+  const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"));
+  useEffect(() => {
+    if (!calendarApp) return;
+    const dateStr = format(currentDate, "yyyy-MM-dd");
+    if (prevDateRef.current === dateStr) return;
+    prevDateRef.current = dateStr;
+    calendarControls.setDate(Temporal.PlainDate.from(dateStr));
+  }, [calendarApp, calendarControls, currentDate]);
+
   // -------------------------------------------------------------------------
-  // Navigation
+  // Navigation (updates URL, which triggers the sync effects above)
   // -------------------------------------------------------------------------
 
   const updateUrl = useCallback(
@@ -494,7 +521,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   const stats = useMemo(() => {
     if (!displayedBookings) return { total: 0, confirmed: 0, pending: 0 };
     return {
-      total: displayedBookings.length,
+      total: displayedBookings.filter((b) => b.status !== "cancelled").length,
       confirmed: displayedBookings.filter((b) => b.status === "confirmed").length,
       pending: displayedBookings.filter((b) => b.status === "pending").length,
     };
@@ -571,7 +598,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       </div>
 
       {/* Calendar body */}
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="min-h-0 flex-1 overflow-auto p-4">
         {showScheduleX ? (
           calendarApp ? (
             <ScheduleXCalendar
