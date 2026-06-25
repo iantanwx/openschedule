@@ -542,10 +542,13 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   }, [displayedBookings])
 
   // -------------------------------------------------------------------------
-  // Loading state
-  // -------------------------------------------------------------------------
+  // Track whether we've ever received booking data (to avoid spinner on subsequent navigations)
+  const hasLoadedRef = useRef(false)
+  if (bookings !== undefined) hasLoadedRef.current = true
 
-  if (!venue || !currentUser || bookings === undefined) {
+  // Loading state — only on initial load, not on subsequent date/view changes
+  // -------------------------------------------------------------------------
+  if (!venue || !currentUser || !hasLoadedRef.current) {
     return (
       <div className="flex h-64 items-center justify-center">
         <Spinner className="h-6 w-6" />
