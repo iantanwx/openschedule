@@ -402,6 +402,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync events + date together (single update to avoid double flash)
   const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
+  const prevEventsSigRef = useRef("")
   useEffect(() => {
     if (!calendarApp) return
     if (bookings === undefined) return // wait for data before updating anything
@@ -421,8 +422,6 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
       }
 
       calendarControls.setDate(Temporal.PlainDate.from(dateStr))
-    } else {
-      console.log("[calendar:sync] events only", displayedBookings?.length ?? 0)
     }
 
     // Build events inline
@@ -456,6 +455,12 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
         )
       }
     }
+
+    // Skip if events haven't changed (prevents redundant re-renders from multiple Convex queries resolving)
+    const sig = `${dateStr}|${events.map((e) => e.id).join(",")}`
+    if (!dateChanged && sig === prevEventsSigRef.current) return
+    prevEventsSigRef.current = sig
+    console.log("[calendar:sync] events", events.length, dateChanged ? "(+ date)" : "")
 
     eventsService.set(events)
   }, [calendarApp, calendarControls, eventsService, currentDate, currentView, bookings, displayedBookings, oooEntries, therapists, venue])
