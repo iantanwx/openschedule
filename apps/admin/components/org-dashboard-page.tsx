@@ -22,6 +22,11 @@ const FEED_EXPANDED_COUNT = 10;
 export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
   const [feedExpanded, setFeedExpanded] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBookingMeta, setSelectedBookingMeta] = useState<{
+    customerName?: string;
+    therapistName?: string;
+    venueName?: string;
+  }>({});
   const org = useQuery(convexApi.queries.organizations.getBySlug, { slug: orgSlug });
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -105,7 +110,16 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
                   key={item._id}
                   type="button"
                   disabled={!isClickable}
-                  onClick={() => { if (bookingId) setSelectedBookingId(bookingId); }}
+                  onClick={() => {
+                    if (bookingId) {
+                      setSelectedBookingId(bookingId);
+                      setSelectedBookingMeta({
+                        customerName: payload.customerName as string | undefined,
+                        therapistName: payload.therapistName as string | undefined,
+                        venueName: payload.venueName as string | undefined,
+                      });
+                    }
+                  }}
                   className={`flex w-full items-start gap-3 rounded-md px-3 py-2 text-left hover:bg-muted/50 ${isClickable ? "cursor-pointer" : "cursor-default"}`}
                 >
                   <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
@@ -149,6 +163,9 @@ export function OrgDashboardPage({ orgSlug }: OrgDashboardPageProps) {
       {selectedBookingId && (
         <BookingDetailModal
           bookingId={selectedBookingId}
+          customerName={selectedBookingMeta.customerName}
+          therapistName={selectedBookingMeta.therapistName}
+          venueName={selectedBookingMeta.venueName}
           onClose={() => setSelectedBookingId(null)}
         />
       )}

@@ -32,6 +32,7 @@ interface BookingDetailModalProps {
   readOnly?: boolean;
   customerName?: string;
   therapistName?: string;
+  venueName?: string;
   initialBooking?: BookingData;
   onClose: () => void;
 }
@@ -42,7 +43,7 @@ const STATUS_BADGE_VARIANT = {
   cancelled: "outline" as const,
 };
 
-export function BookingDetailModal({ bookingId, venueId, readOnly = false, customerName, therapistName, initialBooking, onClose }: BookingDetailModalProps) {
+export function BookingDetailModal({ bookingId, venueId, readOnly = false, customerName, therapistName, venueName, initialBooking, onClose }: BookingDetailModalProps) {
   const [showReschedule, setShowReschedule] = useState(false);
 
   const fetchedBooking = useQuery(
@@ -65,8 +66,9 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
 
   const venue = useQuery(
     convexApi.queries.venues.get,
-    booking ? { id: booking.venueId } : "skip",
+    booking && !venueName ? { id: booking.venueId } : "skip",
   );
+  const resolvedVenueName = venueName ?? venue?.name;
 
   const confirmMutation = useMutation(convexApi.mutations.bookings.confirm);
   const cancelMutation = useMutation(convexApi.mutations.bookings.cancel);
@@ -137,10 +139,10 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
               <span className="text-muted-foreground">Therapist:</span>{" "}
               {resolvedTherapistName}
             </p>
-            {venue && (
+            {resolvedVenueName && (
               <p>
                 <span className="text-muted-foreground">Venue:</span>{" "}
-                {venue.name}
+                {resolvedVenueName}
               </p>
             )}
           </div>
