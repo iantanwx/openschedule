@@ -397,14 +397,14 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Toggle dark mode programmatically (avoids config re-init tearing down the wrapper)
   const prevThemeRef = useRef<string | null>(null)
-  // ISOLATION STEP 4: theme sync enabled
-  useEffect(() => {
-    if (!calendarApp) return
-    const theme = resolvedTheme === "dark" ? "dark" : "light"
-    if (prevThemeRef.current === theme) return
-    prevThemeRef.current = theme
-    calendarApp.setTheme(theme)
-  }, [calendarApp, resolvedTheme])
+  // ISOLATION STEP 0: all effects commented out
+  // useEffect(() => {
+  //   if (!calendarApp) return
+  //   const theme = resolvedTheme === "dark" ? "dark" : "light"
+  //   if (prevThemeRef.current === theme) return
+  //   prevThemeRef.current = theme
+  //   calendarApp.setTheme(theme)
+  // }, [calendarApp, resolvedTheme])
 
   // -------------------------------------------------------------------------
   // Sync state to calendar app via controls plugin (imperative updates)
@@ -412,108 +412,108 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
 
   // Sync date IMMEDIATELY (so grid moves without waiting for data)
   const prevDateRef = useRef(format(currentDate, "yyyy-MM-dd"))
-  // ISOLATION STEP 1: date sync only
-  useEffect(() => {
-    if (!calendarApp) return
-    const dateStr = format(currentDate, "yyyy-MM-dd")
-    if (prevDateRef.current === dateStr) return
-    prevDateRef.current = dateStr
-
-    if (currentView === "3day") {
-      const jsDay = currentDate.getDay()
-      const sxDay = jsDay === 0 ? 7 : jsDay
-      calendarControls.setFirstDayOfWeek(sxDay)
-    }
-
-    calendarControls.setDate(Temporal.PlainDate.from(dateStr))
-  }, [calendarApp, calendarControls, currentDate, currentView])
+  // ISOLATION STEP 0: commented out
+  // useEffect(() => {
+  //   if (!calendarApp) return
+  //   const dateStr = format(currentDate, "yyyy-MM-dd")
+  //   if (prevDateRef.current === dateStr) return
+  //   prevDateRef.current = dateStr
+  //
+  //   if (currentView === "3day") {
+  //     const jsDay = currentDate.getDay()
+  //     const sxDay = jsDay === 0 ? 7 : jsDay
+  //     calendarControls.setFirstDayOfWeek(sxDay)
+  //   }
+  //
+  //   calendarControls.setDate(Temporal.PlainDate.from(dateStr))
+  // }, [calendarApp, calendarControls, currentDate, currentView])
 
   // Sync events when data arrives (separate from date navigation)
   const prevEventsSigRef = useRef("")
-  // ISOLATION STEP 2: events sync enabled
-  useEffect(() => {
-    if (!calendarApp) return
-    if (bookings === undefined) return
-
-    const tz = venue?.timezone ?? "UTC"
-    calendarControls.setTimezone(tz)
-
-    const therapistNames = new Map<string, string>()
-    if (therapists) {
-      for (const t of therapists) {
-        therapistNames.set(t._id, t.name)
-      }
-    }
-
-    const events: CalendarEvent[] = []
-    if (displayedBookings) {
-      for (const b of displayedBookings) {
-        if (b.status === "cancelled") continue
-        events.push(
-          bookingToEvent(
-            b,
-            therapistNames.get(b.therapistId) ?? "Therapist",
-            "Customer",
-            tz
-          )
-        )
-      }
-    }
-    if (oooEntries) {
-      for (const ooo of oooEntries) {
-        if (ooo.status !== "active") continue
-        events.push(
-          oooToEvent(ooo, therapistNames.get(ooo.therapistId) ?? "Therapist", tz)
-        )
-      }
-    }
-
-    const sig = events.map((e) => e.id).join(",")
-    if (sig !== prevEventsSigRef.current) {
-      prevEventsSigRef.current = sig
-      eventsService.set(events)
-    }
-  }, [calendarApp, calendarControls, eventsService, bookings, displayedBookings, oooEntries, therapists, venue])
+  // ISOLATION STEP 0: commented out
+  // useEffect(() => {
+  //   if (!calendarApp) return
+  //   if (bookings === undefined) return
+  //
+  //   const tz = venue?.timezone ?? "UTC"
+  //   calendarControls.setTimezone(tz)
+  //
+  //   const therapistNames = new Map<string, string>()
+  //   if (therapists) {
+  //     for (const t of therapists) {
+  //       therapistNames.set(t._id, t.name)
+  //     }
+  //   }
+  //
+  //   const events: CalendarEvent[] = []
+  //   if (displayedBookings) {
+  //     for (const b of displayedBookings) {
+  //       if (b.status === "cancelled") continue
+  //       events.push(
+  //         bookingToEvent(
+  //           b,
+  //           therapistNames.get(b.therapistId) ?? "Therapist",
+  //           "Customer",
+  //           tz
+  //         )
+  //       )
+  //     }
+  //   }
+  //   if (oooEntries) {
+  //     for (const ooo of oooEntries) {
+  //       if (ooo.status !== "active") continue
+  //       events.push(
+  //         oooToEvent(ooo, therapistNames.get(ooo.therapistId) ?? "Therapist", tz)
+  //       )
+  //     }
+  //   }
+  //
+  //   const sig = events.map((e) => e.id).join(",")
+  //   if (sig !== prevEventsSigRef.current) {
+  //     prevEventsSigRef.current = sig
+  //     eventsService.set(events)
+  //   }
+  // }, [calendarApp, calendarControls, eventsService, bookings, displayedBookings, oooEntries, therapists, venue])
 
 
 
   // Sync view changes (only fires on view switch)
   const prevViewRef = useRef(currentView)
-  // ISOLATION STEP 3: view sync enabled
-  useEffect(() => {
-    if (!calendarApp) return
-    if (prevViewRef.current === currentView) return
-    prevViewRef.current = currentView
-
-    const sxView = toSxViewName(currentView)
-
-    if (currentView === "3day") {
-      const jsDay = currentDate.getDay()
-      const sxDay = jsDay === 0 ? 7 : jsDay
-      calendarControls.setFirstDayOfWeek(sxDay)
-      calendarControls.setWeekOptions({
-        nDays: 3,
-        gridHeight: 800,
-        eventWidth: 95,
-        timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
-        eventOverlap: true,
-        gridStep: 60,
-      })
-    } else if (currentView === "week") {
-      calendarControls.setFirstDayOfWeek(1)
-      calendarControls.setWeekOptions({
-        nDays: 7,
-        gridHeight: 800,
-        eventWidth: 95,
-        timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
-        eventOverlap: true,
-        gridStep: 60,
-      })
-    }
-
-    calendarControls.setView(sxView)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [calendarApp, calendarControls, currentView])
+  // ISOLATION STEP 0: commented out
+  // useEffect(() => {
+  //   if (!calendarApp) return
+  //   if (prevViewRef.current === currentView) return
+  //   prevViewRef.current = currentView
+  //
+  //   const sxView = toSxViewName(currentView)
+  //
+  //   if (currentView === "3day") {
+  //     const jsDay = currentDate.getDay()
+  //     const sxDay = jsDay === 0 ? 7 : jsDay
+  //     calendarControls.setFirstDayOfWeek(sxDay)
+  //     calendarControls.setWeekOptions({
+  //       nDays: 3,
+  //       gridHeight: 800,
+  //       eventWidth: 95,
+  //       timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
+  //       eventOverlap: true,
+  //       gridStep: 60,
+  //     })
+  //   } else if (currentView === "week") {
+  //     calendarControls.setFirstDayOfWeek(1)
+  //     calendarControls.setWeekOptions({
+  //       nDays: 7,
+  //       gridHeight: 800,
+  //       eventWidth: 95,
+  //       timeAxisFormatOptions: { hour: "numeric", minute: "2-digit" },
+  //       eventOverlap: true,
+  //       gridStep: 60,
+  //     })
+  //   }
+  //
+  //   calendarControls.setView(sxView)
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [calendarApp, calendarControls, currentView])
 
   // -------------------------------------------------------------------------
   // Navigation (local state, no URL changes = no remount)
