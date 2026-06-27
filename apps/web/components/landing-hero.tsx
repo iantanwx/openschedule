@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 import { SearchInput } from "./search-input"
 import { PasteLinkInput } from "./paste-link-input"
 
@@ -22,6 +24,14 @@ export function LandingHero() {
         <SearchInput />
         <PasteLinkInput />
       </div>
+
+      <Link
+        href="https://app.opencal.xyz/signup"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+      >
+        Are you a business owner? Sign up for free
+        <ArrowRight className="h-4 w-4" />
+      </Link>
     </section>
   )
 }
