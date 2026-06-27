@@ -11,6 +11,8 @@ import {
   bookingCancelledPlainText,
   BookingRescheduled,
   bookingRescheduledPlainText,
+  NewBookingTherapist,
+  newBookingTherapistPlainText,
   generateIcs,
   buildGoogleCalendarUrl,
 } from "@opencal/emails";
@@ -97,12 +99,34 @@ export const send = internalAction({
     const webUrl = process.env.WEB_URL ?? "http://localhost:3000";
     const orgName = organization.name;
 
-    // For "confirmed" event, send plain text to therapist only
+    // For "confirmed" event, send rich HTML notification to therapist only
     // (customer already gets the rich HTML email from sendBookingCreatedEmail)
     if (args.event === "confirmed") {
-      const subject = `New booking — ${formattedDate} at ${formatTime(booking.startTime)}`;
-      const text = `New booking with ${customer.name} on ${booking.date} from ${booking.startTime} to ${booking.endTime}.\n\nService: ${serviceName}`;
-      await sendEmail({ to: [therapist.email], subject, text });
+      const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+      const dashboardUrl = `${appUrl}/${organization.slug}/venues/${venue.slug}`;
+
+      const templateProps = {
+        therapistName: therapist.name,
+        orgName,
+        customerName: customer.name,
+        customerEmail: customer.email,
+        customerPhone: customer.phone,
+        serviceName,
+        date: formattedDate,
+        time: formattedTime,
+        venueName: venue.name,
+        dashboardUrl,
+      };
+
+      const html = await render(NewBookingTherapist(templateProps));
+      const text = newBookingTherapistPlainText(templateProps);
+
+      await sendEmail({
+        to: [therapist.email],
+        subject: `New booking — ${customer.name} · ${serviceName} · ${formattedDate}`,
+        text,
+        html,
+      });
       return;
     }
 

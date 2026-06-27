@@ -9,6 +9,8 @@ export { Invitation, invitationPlainText } from "./templates/invitation";
 export type { InvitationProps } from "./templates/invitation";
 export { EmailVerification, emailVerificationPlainText } from "./templates/email-verification";
 export type { EmailVerificationProps } from "./templates/email-verification";
+export { NewBookingTherapist, newBookingTherapistPlainText } from "./templates/new-booking-therapist";
+export type { NewBookingTherapistProps } from "./templates/new-booking-therapist";
 
 // Components
 export { EmailLayout } from "./components/email-layout";
