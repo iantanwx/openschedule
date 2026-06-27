@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
   const sessionResponse = await fetch(`${convexSiteUrl}/api/auth/get-session`, {
     method: "GET",
     headers: {
-      Cookie: `better-auth.session_token=${sessionToken}`,
+      Cookie: `better-auth.session_token=${sessionToken}; __Secure-better-auth.session_token=${sessionToken}`,
     },
   });
 
