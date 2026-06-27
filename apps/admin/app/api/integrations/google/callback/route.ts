@@ -65,7 +65,9 @@ export async function GET(request: NextRequest) {
   const tokenData = await tokenResponse.json();
 
   // Get the auth token from the request cookies to authenticate the Convex mutation
-  const authToken = request.cookies.get("better-auth.session_token")?.value;
+  const authToken =
+    request.cookies.get("__Secure-better-auth.session_token")?.value ??
+    request.cookies.get("better-auth.session_token")?.value;
 
   if (!authToken) {
     return NextResponse.redirect(`${accountUrl}?error=not_authenticated`);
