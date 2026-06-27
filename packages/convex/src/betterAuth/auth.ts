@@ -231,10 +231,12 @@ export const authComponent: any = createClient<DataModel, typeof schema>(
 );
 
 export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions => {
+  const appUrl = process.env.APP_URL ?? "http://localhost:3001";
   return {
-    appName: "OpenSchedule",
+    appName: "OpenCal",
     baseURL: process.env.SITE_URL,
     secret: process.env.BETTER_AUTH_SECRET,
+    trustedOrigins: [appUrl],
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
