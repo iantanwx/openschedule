@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "@openschedule/ui/lib/utils"
+import { cn } from "@opencal/ui/lib/utils"
 
 interface CalendarBookingEventProps {
   calendarEvent: {

@@ -1,8 +1,8 @@
 {
-  "extends": "@openschedule/typescript-config/react-library.json",
+  "extends": "@opencal/typescript-config/react-library.json",
   "compilerOptions": {
     "paths": {
-      "@openschedule/ui/*": ["./src/*"]
+      "@opencal/ui/*": ["./src/*"]
     }
   },
   "include": ["."],

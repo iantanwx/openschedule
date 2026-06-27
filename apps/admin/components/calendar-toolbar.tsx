@@ -2,15 +2,15 @@
 
 import { format, startOfWeek, endOfWeek, addDays } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@openschedule/ui/components/button";
+import { Button } from "@opencal/ui/components/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@openschedule/ui/components/select";
-import { cn } from "@openschedule/ui/lib/utils";
+} from "@opencal/ui/components/select";
+import { cn } from "@opencal/ui/lib/utils";
 
 export type CalendarView = "day" | "3day" | "week" | "month" | "schedule";
 

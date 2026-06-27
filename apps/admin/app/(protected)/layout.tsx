@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { useEffect } from "react";
 import { NotificationToast } from "@/components/notification-toast";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Spinner } from "@opencal/ui/components/spinner";
 
 export default function ProtectedLayout({
   children,

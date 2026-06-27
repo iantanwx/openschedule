@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { format } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
-import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
-import { Badge } from "@openschedule/ui/components/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@opencal/ui/components/card";
+import { Badge } from "@opencal/ui/components/badge";
 
 interface VenueCardProps {
   venue: {

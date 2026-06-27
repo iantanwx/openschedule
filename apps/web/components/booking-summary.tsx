@@ -3,8 +3,8 @@
 import { useQuery } from "convex/react"
 import type { FunctionReference } from "convex/server"
 import { useParams, useSearchParams } from "next/navigation"
-import { api } from "@openschedule/convex/api"
-import { Skeleton } from "@openschedule/ui/components/skeleton"
+import { api } from "@opencal/convex/api"
+import { Skeleton } from "@opencal/ui/components/skeleton"
 import { VenueMap } from "./venue-map"
 
 // FilterApi doesn't fully resolve across package boundaries in monorepo .d.ts

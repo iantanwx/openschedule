@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { Button } from "@openschedule/ui/components/button";
-import { Card, CardContent } from "@openschedule/ui/components/card";
+import { Button } from "@opencal/ui/components/button";
+import { Card, CardContent } from "@opencal/ui/components/card";
 import { ServiceForm } from "./service-form";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Spinner } from "@opencal/ui/components/spinner";
 
 interface ServicesPageProps {
   orgSlug: string;

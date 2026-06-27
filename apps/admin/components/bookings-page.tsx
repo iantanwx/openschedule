@@ -10,7 +10,7 @@ import { BookingCard } from "./booking-card";
 import { BookingDetailModal } from "./booking-detail-modal";
 import { Fab } from "./fab";
 import { ViewToggle } from "./view-toggle";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Spinner } from "@opencal/ui/components/spinner";
 
 interface BookingsPageProps {
   orgSlug: string;

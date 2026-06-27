@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react"
 import { useQuery } from "convex/react"
 import { useRouter } from "next/navigation"
 import type { FunctionReference } from "convex/server"
-import { api } from "@openschedule/convex/api"
-import { Input } from "@openschedule/ui/components/input"
+import { api } from "@opencal/convex/api"
+import { Input } from "@opencal/ui/components/input"
 
 const convexApi = api as unknown as {
   queries: {

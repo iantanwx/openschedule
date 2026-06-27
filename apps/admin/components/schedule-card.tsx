@@ -2,10 +2,10 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { Card, CardContent } from "@openschedule/ui/components/card";
-import { Badge } from "@openschedule/ui/components/badge";
-import { Button } from "@openschedule/ui/components/button";
-import { Separator } from "@openschedule/ui/components/separator";
+import { Card, CardContent } from "@opencal/ui/components/card";
+import { Badge } from "@opencal/ui/components/badge";
+import { Button } from "@opencal/ui/components/button";
+import { Separator } from "@opencal/ui/components/separator";
 import { Plus } from "lucide-react";
 import { format, isBefore, parseISO, startOfDay } from "date-fns";
 

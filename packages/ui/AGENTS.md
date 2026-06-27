@@ -20,7 +20,7 @@ cd apps/web
 pnpm dlx shadcn@latest add <component>
 ```
 
-The `apps/web/components.json` routes the `"ui"` alias to this package (`@openschedule/ui/components`), so the CLI writes files here automatically.
+The `apps/web/components.json` routes the `"ui"` alias to this package (`@opencal/ui/components`), so the CLI writes files here automatically.
 
 See: https://ui.shadcn.com/docs/monorepo#add-components-to-your-project
 

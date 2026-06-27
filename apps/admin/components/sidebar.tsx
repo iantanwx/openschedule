@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { User } from "lucide-react";
-import { cn } from "@openschedule/ui/lib/utils";
+import { cn } from "@opencal/ui/lib/utils";
 import { convexApi } from "@/lib/convex-api";
 import { getVisibleOrgLinks } from "@/lib/nav/org-links";
 import { getVisibleVenueTabs } from "@/lib/nav/venue-tabs";

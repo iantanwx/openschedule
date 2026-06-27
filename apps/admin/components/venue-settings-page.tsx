@@ -3,12 +3,12 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { Button } from "@openschedule/ui/components/button";
-import { Input } from "@openschedule/ui/components/input";
-import { Label } from "@openschedule/ui/components/label";
-import { Textarea } from "@openschedule/ui/components/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Button } from "@opencal/ui/components/button";
+import { Input } from "@opencal/ui/components/input";
+import { Label } from "@opencal/ui/components/label";
+import { Textarea } from "@opencal/ui/components/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@opencal/ui/components/card";
+import { Spinner } from "@opencal/ui/components/spinner";
 import { AddressAutocomplete } from "./address-autocomplete";
 import { TimezoneCombobox } from "./timezone-combobox";
 

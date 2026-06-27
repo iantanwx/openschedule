@@ -7,7 +7,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@openschedule/ui/components/popover";
+} from "@opencal/ui/components/popover";
 import { NotificationList } from "./notification-list";
 
 export function NotificationBell() {

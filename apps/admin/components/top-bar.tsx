@@ -6,18 +6,18 @@ import { useQuery } from "convex/react";
 import { useTheme } from "next-themes";
 import { useSession, signOut } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
-import { Avatar, AvatarFallback } from "@openschedule/ui/components/avatar";
+import { Avatar, AvatarFallback } from "@opencal/ui/components/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@openschedule/ui/components/dropdown-menu";
+} from "@opencal/ui/components/dropdown-menu";
 import { ChevronsUpDown, Check, Plus, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { NotificationBell } from "./notification-bell";
 import { CreateVenueDialog } from "./create-venue-dialog";
-import { cn } from "@openschedule/ui/lib/utils";
+import { cn } from "@opencal/ui/lib/utils";
 
 interface TopBarProps {
   className?: string;

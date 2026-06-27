@@ -4,7 +4,7 @@ import { internalAction } from "../_generated/server";
 import { v } from "convex/values";
 import { sendEmail } from "./email";
 import { render } from "@react-email/render";
-import { Invitation, invitationPlainText } from "@openschedule/emails";
+import { Invitation, invitationPlainText } from "@opencal/emails";
 
 export const send = internalAction({
   args: {

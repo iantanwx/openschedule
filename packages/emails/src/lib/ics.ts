@@ -14,13 +14,13 @@ export interface IcsEventData {
  * The timezone is specified via the TZID parameter.
  */
 export function generateIcs(data: IcsEventData): string {
-  const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}@openschedule`;
+  const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}@opencal`;
   const now = formatIcsDate(new Date().toISOString().slice(0, 19));
 
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//OpenSchedule//Booking//EN",
+    "PRODID:-//OpenCal//Booking//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",

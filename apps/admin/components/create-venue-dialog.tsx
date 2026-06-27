@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { Button } from "@openschedule/ui/components/button";
-import { Input } from "@openschedule/ui/components/input";
-import { Label } from "@openschedule/ui/components/label";
+import { Button } from "@opencal/ui/components/button";
+import { Input } from "@opencal/ui/components/input";
+import { Label } from "@opencal/ui/components/label";
 import { TimezoneCombobox } from "./timezone-combobox";
 
 function slugify(text: string): string {

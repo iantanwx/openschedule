@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Input } from "@openschedule/ui/components/input"
-import { Button } from "@openschedule/ui/components/button"
+import { Input } from "@opencal/ui/components/input"
+import { Button } from "@opencal/ui/components/button"
 
 export function PasteLinkInput() {
   const router = useRouter()

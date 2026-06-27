@@ -11,11 +11,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@openschedule/ui/components",
-    "utils": "@openschedule/ui/lib/utils",
-    "hooks": "@openschedule/ui/hooks",
-    "lib": "@openschedule/ui/lib",
-    "ui": "@openschedule/ui/components"
+    "components": "@opencal/ui/components",
+    "utils": "@opencal/ui/lib/utils",
+    "hooks": "@opencal/ui/hooks",
+    "lib": "@opencal/ui/lib",
+    "ui": "@opencal/ui/components"
   },
   "rtl": false,
   "menuColor": "default",

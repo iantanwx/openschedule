@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@openschedule/ui/components/button"
+import { Button } from "@opencal/ui/components/button"
 
 interface TimeSlotListProps {
   slots: { startTime: string; endTime: string }[]

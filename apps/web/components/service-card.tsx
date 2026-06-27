@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Card } from "@openschedule/ui/components/card"
+import { Card } from "@opencal/ui/components/card"
 
 interface ServiceCardProps {
   id: string

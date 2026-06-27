@@ -3,9 +3,9 @@
 import Link from "next/link"
 import { useQuery } from "convex/react"
 import type { FunctionReference } from "convex/server"
-import { api } from "@openschedule/convex/api"
-import { Badge } from "@openschedule/ui/components/badge"
-import { Card } from "@openschedule/ui/components/card"
+import { api } from "@opencal/convex/api"
+import { Badge } from "@opencal/ui/components/badge"
+import { Card } from "@opencal/ui/components/card"
 import { ArrowLeft } from "lucide-react"
 import { VenueMap } from "./venue-map"
 

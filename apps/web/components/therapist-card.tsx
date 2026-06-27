@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { Avatar, AvatarFallback } from "@openschedule/ui/components/avatar"
-import { Card } from "@openschedule/ui/components/card"
+import { Avatar, AvatarFallback } from "@opencal/ui/components/avatar"
+import { Card } from "@opencal/ui/components/card"
 
 interface TherapistCardProps {
   id: string

@@ -5,9 +5,9 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 import { safeRedirect } from "@/lib/safe-redirect";
-import { Button } from "@openschedule/ui/components/button";
-import { Input } from "@openschedule/ui/components/input";
-import { Label } from "@openschedule/ui/components/label";
+import { Button } from "@opencal/ui/components/button";
+import { Input } from "@opencal/ui/components/input";
+import { Label } from "@opencal/ui/components/label";
 import Link from "next/link";
 
 export default function LoginPage() {

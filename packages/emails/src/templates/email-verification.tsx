@@ -11,7 +11,7 @@ export function EmailVerification(props: EmailVerificationProps) {
   const { userName, verificationUrl } = props;
 
   return (
-    <EmailLayout orgName="OpenSchedule">
+    <EmailLayout orgName="OpenCal">
       <Text style={headline}>Verify your email address</Text>
       <Text style={subheading}>
         Hi {userName}, please verify your email to complete your account setup.
@@ -24,7 +24,7 @@ export function EmailVerification(props: EmailVerificationProps) {
       </Section>
 
       <Text style={footerNote}>
-        If you didn&apos;t create an account on OpenSchedule, you can safely
+        If you didn&apos;t create an account on OpenCal, you can safely
         ignore this email.
       </Text>
     </EmailLayout>
@@ -38,7 +38,7 @@ export function emailVerificationPlainText(props: EmailVerificationProps): strin
     `Please verify your email address by clicking the link below:`,
     props.verificationUrl,
     ``,
-    `If you didn't create an account on OpenSchedule, you can safely ignore this email.`,
+    `If you didn't create an account on OpenCal, you can safely ignore this email.`,
   ].join("\n");
 }
 

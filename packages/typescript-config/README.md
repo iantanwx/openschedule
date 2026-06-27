@@ -1,3 +1,3 @@
-# `@openschedule/typescript-config`
+# `@opencal/typescript-config`
 
 Shared typescript configuration for the workspace.

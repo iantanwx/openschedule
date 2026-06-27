@@ -2,9 +2,9 @@
 
 import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { capitalize } from "@openschedule/lib/strings";
-import { Badge } from "@openschedule/ui/components/badge";
-import { Card, CardContent } from "@openschedule/ui/components/card";
+import { capitalize } from "@opencal/lib/strings";
+import { Badge } from "@opencal/ui/components/badge";
+import { Card, CardContent } from "@opencal/ui/components/card";
 
 interface BookingCardProps {
   booking: {

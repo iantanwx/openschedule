@@ -1,11 +1,11 @@
 {
-  "name": "openschedule",
+  "name": "opencal",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "dev:convex": "pnpm --filter @openschedule/convex dev",
+    "dev:convex": "pnpm --filter @opencal/convex dev",
     "dev:admin": "pnpm --filter admin dev",
     "dev:web": "pnpm --filter web dev",
     "lint": "turbo lint",
@@ -13,7 +13,7 @@
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {
-    "@openschedule/typescript-config": "workspace:*",
+    "@opencal/typescript-config": "workspace:*",
     "oxlint": "^1",
     "turbo": "^2.9.15",
     "typescript": "^5"

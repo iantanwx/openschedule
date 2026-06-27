@@ -1,6 +1,6 @@
 // apps/admin/lib/convex-api.ts
 import type { FunctionReference } from "convex/server";
-import { api } from "@openschedule/convex/api";
+import { api } from "@opencal/convex/api";
 
 /**
  * Typed Convex API map for the admin app.

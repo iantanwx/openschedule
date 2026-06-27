@@ -7,9 +7,9 @@ import { authClient } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { TimezoneCombobox } from "@/components/timezone-combobox";
-import { Button } from "@openschedule/ui/components/button";
-import { Input } from "@openschedule/ui/components/input";
-import { Label } from "@openschedule/ui/components/label";
+import { Button } from "@opencal/ui/components/button";
+import { Input } from "@opencal/ui/components/input";
+import { Label } from "@opencal/ui/components/label";
 import { ArrowLeft } from "lucide-react";
 
 function slugify(text: string): string {
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
                   placeholder="my-clinic"
                 />
                 <p className="text-xs text-muted-foreground">
-                  admin.openschedule.com/{orgSlug || "your-org"}
+                  admin.opencal.xyz/{orgSlug || "your-org"}
                 </p>
               </div>
 

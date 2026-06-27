@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@openschedule/ui/components/dropdown-menu";
+} from "@opencal/ui/components/dropdown-menu";
 
 interface Org {
   id: string;

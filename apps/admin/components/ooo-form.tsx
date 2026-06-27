@@ -3,22 +3,22 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { Button } from "@openschedule/ui/components/button";
-import { Input } from "@openschedule/ui/components/input";
-import { Label } from "@openschedule/ui/components/label";
+import { Button } from "@opencal/ui/components/button";
+import { Input } from "@opencal/ui/components/input";
+import { Label } from "@opencal/ui/components/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@openschedule/ui/components/dialog";
+} from "@opencal/ui/components/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@openschedule/ui/components/select";
+} from "@opencal/ui/components/select";
 
 interface OooFormProps {
   therapistId: string;

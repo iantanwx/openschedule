@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { authClient } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
-import { Button } from "@openschedule/ui/components/button";
-import { Input } from "@openschedule/ui/components/input";
-import { Label } from "@openschedule/ui/components/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
-import { Badge } from "@openschedule/ui/components/badge";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Button } from "@opencal/ui/components/button";
+import { Input } from "@opencal/ui/components/input";
+import { Label } from "@opencal/ui/components/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@opencal/ui/components/card";
+import { Badge } from "@opencal/ui/components/badge";
+import { Spinner } from "@opencal/ui/components/spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,13 +19,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@openschedule/ui/components/alert-dialog";
+} from "@opencal/ui/components/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@openschedule/ui/components/dropdown-menu";
+} from "@opencal/ui/components/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 
 interface Member {

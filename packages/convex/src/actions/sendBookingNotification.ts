@@ -13,7 +13,7 @@ import {
   bookingRescheduledPlainText,
   generateIcs,
   buildGoogleCalendarUrl,
-} from "@openschedule/emails";
+} from "@opencal/emails";
 
 export const send = internalAction({
   args: {

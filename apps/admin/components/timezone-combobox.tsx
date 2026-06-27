@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button } from "@openschedule/ui/components/button";
+import { Button } from "@opencal/ui/components/button";
 import {
   Command,
   CommandEmpty,
@@ -9,14 +9,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@openschedule/ui/components/command";
+} from "@opencal/ui/components/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@openschedule/ui/components/popover";
+} from "@opencal/ui/components/popover";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
-import { cn } from "@openschedule/ui/lib/utils";
+import { cn } from "@opencal/ui/lib/utils";
 
 interface TimezoneOption {
   value: string;

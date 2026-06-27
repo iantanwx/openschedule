@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { fetchMutation } from "convex/nextjs";
-import { api } from "@openschedule/convex/api";
+import { api } from "@opencal/convex/api";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

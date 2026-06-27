@@ -1,11 +1,11 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import { Toaster } from "sonner"
 
-import "@openschedule/ui/globals.css"
+import "@opencal/ui/globals.css"
 import "./calendar.css"
 import { ConvexClientProvider } from "@/components/convex-provider"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@openschedule/ui/lib/utils"
+import { cn } from "@opencal/ui/lib/utils"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 

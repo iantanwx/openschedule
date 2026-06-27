@@ -2,9 +2,9 @@
 
 import { useQuery } from "convex/react"
 import type { FunctionReference } from "convex/server"
-import { api } from "@openschedule/convex/api"
-import { Avatar, AvatarFallback } from "@openschedule/ui/components/avatar"
-import { Skeleton } from "@openschedule/ui/components/skeleton"
+import { api } from "@opencal/convex/api"
+import { Avatar, AvatarFallback } from "@opencal/ui/components/avatar"
+import { Skeleton } from "@opencal/ui/components/skeleton"
 
 // FilterApi doesn't fully resolve across package boundaries in monorepo .d.ts
 const convexApi = api as unknown as {

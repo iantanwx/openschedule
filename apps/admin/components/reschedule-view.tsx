@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { format } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
-import { Button } from "@openschedule/ui/components/button";
-import { Calendar } from "@openschedule/ui/components/calendar";
+import { Button } from "@opencal/ui/components/button";
+import { Calendar } from "@opencal/ui/components/calendar";
 
 interface RescheduleViewProps {
   bookingId: string;

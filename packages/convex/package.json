@@ -1,5 +1,5 @@
 {
-  "name": "@openschedule/convex",
+  "name": "@opencal/convex",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@convex-dev/better-auth": "^0.12.4",
-    "@openschedule/emails": "workspace:*",
+    "@opencal/emails": "workspace:*",
     "@react-email/render": "^1.4.0",
     "better-auth": "^1.6.18",
     "convex": "^1.21.0",
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@edge-runtime/vm": "^4.0.0",
-    "@openschedule/typescript-config": "workspace:*",
+    "@opencal/typescript-config": "workspace:*",
     "convex-test": "^0.0.36",
     "typescript": "^5",
     "vite": "^8.0.16",

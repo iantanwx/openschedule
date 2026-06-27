@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { useQuery } from "convex/react"
 import { useTheme } from "next-themes"
-import { useIsMobile } from "@openschedule/ui/hooks/use-mobile"
+import { useIsMobile } from "@opencal/ui/hooks/use-mobile"
 import {
   format,
   addDays,
@@ -34,15 +34,15 @@ import { CalendarOooEvent } from "./calendar-ooo-event"
 import { BookingDetailModal } from "./booking-detail-modal"
 import { Fab } from "./fab"
 import { ViewToggle } from "./view-toggle"
-import { Badge } from "@openschedule/ui/components/badge"
-import { Spinner } from "@openschedule/ui/components/spinner"
+import { Badge } from "@opencal/ui/components/badge"
+import { Spinner } from "@opencal/ui/components/spinner"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@openschedule/ui/components/select"
+} from "@opencal/ui/components/select"
 
 // ---------------------------------------------------------------------------
 // Types

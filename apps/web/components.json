@@ -14,8 +14,8 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@openschedule/ui/lib/utils",
-    "ui": "@openschedule/ui/components"
+    "utils": "@opencal/ui/lib/utils",
+    "ui": "@opencal/ui/components"
   },
   "rtl": false,
   "menuColor": "default",

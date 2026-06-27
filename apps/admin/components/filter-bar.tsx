@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@openschedule/ui/components/button";
+import { Button } from "@opencal/ui/components/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@openschedule/ui/components/select";
+} from "@opencal/ui/components/select";
 
 type StatusFilter = "all" | "pending" | "confirmed" | "cancelled";
 

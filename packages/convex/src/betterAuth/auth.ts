@@ -247,7 +247,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
           const from = process.env.TRANSACTIONAL_FROM_EMAIL ?? "noreply@notifications.opencal.xyz";
 
           const { render } = await import("@react-email/render");
-          const { EmailVerification, emailVerificationPlainText } = await import("@openschedule/emails");
+          const { EmailVerification, emailVerificationPlainText } = await import("@opencal/emails");
 
           const templateProps = {
             userName: user.name,
@@ -317,7 +317,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
 
             const { render } = await import("@react-email/render");
             const { Invitation, invitationPlainText } = await import(
-              "@openschedule/emails"
+              "@opencal/emails"
             );
 
             const html = await render(Invitation(templateProps));

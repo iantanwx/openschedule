@@ -3,8 +3,8 @@
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { formatNotification } from "@/lib/format-notification";
-import { Button } from "@openschedule/ui/components/button";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Button } from "@opencal/ui/components/button";
+import { Spinner } from "@opencal/ui/components/spinner";
 
 function relativeTime(timestamp: number): string {
   const diff = Date.now() - timestamp;

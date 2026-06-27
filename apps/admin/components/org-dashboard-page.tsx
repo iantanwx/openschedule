@@ -4,12 +4,12 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { format } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
-import { Card, CardContent } from "@openschedule/ui/components/card";
+import { Card, CardContent } from "@opencal/ui/components/card";
 import { formatNotification } from "@/lib/format-notification";
 import { CalendarCheck, Clock, DollarSign, Calendar, ChevronDown } from "lucide-react";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Spinner } from "@opencal/ui/components/spinner";
 import { VenueCard } from "./venue-card";
-import { Button } from "@openschedule/ui/components/button";
+import { Button } from "@opencal/ui/components/button";
 import { BookingDetailModal } from "./booking-detail-modal";
 
 interface OrgDashboardPageProps {

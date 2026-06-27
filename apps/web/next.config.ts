@@ -1,7 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@openschedule/ui"],
+  transpilePackages: ["@opencal/ui"],
 }
 
 export default nextConfig

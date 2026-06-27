@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button } from "@openschedule/ui/components/button";
+import { Button } from "@opencal/ui/components/button";
 import { NewBookingSheet } from "./new-booking-sheet";
 
 interface FabProps {

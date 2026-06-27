@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useCallback, useState } from "react";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
-import { Input } from "@openschedule/ui/components/input";
+import { Input } from "@opencal/ui/components/input";
 
 interface AddressAutocompleteProps {
   value: string;

@@ -1,1 +1,1 @@
-export { default } from "@openschedule/ui/postcss.config"
+export { default } from "@opencal/ui/postcss.config"

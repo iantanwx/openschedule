@@ -2,17 +2,17 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { capitalize } from "@openschedule/lib/strings";
+import { capitalize } from "@opencal/lib/strings";
 import { RescheduleView } from "./reschedule-view";
 import { useState } from "react";
-import { Button } from "@openschedule/ui/components/button";
-import { Badge } from "@openschedule/ui/components/badge";
+import { Button } from "@opencal/ui/components/button";
+import { Badge } from "@opencal/ui/components/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@openschedule/ui/components/dialog";
+} from "@opencal/ui/components/dialog";
 
 interface BookingData {
   _id: string;

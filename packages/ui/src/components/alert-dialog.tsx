@@ -3,8 +3,8 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
-import { cn } from "@openschedule/ui/lib/utils"
-import { Button } from "@openschedule/ui/components/button"
+import { cn } from "@opencal/ui/lib/utils"
+import { Button } from "@opencal/ui/components/button"
 
 function AlertDialog({
   ...props

@@ -32,7 +32,7 @@ export function EmailLayout({ orgName, children }: EmailLayoutProps) {
           <Section style={footer}>
             <Hr style={footerHr} />
             <Text style={footerText}>
-              Powered by OpenSchedule
+              Powered by OpenCal
             </Text>
           </Section>
         </Container>

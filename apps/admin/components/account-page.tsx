@@ -4,10 +4,10 @@ import { useQuery, useMutation } from "convex/react";
 import { useSession } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@openschedule/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
-import { Avatar, AvatarFallback } from "@openschedule/ui/components/avatar";
-import { Badge } from "@openschedule/ui/components/badge";
+import { Button } from "@opencal/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@opencal/ui/components/card";
+import { Avatar, AvatarFallback } from "@opencal/ui/components/avatar";
+import { Badge } from "@opencal/ui/components/badge";
 import { TopBar } from "./top-bar";
 
 export function AccountPage() {

@@ -4,23 +4,23 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { format } from "date-fns";
 import { convexApi } from "@/lib/convex-api";
-import { Button } from "@openschedule/ui/components/button";
-import { Input } from "@openschedule/ui/components/input";
-import { Label } from "@openschedule/ui/components/label";
-import { Calendar } from "@openschedule/ui/components/calendar";
+import { Button } from "@opencal/ui/components/button";
+import { Input } from "@opencal/ui/components/input";
+import { Label } from "@opencal/ui/components/label";
+import { Calendar } from "@opencal/ui/components/calendar";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@openschedule/ui/components/dialog";
+} from "@opencal/ui/components/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@openschedule/ui/components/select";
+} from "@opencal/ui/components/select";
 
 interface NewBookingSheetProps {
   orgSlug: string;

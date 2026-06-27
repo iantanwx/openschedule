@@ -2,9 +2,9 @@
 
 import { useQuery } from "convex/react"
 import type { FunctionReference } from "convex/server"
-import { api } from "@openschedule/convex/api"
+import { api } from "@opencal/convex/api"
 import { ServiceCard } from "@/components/service-card"
-import { Skeleton } from "@openschedule/ui/components/skeleton"
+import { Skeleton } from "@opencal/ui/components/skeleton"
 
 const convexApi = api as unknown as {
   queries: {

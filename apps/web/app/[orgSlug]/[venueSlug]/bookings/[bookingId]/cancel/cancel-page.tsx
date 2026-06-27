@@ -5,11 +5,11 @@ import { useMutation, useQuery } from "convex/react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import type { FunctionReference } from "convex/server"
-import { api } from "@openschedule/convex/api"
-import { Button } from "@openschedule/ui/components/button"
-import { Badge } from "@openschedule/ui/components/badge"
-import { Card } from "@openschedule/ui/components/card"
-import { Skeleton } from "@openschedule/ui/components/skeleton"
+import { api } from "@opencal/convex/api"
+import { Button } from "@opencal/ui/components/button"
+import { Badge } from "@opencal/ui/components/badge"
+import { Card } from "@opencal/ui/components/card"
+import { Skeleton } from "@opencal/ui/components/skeleton"
 
 // FilterApi doesn't fully resolve across package boundaries in monorepo .d.ts
 const convexApi = api as unknown as {

@@ -3,10 +3,10 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import { cn } from "@openschedule/ui/lib/utils"
-import { Button } from "@openschedule/ui/components/button"
-import { Input } from "@openschedule/ui/components/input"
-import { Textarea } from "@openschedule/ui/components/textarea"
+import { cn } from "@opencal/ui/lib/utils"
+import { Button } from "@opencal/ui/components/button"
+import { Input } from "@opencal/ui/components/input"
+import { Textarea } from "@opencal/ui/components/textarea"
 
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (

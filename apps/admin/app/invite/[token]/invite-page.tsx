@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient, useSession } from "@/lib/auth-client";
-import { Button } from "@openschedule/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@openschedule/ui/components/card";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Button } from "@opencal/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@opencal/ui/components/card";
+import { Spinner } from "@opencal/ui/components/spinner";
 
 export function InvitePage({ token }: { token: string }) {
   const router = useRouter();
@@ -56,7 +56,7 @@ export function InvitePage({ token }: { token: string }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Accept your invitation to join the organization on OpenSchedule.
+            Accept your invitation to join the organization on OpenCal.
           </p>
           {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
           <Button

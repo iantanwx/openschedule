@@ -3,9 +3,9 @@
 import { useQuery } from "convex/react"
 import { useSearchParams } from "next/navigation"
 import type { FunctionReference } from "convex/server"
-import { api } from "@openschedule/convex/api"
+import { api } from "@opencal/convex/api"
 import { DateTimePage } from "./date-time-page"
-import { Skeleton } from "@openschedule/ui/components/skeleton"
+import { Skeleton } from "@opencal/ui/components/skeleton"
 
 const convexApi = api as unknown as {
   queries: {

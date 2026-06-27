@@ -11,7 +11,7 @@ importers:
 
   .:
     devDependencies:
-      '@openschedule/typescript-config':
+      '@opencal/typescript-config':
         specifier: workspace:*
         version: link:packages/typescript-config
       oxlint:
@@ -29,13 +29,13 @@ importers:
       '@convex-dev/better-auth':
         specifier: ^0.12.0
         version: 0.12.3(@standard-schema/spec@1.1.0)(better-auth@1.6.18(next@16.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vitest@3.2.6(@edge-runtime/vm@4.0.4)(@types/node@20.19.41)(jiti@2.7.0)(lightningcss@1.32.0)))(convex@1.41.0(react@19.2.4))(hono@4.12.25)(react@19.2.4)(typescript@5.9.3)
-      '@openschedule/convex':
+      '@opencal/convex':
         specifier: workspace:*
         version: link:../../packages/convex
-      '@openschedule/lib':
+      '@opencal/lib':
         specifier: workspace:*
         version: link:../../packages/lib
-      '@openschedule/ui':
+      '@opencal/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@schedule-x/calendar':
@@ -99,7 +99,7 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
     devDependencies:
-      '@openschedule/typescript-config':
+      '@opencal/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@tailwindcss/postcss':
@@ -120,10 +120,10 @@ importers:
 
   apps/web:
     dependencies:
-      '@openschedule/convex':
+      '@opencal/convex':
         specifier: workspace:*
         version: link:../../packages/convex
-      '@openschedule/ui':
+      '@opencal/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       convex:
@@ -157,7 +157,7 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@openschedule/typescript-config':
+      '@opencal/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@tailwindcss/postcss':
@@ -178,7 +178,7 @@ importers:
       '@convex-dev/better-auth':
         specifier: ^0.12.4
         version: 0.12.4(@standard-schema/spec@1.1.0)(better-auth@1.6.18(next@16.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vitest@3.2.6(@edge-runtime/vm@4.0.4)(@types/node@20.19.41)(jiti@2.7.0)(lightningcss@1.32.0)))(convex@1.41.0(react@19.2.4))(hono@4.12.25)(react@19.2.4)(typescript@5.9.3)
-      '@openschedule/emails':
+      '@opencal/emails':
         specifier: workspace:*
         version: link:../emails
       '@react-email/render':
@@ -200,7 +200,7 @@ importers:
       '@edge-runtime/vm':
         specifier: ^4.0.0
         version: 4.0.4
-      '@openschedule/typescript-config':
+      '@opencal/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       convex-test:
@@ -228,7 +228,7 @@ importers:
         specifier: ^19.1.0
         version: 19.2.4
     devDependencies:
-      '@openschedule/typescript-config':
+      '@opencal/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       '@types/react':
@@ -240,7 +240,7 @@ importers:
 
   packages/lib:
     devDependencies:
-      '@openschedule/typescript-config':
+      '@opencal/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       typescript:
@@ -294,7 +294,7 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@openschedule/typescript-config':
+      '@opencal/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       '@tailwindcss/postcss':

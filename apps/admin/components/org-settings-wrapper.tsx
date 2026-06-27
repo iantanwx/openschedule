@@ -5,14 +5,14 @@ import { convexApi } from "@/lib/convex-api";
 import { OrgSettingsForm } from "./org-settings-form";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { Button } from "@openschedule/ui/components/button";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Button } from "@opencal/ui/components/button";
+import { Spinner } from "@opencal/ui/components/spinner";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@openschedule/ui/components/card";
+} from "@opencal/ui/components/card";
 
 interface OrgSettingsWrapperProps {
   orgSlug: string;

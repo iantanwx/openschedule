@@ -6,8 +6,8 @@ import { convexApi } from "@/lib/convex-api";
 import { ScheduleCard } from "./schedule-card";
 import { ScheduleEditForm } from "./schedule-edit-form";
 import { OooForm } from "./ooo-form";
-import { Button } from "@openschedule/ui/components/button";
-import { Spinner } from "@openschedule/ui/components/spinner";
+import { Button } from "@opencal/ui/components/button";
+import { Spinner } from "@opencal/ui/components/spinner";
 
 interface SchedulePageProps {
   orgSlug: string;

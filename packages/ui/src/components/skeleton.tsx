@@ -1,4 +1,4 @@
-import { cn } from "@openschedule/ui/lib/utils"
+import { cn } from "@opencal/ui/lib/utils"
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (

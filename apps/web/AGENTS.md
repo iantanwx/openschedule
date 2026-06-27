@@ -29,7 +29,7 @@ cd apps/web
 pnpm dlx shadcn@latest add <component>
 ```
 
-The `components.json` here routes the `"ui"` alias to `@openschedule/ui/components`, so the CLI writes files to the shared package automatically. Never run `shadcn add` from `packages/ui` directly.
+The `components.json` here routes the `"ui"` alias to `@opencal/ui/components`, so the CLI writes files to the shared package automatically. Never run `shadcn add` from `packages/ui` directly.
 
 See: https://ui.shadcn.com/docs/monorepo#add-components-to-your-project
 
@@ -39,4 +39,4 @@ See: https://ui.shadcn.com/docs/monorepo#add-components-to-your-project
 - React 19
 - Tailwind v4
 - shadcn/ui (radix-nova base)
-- Convex (backend via `@openschedule/convex`)
+- Convex (backend via `@opencal/convex`)
