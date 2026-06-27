@@ -5,19 +5,23 @@ import { PasteLinkInput } from "./paste-link-input"
 
 export function LandingHero() {
   return (
-    <section className="flex flex-col items-center gap-6 py-16 text-center">
-      <div className="space-y-2">
+    <section className="flex flex-col items-center gap-8 py-16 text-center">
+      <div className="space-y-3">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Book wellness services nearby
+          OpenCal
         </h1>
-        <p className="text-muted-foreground">
-          Discover studios and book your next appointment
+        <p className="text-lg text-muted-foreground">
+          Free online scheduling for fitness, wellness and performance businesses in South-East Asia.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Free for any business with less than US$1M in annual revenue.
         </p>
       </div>
 
-      <SearchInput />
-
-      <PasteLinkInput />
+      <div className="w-full space-y-4">
+        <SearchInput />
+        <PasteLinkInput />
+      </div>
     </section>
   )
 }
