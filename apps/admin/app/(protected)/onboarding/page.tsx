@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { authClient } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
@@ -53,7 +53,13 @@ export default function OnboardingPage() {
   // Shared state
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [orgId, setOrgId] = useState<string | null>(null);
+  const [orgCreated, setOrgCreated] = useState(false);
+
+  // Resolve the real Convex org _id by slug after creation
+  const org = useQuery(
+    convexApi.queries.organizations.getBySlug,
+    orgCreated && orgSlug ? { slug: orgSlug } : "skip",
+  );
 
   function handleOrgNameChange(value: string) {
     setOrgName(value);
@@ -84,20 +90,20 @@ export default function OnboardingPage() {
       await authClient.organization.setActive({
         organizationId: result.data.id,
       });
-      setOrgId(result.data.id);
+      setOrgCreated(true);
       setStep(2);
     }
   }
 
   async function handleCreateVenue(e: React.FormEvent) {
     e.preventDefault();
-    if (!orgId) return;
+    if (!org) return;
     setError(null);
     setLoading(true);
 
     try {
       await createVenue({
-        orgId: orgId as any,
+        orgId: org._id as any,
         name: venueName,
         slug: venueSlug,
         timezone,
@@ -110,7 +116,7 @@ export default function OnboardingPage() {
       });
       // Seed org settings with the business name from onboarding
       await upsertSettings({
-        orgId: orgId as any,
+        orgId: org._id as any,
         data: {
           businessName: orgName,
           contactEmail: null,
