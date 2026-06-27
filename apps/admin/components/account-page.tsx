@@ -4,11 +4,12 @@ import { useQuery, useMutation } from "convex/react";
 import { useSession } from "@/lib/auth-client";
 import { convexApi } from "@/lib/convex-api";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@opencal/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@opencal/ui/components/card";
 import { Avatar, AvatarFallback } from "@opencal/ui/components/avatar";
 import { Badge } from "@opencal/ui/components/badge";
-import { TopBar } from "./top-bar";
+import { ArrowLeft } from "lucide-react";
 
 export function AccountPage() {
   const { data: session } = useSession();
@@ -39,7 +40,15 @@ export function AccountPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <TopBar />
+      <header className="flex h-14 items-center border-b px-4">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to dashboard
+        </Link>
+      </header>
       <main className="mx-auto w-full max-w-2xl space-y-6 p-6">
         <h1 className="text-2xl font-semibold">Account Settings</h1>
 
