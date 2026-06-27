@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { fetchMutation } from "convex/nextjs";
 import { api } from "@opencal/convex/api";
+import { getAppUrl } from "@/lib/get-app-url";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get("state");
   const error = searchParams.get("error");
 
-  const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+  const appUrl = getAppUrl();
   const accountUrl = `${appUrl}/account`;
 
   // Handle OAuth errors (user denied, etc.)

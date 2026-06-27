@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { getAppUrl } from "@/lib/get-app-url";
 
 export async function GET() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+  const appUrl = getAppUrl();
   const redirectUri = `${appUrl}/api/integrations/google/callback`;
 
   if (!clientId) {
