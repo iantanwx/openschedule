@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
+import { signIn, useSession } from "@/lib/auth-client";
 import { safeRedirect } from "@/lib/safe-redirect";
 import { Button } from "@opencal/ui/components/button";
 import { Input } from "@opencal/ui/components/input";
@@ -22,10 +22,17 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = safeRedirect(searchParams.get("next"), "/");
+  const { data: session, isPending } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already authenticated
+  if (!isPending && session) {
+    router.replace(nextPath);
+    return null;
+  }
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
