@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
+import { toast } from "sonner";
 import { convexApi } from "@/lib/convex-api";
 import { Button } from "@opencal/ui/components/button";
 import { Input } from "@opencal/ui/components/input";
@@ -72,6 +73,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
         id: orgId as any,
         description: orgDescription || undefined,
       });
+      toast.success("Settings saved");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save settings");
     } finally {

@@ -196,6 +196,9 @@ export function TeamSection() {
                     <Badge variant="secondary">
                       {member.role === "owner" ? "Owner" : "Therapist"}
                     </Badge>
+                    {member.role === "owner" && member.user.email === currentUser?.email && currentUser?.roles?.includes("therapist") && (
+                      <Badge variant="secondary">Therapist</Badge>
+                    )}
                     {member.role === "owner" && isOwner && member.user.email === currentUser?.email && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

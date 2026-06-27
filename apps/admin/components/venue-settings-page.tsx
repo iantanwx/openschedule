@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
+import { toast } from "sonner";
 import { convexApi } from "@/lib/convex-api";
 import { Button } from "@opencal/ui/components/button";
 import { Input } from "@opencal/ui/components/input";
@@ -95,6 +96,7 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
         description: description || undefined,
         coverImageId: coverImageId || undefined,
       });
+      toast.success("Venue settings saved");
     } finally {
       setIsSaving(false);
     }
