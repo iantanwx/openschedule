@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, signUp } from "@/lib/auth-client";
@@ -10,6 +11,14 @@ import { Label } from "@openschedule/ui/components/label";
 import Link from "next/link";
 
 export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = safeRedirect(searchParams.get("next"), "/onboarding");
