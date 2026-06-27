@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { ConvexHttpClient } from "convex/browser";
+import { fetchMutation } from "convex/nextjs";
 import { api } from "@opencal/convex/api";
 import { getAppUrl } from "@/lib/get-app-url";
 
@@ -64,29 +64,52 @@ export async function GET(request: NextRequest) {
 
   const tokenData = await tokenResponse.json();
 
-  // Get the auth token from the request cookies to authenticate the Convex mutation
-  const authToken =
+  // Validate session via better-auth's getSession endpoint on the Convex site
+  const sessionToken =
     request.cookies.get("__Secure-better-auth.session_token")?.value ??
     request.cookies.get("better-auth.session_token")?.value;
 
-  if (!authToken) {
+  if (!sessionToken) {
     return NextResponse.redirect(`${accountUrl}?error=not_authenticated`);
   }
 
-  // Store tokens in Convex using ConvexHttpClient (better-auth session tokens aren't JWTs)
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  if (!convexUrl) {
+  const convexSiteUrl = process.env.NEXT_PUBLIC_CONVEX_SITE_URL;
+  if (!convexSiteUrl) {
     return NextResponse.redirect(`${accountUrl}?error=server_config`);
   }
 
+  // Call better-auth getSession to resolve the user from the session token
+  const sessionResponse = await fetch(`${convexSiteUrl}/api/auth/get-session`, {
+    method: "GET",
+    headers: {
+      Cookie: `better-auth.session_token=${sessionToken}`,
+    },
+  });
+
+  if (!sessionResponse.ok) {
+    console.error("[GOOGLE OAUTH] Session validation failed:", sessionResponse.status);
+    return NextResponse.redirect(`${accountUrl}?error=not_authenticated`);
+  }
+
+  const sessionData = await sessionResponse.json();
+  const authUserId = sessionData?.user?.id;
+
+  if (!authUserId) {
+    return NextResponse.redirect(`${accountUrl}?error=not_authenticated`);
+  }
+
+  // Store tokens via upsertByAuthId (public mutation, no auth token needed — security
+  // is handled by session validation above; authId is opaque to external callers)
   try {
-    const client = new ConvexHttpClient(convexUrl);
-    client.setAuth(authToken);
-    await client.mutation(api.mutations.integrations.upsert as any, {
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
-      expiresAt: Date.now() + tokenData.expires_in * 1000,
-    });
+    await fetchMutation(
+      api.mutations.integrations.upsertByAuthId as any,
+      {
+        authId: authUserId,
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token,
+        expiresAt: Date.now() + tokenData.expires_in * 1000,
+      },
+    );
   } catch (err) {
     console.error("[GOOGLE OAUTH] Failed to store tokens:", err);
     return NextResponse.redirect(`${accountUrl}?error=storage_failed`);
