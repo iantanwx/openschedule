@@ -2,9 +2,11 @@
 
 import Link from "next/link"
 import { useQuery } from "convex/react"
+import { useSearchParams } from "next/navigation"
 import type { FunctionReference } from "convex/server"
 import { api } from "@opencal/convex/api"
-import { Badge } from "@opencal/ui/components/badge"
+import { StatusBadge } from "@opencal/ui/components/status-badge"
+import { Button } from "@opencal/ui/components/button"
 import { Card } from "@opencal/ui/components/card"
 import { ArrowLeft } from "lucide-react"
 import { VenueMap } from "./venue-map"
@@ -31,6 +33,9 @@ interface BookingConfirmationProps {
 }
 
 export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingConfirmationProps) {
+  const searchParams = useSearchParams()
+  const token = searchParams.get("token")
+
   const booking = useQuery(bookingsGet, { id: bookingId })
   const org = useQuery(orgGetBySlug, { slug: orgSlug })
   const venue = useQuery(venueGetBySlug, org ? { orgId: org._id, slug: venueSlug } : "skip")
@@ -103,7 +108,16 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
         <TherapistLine therapistId={booking.therapistId} />
       </Card>
 
-      {booking.status !== "cancelled" && (
+      {booking.status !== "cancelled" && token && (
+        <div className="text-center">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/${orgSlug}/${venueSlug}/bookings/${bookingId}/cancel?token=${token}`}>
+              Cancel booking
+            </Link>
+          </Button>
+        </div>
+      )}
+      {booking.status !== "cancelled" && !token && (
         <p className="text-center text-sm text-muted-foreground">
           Need to cancel? Use the link in your booking confirmation email.
         </p>
@@ -133,16 +147,6 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
       </div>
     </div>
   )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const variant =
-    status === "confirmed"
-      ? "default"
-      : status === "cancelled"
-        ? "destructive"
-        : "secondary"
-  return <Badge variant={variant}>{status}</Badge>
 }
 
 function TherapistLine({ therapistId }: { therapistId: string }) {

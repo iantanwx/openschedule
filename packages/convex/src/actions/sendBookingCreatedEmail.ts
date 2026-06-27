@@ -82,7 +82,7 @@ export const send = internalAction({
 
     // Build URLs
     const webUrl = process.env.WEB_URL ?? "http://localhost:3000";
-    const viewUrl = `${webUrl}/${organization.slug}/${venue.slug}/bookings/${booking._id}`;
+    const viewUrl = `${webUrl}/${organization.slug}/${venue.slug}/bookings/${booking._id}?token=${booking.cancelToken}`;
     const cancelUrl = `${webUrl}/${organization.slug}/${venue.slug}/bookings/${booking._id}/cancel?token=${booking.cancelToken}`;
 
     // Venue location data

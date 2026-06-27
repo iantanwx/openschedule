@@ -113,6 +113,11 @@ export const create = mutation({
     );
     await ctx.scheduler.runAfter(
       0,
+      internal.actions.sendBookingNotification.send,
+      { bookingId, event: "confirmed" },
+    );
+    await ctx.scheduler.runAfter(
+      0,
       internal.actions.syncCalendarEvent.send,
       { bookingId, action: "create" },
     );

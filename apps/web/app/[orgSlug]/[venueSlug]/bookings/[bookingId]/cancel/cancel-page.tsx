@@ -7,7 +7,7 @@ import Link from "next/link"
 import type { FunctionReference } from "convex/server"
 import { api } from "@opencal/convex/api"
 import { Button } from "@opencal/ui/components/button"
-import { Badge } from "@opencal/ui/components/badge"
+import { StatusBadge } from "@opencal/ui/components/status-badge"
 import { Card } from "@opencal/ui/components/card"
 import { Skeleton } from "@opencal/ui/components/skeleton"
 
@@ -113,9 +113,7 @@ export function CancelPage({ orgSlug, venueSlug, bookingId }: CancelPageProps) {
       <Card className="space-y-3 p-6">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Status</span>
-          <Badge variant={booking.status === "confirmed" ? "default" : "secondary"}>
-            {booking.status}
-          </Badge>
+          <StatusBadge status={booking.status} />
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Date</span>
