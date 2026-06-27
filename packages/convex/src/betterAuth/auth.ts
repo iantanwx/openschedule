@@ -12,7 +12,8 @@ import authConfig from "../auth.config";
 import { createNotificationsForOwners } from "../lib/notifications";
 import schema from "./schema";
 
-export const authComponent = createClient<DataModel, typeof schema>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- circular ref with triggers.ts makes inference impossible
+export const authComponent: any = createClient<DataModel, typeof schema>(
   // @ts-ignore - components.betterAuth requires codegen from `convex dev`
   components.betterAuth,
   // @ts-ignore - authFunctions generated after first deploy

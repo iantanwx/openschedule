@@ -89,7 +89,9 @@ describe("directory queries", () => {
 
     const results = await t.query(api.queries.directory.searchDirectory, { query: "downtown" });
     expect(results.length).toBe(1);
-    expect(results[0].name).toBe("Downtown Branch");
+    const first = results[0];
+    expect(first).toBeDefined();
+    expect(first?.name).toBe("Downtown Branch");
   });
 
   test("searchDirectory filters by org name (case-insensitive)", async () => {
@@ -98,7 +100,9 @@ describe("directory queries", () => {
 
     const results = await t.query(api.queries.directory.searchDirectory, { query: "zen" });
     expect(results.length).toBe(1);
-    expect(results[0].name).toBe("Zen Retreat");
+    const first = results[0];
+    expect(first).toBeDefined();
+    expect(first?.name).toBe("Zen Retreat");
   });
 
   test("searchDirectory returns empty array for no matches", async () => {

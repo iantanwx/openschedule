@@ -436,6 +436,7 @@ export function CalendarPage({ orgSlug, venueSlug }: CalendarPageProps) {
   }))
 
   const calendarApp = useNextCalendarApp({
+    // @ts-expect-error — views array is always non-empty; library expects tuple type
     views,
     events: [],
     selectedDate: Temporal.Now.plainDateISO(),

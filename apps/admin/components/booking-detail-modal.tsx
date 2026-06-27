@@ -16,6 +16,7 @@ import {
 
 interface BookingData {
   _id: string;
+  venueId: string;
   date: string;
   startTime: string;
   endTime: string;

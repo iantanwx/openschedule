@@ -19,9 +19,9 @@
 - [x] Add **Authorized redirect URIs**:
   - `https://app.opencal.xyz/api/integrations/google/callback` (Google Calendar OAuth)
   - `https://<convex-prod-site-url>/api/auth/callback/google` (Google social login via BetterAuth)
-- [ ] Enable APIs: Maps JavaScript API, Places API, Maps Static API, Google Calendar API
-- [ ] Create or restrict API key for Maps (restrict to prod domains: admin + web)
-- [ ] Note down: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, Maps API key
+- [x] Enable APIs: Maps JavaScript API, Places API, Maps Static API, Google Calendar API
+- [x] Create or restrict API key for Maps (restrict to prod domains: admin + web)
+- [x] Note down: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, Maps API key
 
 ### Google Maps API Keys — What You Need
 
@@ -64,10 +64,10 @@ These can be the **same key** or separate keys. Using one key is simpler; two ke
 
 ## Step 2: Resend
 
-- [ ] Verify sending domain (e.g. `notifications.opencal.xyz`)
-- [ ] Add DNS records: SPF, DKIM, DMARC (Resend dashboard provides these)
-- [ ] Wait for domain verification to complete
-- [ ] Note down: `RESEND_API_KEY` (production key, not test)
+- [x] Verify sending domain (e.g. `notifications.opencal.xyz`)
+- [x] Add DNS records: SPF, DKIM, DMARC (Resend dashboard provides these)
+- [x] Wait for domain verification to complete
+- [x] Note down: `RESEND_API_KEY` (production key, not test)
 
 ## Step 3: DNS / Domains
 
