@@ -293,7 +293,7 @@ export default function OnboardingPage() {
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <Button type="submit" className="flex-1" disabled={loading}>
+                <Button type="submit" className="flex-1" disabled={loading || !org}>
                   {loading ? "Creating..." : "Create venue"}
                 </Button>
               </div>
