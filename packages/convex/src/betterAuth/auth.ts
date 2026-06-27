@@ -297,11 +297,6 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions
       database: {
         generateId: false, // Convex manages its own _id; prevents org plugin from injecting id
       },
-      useSecureCookies: true,
-      defaultCookieAttributes: {
-        sameSite: "none",
-        secure: true,
-      },
     },
     plugins: [
       convex({ authConfig }),
