@@ -2,11 +2,10 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { capitalize } from "@opencal/lib/strings";
 import { RescheduleView } from "./reschedule-view";
 import { useState } from "react";
 import { Button } from "@opencal/ui/components/button";
-import { Badge } from "@opencal/ui/components/badge";
+import { StatusBadge } from "@opencal/ui/components/status-badge";
 import {
   Dialog,
   DialogContent,
@@ -37,12 +36,6 @@ interface BookingDetailModalProps {
   initialBooking?: BookingData;
   onClose: () => void;
 }
-
-const STATUS_BADGE_VARIANT = {
-  confirmed: "default" as const,
-  pending: "secondary" as const,
-  cancelled: "outline" as const,
-};
 
 export function BookingDetailModal({ bookingId, venueId, readOnly = false, customerName, therapistName, venueName, initialBooking, onClose }: BookingDetailModalProps) {
   const [showReschedule, setShowReschedule] = useState(false);
@@ -119,9 +112,7 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
         <div className="space-y-4">
           {/* Status */}
           <div className="flex items-center gap-2">
-            <Badge variant={STATUS_BADGE_VARIANT[booking.status]}>
-              {capitalize(booking.status)}
-            </Badge>
+            <StatusBadge status={booking.status} />
             <span className="text-sm text-muted-foreground">
               Created by {booking.createdBy}
             </span>

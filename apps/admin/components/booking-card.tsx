@@ -2,8 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
-import { capitalize } from "@opencal/lib/strings";
-import { Badge } from "@opencal/ui/components/badge";
+import { StatusBadge } from "@opencal/ui/components/status-badge";
 import { Card, CardContent } from "@opencal/ui/components/card";
 
 interface BookingCardProps {
@@ -19,12 +18,6 @@ interface BookingCardProps {
   };
   onTap: (bookingId: string) => void;
 }
-
-const STATUS_COLORS = {
-  confirmed: "bg-emerald-50 text-emerald-700",
-  pending: "bg-amber-50 text-amber-700",
-  cancelled: "bg-gray-50 text-gray-500",
-} as const;
 
 export function BookingCard({ booking, onTap }: BookingCardProps) {
   const customer = useQuery(convexApi.queries.customers.get, { id: booking.customerId });
@@ -59,9 +52,7 @@ export function BookingCard({ booking, onTap }: BookingCardProps) {
             {service && <span>{service.name}</span>}
           </div>
         </div>
-        <Badge className={STATUS_COLORS[booking.status]} variant="secondary">
-          {capitalize(booking.status)}
-        </Badge>
+        <StatusBadge status={booking.status} />
       </CardContent>
     </Card>
   );
