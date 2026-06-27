@@ -97,12 +97,12 @@ export const send = internalAction({
     const webUrl = process.env.WEB_URL ?? "http://localhost:3000";
     const orgName = organization.name;
 
-    // For "confirmed" event, send plain text (HTML handled by sendBookingCreatedEmail)
+    // For "confirmed" event, send plain text to therapist only
+    // (customer already gets the rich HTML email from sendBookingCreatedEmail)
     if (args.event === "confirmed") {
-      const subject = `Booking confirmed — ${formattedDate}`;
-      const text = `Your booking on ${booking.date} from ${booking.startTime} to ${booking.endTime} with ${therapist.name} has been confirmed.`;
-      const recipients = [customer.email, therapist.email].filter(Boolean);
-      await sendEmail({ to: recipients, subject, text });
+      const subject = `New booking — ${formattedDate} at ${formatTime(booking.startTime)}`;
+      const text = `New booking with ${customer.name} on ${booking.date} from ${booking.startTime} to ${booking.endTime}.\n\nService: ${serviceName}`;
+      await sendEmail({ to: [therapist.email], subject, text });
       return;
     }
 
