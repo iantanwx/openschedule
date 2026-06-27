@@ -10,6 +10,7 @@ import { TimezoneCombobox } from "@/components/timezone-combobox";
 import { Button } from "@opencal/ui/components/button";
 import { Input } from "@opencal/ui/components/input";
 import { Label } from "@opencal/ui/components/label";
+import { Spinner } from "@opencal/ui/components/spinner";
 import { ArrowLeft } from "lucide-react";
 
 function slugify(text: string): string {
@@ -86,6 +87,15 @@ export default function OnboardingPage() {
       setStep(2);
     }
   }, [orgPending, activeOrg, orgCreated]);
+
+  // Don't render until we know whether the user has an existing org
+  if (orgPending) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
 
   function handleOrgNameChange(value: string) {
     setOrgName(value);
