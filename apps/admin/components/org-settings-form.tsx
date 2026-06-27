@@ -38,8 +38,8 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
   const updateOrg = useMutation(convexApi.mutations.organizations.update);
   const org = useQuery(convexApi.queries.organizations.get, { id: orgId });
 
-  // Initialize form when settings load
-  if (settings !== undefined && !isInitialized) {
+  // Initialize form when settings AND org load
+  if (settings !== undefined && org !== undefined && !isInitialized) {
     if (settings) {
       setBusinessName(settings.businessName);
       setContactEmail(settings.contactEmail ?? "");
@@ -47,9 +47,9 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
       setEmailNotificationsEnabled(settings.emailNotificationsEnabled);
       setHideFromDirectory(settings.hideFromDirectory ?? false);
       setLogoStorageId(settings.logoStorageId);
-      if (org) {
-        setOrgDescription(org.description ?? "");
-      }
+    }
+    if (org) {
+      setOrgDescription(org.description ?? "");
     }
     setIsInitialized(true);
   }
