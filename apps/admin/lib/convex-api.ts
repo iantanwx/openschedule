@@ -271,6 +271,7 @@ export const convexApi = api as unknown as {
         contactPhone: string | null;
         logoStorageId: string | null;
         emailNotificationsEnabled: boolean;
+        hideFromDirectory: boolean;
       } | null>;
     };
     integrations: {
@@ -421,6 +422,7 @@ export const convexApi = api as unknown as {
           contactPhone: string | null;
           logoStorageId: string | null;
           emailNotificationsEnabled: boolean;
+          hideFromDirectory?: boolean;
         };
       }, void>;
     };

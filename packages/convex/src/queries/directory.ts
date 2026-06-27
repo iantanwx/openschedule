@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import type { OrgSettings } from "../types/settings.queries";
 
 interface DirectoryVenue {
   _id: string;
@@ -26,6 +27,18 @@ export const listPublicDirectory = query({
     for (const venue of activeVenues) {
       const org = await ctx.db.get(venue.orgId);
       if (!org) continue;
+
+      // Check if org is hidden from directory
+      const settingsDoc = await ctx.db
+        .query("settings")
+        .withIndex("by_scope_and_scopeId", (q) =>
+          q.eq("scope", "org").eq("scopeId", venue.orgId),
+        )
+        .unique();
+      if (settingsDoc) {
+        const data = settingsDoc.data as OrgSettings;
+        if (data.hideFromDirectory) continue;
+      }
 
       let coverImageUrl: string | null = null;
       if (venue.coverImageId) {
@@ -66,6 +79,18 @@ export const searchDirectory = query({
 
       const org = await ctx.db.get(venue.orgId);
       if (!org) continue;
+
+      // Check if org is hidden from directory
+      const settingsDoc = await ctx.db
+        .query("settings")
+        .withIndex("by_scope_and_scopeId", (q) =>
+          q.eq("scope", "org").eq("scopeId", venue.orgId),
+        )
+        .unique();
+      if (settingsDoc) {
+        const data = settingsDoc.data as OrgSettings;
+        if (data.hideFromDirectory) continue;
+      }
 
       const venueNameMatch = venue.name.toLowerCase().includes(searchTerm);
       const orgNameMatch = org.name.toLowerCase().includes(searchTerm);

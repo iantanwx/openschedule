@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS: OrgSettings = {
   contactPhone: null,
   logoStorageId: null,
   emailNotificationsEnabled: false,
+  hideFromDirectory: false,
 };
 
 export const upsert = mutation({
@@ -21,6 +22,7 @@ export const upsert = mutation({
       contactPhone: v.optional(v.union(v.string(), v.null())),
       logoStorageId: v.optional(v.union(v.string(), v.null())),
       emailNotificationsEnabled: v.optional(v.boolean()),
+      hideFromDirectory: v.optional(v.boolean()),
     }),
   },
   handler: async (ctx, args) => {
@@ -54,6 +56,9 @@ export const upsert = mutation({
         emailNotificationsEnabled:
           args.data.emailNotificationsEnabled ??
           currentData.emailNotificationsEnabled,
+        hideFromDirectory:
+          args.data.hideFromDirectory ??
+          currentData.hideFromDirectory ?? false,
       };
 
       // If logo is being replaced, delete old file
@@ -89,6 +94,9 @@ export const upsert = mutation({
         emailNotificationsEnabled:
           args.data.emailNotificationsEnabled ??
           DEFAULT_SETTINGS.emailNotificationsEnabled,
+        hideFromDirectory:
+          args.data.hideFromDirectory ??
+          DEFAULT_SETTINGS.hideFromDirectory,
       };
 
       await ctx.db.insert("settings", {

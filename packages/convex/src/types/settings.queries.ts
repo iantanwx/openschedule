@@ -4,4 +4,5 @@ export interface OrgSettings {
   contactPhone: string | null;
   logoStorageId: string | null;
   emailNotificationsEnabled: boolean;
+  hideFromDirectory: boolean;
 }

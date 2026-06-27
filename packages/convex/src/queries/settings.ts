@@ -19,6 +19,7 @@ export const getByOrg = query({
       contactPhone: data.contactPhone,
       logoStorageId: data.logoStorageId,
       emailNotificationsEnabled: data.emailNotificationsEnabled,
+      hideFromDirectory: data.hideFromDirectory ?? false,
     };
   },
 });

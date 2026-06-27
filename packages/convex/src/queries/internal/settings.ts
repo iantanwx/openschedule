@@ -21,6 +21,7 @@ export const getByOrgInternal = internalQuery({
       contactPhone: data.contactPhone,
       logoStorageId: data.logoStorageId,
       emailNotificationsEnabled: data.emailNotificationsEnabled,
+      hideFromDirectory: data.hideFromDirectory ?? false,
     };
   },
 });

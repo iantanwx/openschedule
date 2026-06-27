@@ -25,6 +25,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
   const [contactPhone, setContactPhone] = useState("");
   const [orgDescription, setOrgDescription] = useState("");
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(false);
+  const [hideFromDirectory, setHideFromDirectory] = useState(false);
   const [logoStorageId, setLogoStorageId] = useState<string | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -43,6 +44,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
       setContactEmail(settings.contactEmail ?? "");
       setContactPhone(settings.contactPhone ?? "");
       setEmailNotificationsEnabled(settings.emailNotificationsEnabled);
+      setHideFromDirectory(settings.hideFromDirectory ?? false);
       setLogoStorageId(settings.logoStorageId);
       if (org) {
         setOrgDescription(org.description ?? "");
@@ -63,6 +65,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
           contactPhone: contactPhone || null,
           logoStorageId: logoStorageId as any,
           emailNotificationsEnabled,
+          hideFromDirectory,
         },
       });
       await updateOrg({
@@ -235,6 +238,21 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
               id="email-notifications"
               checked={emailNotificationsEnabled}
               onCheckedChange={setEmailNotificationsEnabled}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-md border p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="hide-from-directory" className="text-sm font-medium">
+                Hide from directory
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                When enabled, this organization will not appear in the public business directory.
+              </p>
+            </div>
+            <Switch
+              id="hide-from-directory"
+              checked={hideFromDirectory}
+              onCheckedChange={setHideFromDirectory}
             />
           </div>
         </div>
