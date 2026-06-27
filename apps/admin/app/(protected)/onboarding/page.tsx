@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { authClient } from "@/lib/auth-client";
@@ -32,6 +32,9 @@ export default function OnboardingPage() {
   const createVenue = useMutation(convexApi.mutations.venues.create);
   const upsertSettings = useMutation(convexApi.mutations.settings.upsert);
 
+  // Check if user already has an active org (e.g. refreshed mid-onboarding)
+  const { data: activeOrg, isPending: orgPending } = authClient.useActiveOrganization();
+
   // Step state
   const [step, setStep] = useState<1 | 2>(1);
 
@@ -55,11 +58,34 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [orgCreated, setOrgCreated] = useState(false);
 
-  // Resolve the real Convex org _id by slug after creation
+  // Resolve the real Convex org _id — either from freshly created slug or existing active org
+  const resolveSlug = orgCreated ? orgSlug : (activeOrg?.slug ?? null);
   const org = useQuery(
     convexApi.queries.organizations.getBySlug,
-    orgCreated && orgSlug ? { slug: orgSlug } : "skip",
+    resolveSlug ? { slug: resolveSlug } : "skip",
   );
+
+  // Check if org already has venues (to decide if onboarding is complete)
+  const venues = useQuery(
+    convexApi.queries.venues.listByOrg,
+    org ? { orgId: org._id } : "skip",
+  );
+
+  // If user already has an org with venues, redirect to dashboard
+  useEffect(() => {
+    if (org && venues && venues.length > 0) {
+      router.replace(`/${org.slug ?? resolveSlug}`);
+    }
+  }, [org, venues, router, resolveSlug]);
+
+  // If user has an active org but no venues, skip to step 2
+  useEffect(() => {
+    if (!orgPending && activeOrg && !orgCreated) {
+      setOrgName(activeOrg.name ?? "");
+      setOrgSlug(activeOrg.slug ?? "");
+      setStep(2);
+    }
+  }, [orgPending, activeOrg, orgCreated]);
 
   function handleOrgNameChange(value: string) {
     setOrgName(value);
