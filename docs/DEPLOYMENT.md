@@ -14,14 +14,53 @@
 
 ## Step 1: Google Cloud Console
 
-- [ ] Create OAuth 2.0 credentials (or reuse dev credentials with prod URIs added)
-- [ ] Add **Authorized JavaScript origins**: `https://app.opencal.xyz`
-- [ ] Add **Authorized redirect URIs**:
+- [x] Create OAuth 2.0 credentials (or reuse dev credentials with prod URIs added)
+- [x] Add **Authorized JavaScript origins**: `https://app.opencal.xyz`
+- [x] Add **Authorized redirect URIs**:
   - `https://app.opencal.xyz/api/integrations/google/callback` (Google Calendar OAuth)
   - `https://<convex-prod-site-url>/api/auth/callback/google` (Google social login via BetterAuth)
 - [ ] Enable APIs: Maps JavaScript API, Places API, Maps Static API, Google Calendar API
 - [ ] Create or restrict API key for Maps (restrict to prod domains: admin + web)
 - [ ] Note down: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, Maps API key
+
+### Google Maps API Keys — What You Need
+
+You need **one API key** that works in two contexts:
+
+1. **Client-side (browser)** — used by `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` in admin (address autocomplete) and web (static map images via `<img>` tag)
+2. **Server-side (Convex actions)** — used by `GOOGLE_MAPS_API_KEY` for static map images embedded in HTML emails
+
+These can be the **same key** or separate keys. Using one key is simpler; two keys gives you tighter restriction.
+
+**If using one key:**
+
+1. Go to Google Cloud Console → APIs & Services → Credentials
+2. Create an API key (or edit your existing one)
+3. Under **Application restrictions**, choose "HTTP referrers (websites)"
+4. Add referrers:
+   - `https://app.opencal.xyz/*` (admin)
+   - `https://opencal.xyz/*` (customer web)
+5. Under **API restrictions**, restrict to:
+   - Maps JavaScript API
+   - Places API
+   - Maps Static API
+6. Use this key for BOTH `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` and `GOOGLE_MAPS_API_KEY`
+
+**Note:** HTTP referrer restrictions don't apply to server-side calls (Convex actions have no `Referer` header). If you want to lock down the server key separately:
+
+**If using two keys (tighter security):**
+
+- **Key 1 (client):** Restricted to HTTP referrers (`app.opencal.xyz/*`, `opencal.xyz/*`) → use as `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
+- **Key 2 (server):** Restricted by IP (Convex's egress IPs, or unrestricted if unknown) → use as `GOOGLE_MAPS_API_KEY` on the Convex deployment
+
+**Required APIs to enable (in APIs & Services → Library):**
+
+| API | Used by |
+|-----|---------|
+| Maps JavaScript API | Admin address autocomplete (Places widget) |
+| Places API | Admin address autocomplete (place details) |
+| Maps Static API | Email templates (static map image) + customer web (venue map) |
+| Google Calendar API | Calendar sync (already enabled if Google login works) |
 
 ## Step 2: Resend
 
