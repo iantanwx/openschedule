@@ -45,6 +45,8 @@ export interface ComputeSlotsInput {
   todayDate?: string;
   /** Current time in venue timezone (HH:MM) — slots before this on todayDate are excluded */
   nowTime?: string;
+  /** Minimum advance booking time in minutes — slots within this window from now are excluded on todayDate */
+  minAdvanceMinutes?: number;
 }
 
 /**
@@ -92,9 +94,11 @@ export function computeAvailableSlots(
     const venueBookingsForDate = allBookingsForVenueByDate[date] ?? [];
 
     const available = candidates.filter((slot) => {
-      // Filter out past slots for today
+      // Filter out past slots and slots within advance booking window for today
       if (todayDate && date === todayDate && nowMinutes !== null) {
-        if (timeToMinutes(slot.startTime) < nowMinutes) {
+        const minAdvance = input.minAdvanceMinutes ?? 0;
+        const cutoffMinutes = nowMinutes + minAdvance;
+        if (timeToMinutes(slot.startTime) < cutoffMinutes) {
           return false;
         }
       }
