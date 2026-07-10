@@ -49,6 +49,8 @@ export const update = mutation({
     placeId: v.optional(v.string()),
     description: v.optional(v.string()),
     coverImageId: v.optional(v.string()),
+    minAdvanceBookingEnabled: v.optional(v.boolean()),
+    minAdvanceBookingMinutes: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
@@ -73,7 +75,18 @@ export const update = mutation({
         throw new Error(`Venue with slug "${newSlug}" already exists in this org`);
       }
     }
-    const patch: Record<string, string | number | { lat: number; lng: number }> = {};
+
+    // Validate minAdvanceBookingMinutes if provided
+    if (fields.minAdvanceBookingMinutes !== undefined) {
+      if (fields.minAdvanceBookingMinutes < 30) {
+        throw new Error("Minimum advance booking time must be at least 30 minutes");
+      }
+      if (fields.minAdvanceBookingMinutes % 30 !== 0) {
+        throw new Error("Minimum advance booking time must be divisible by 30 minutes");
+      }
+    }
+
+    const patch: Record<string, string | number | boolean | { lat: number; lng: number }> = {};
     for (const [key, value] of Object.entries(fields)) {
       if (value !== undefined) {
         patch[key] = value;
