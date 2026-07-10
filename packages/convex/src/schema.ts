@@ -25,6 +25,8 @@ export default defineSchema({
     description: v.optional(v.string()),
     coverImageId: v.optional(v.string()),
     status: v.union(v.literal("active"), v.literal("archived")),
+    minAdvanceBookingEnabled: v.optional(v.boolean()),
+    minAdvanceBookingMinutes: v.optional(v.number()),
   })
     .index("by_orgId", ["orgId"])
     .index("by_orgId_and_slug", ["orgId", "slug"]),
