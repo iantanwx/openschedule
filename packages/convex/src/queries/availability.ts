@@ -4,6 +4,12 @@ import { computeAvailableSlots } from "../lib/slots";
 import { expandOooToDateRanges } from "../lib/ooo";
 import { generateDateRange, todayInTimezone, nowTimeInTimezone } from "../lib/time";
 
+/** Resolve min advance booking minutes from venue config. Returns 0 if disabled. */
+function resolveMinAdvanceMinutes(venue: { minAdvanceBookingEnabled?: boolean; minAdvanceBookingMinutes?: number }): number {
+  if (!venue.minAdvanceBookingEnabled) return 0;
+  return venue.minAdvanceBookingMinutes ?? 90;
+}
+
 export const getSlots = query({
   args: {
     venueId: v.id("venues"),
@@ -93,6 +99,7 @@ export const getSlots = query({
       allBookingsForVenueByDate,
       todayDate: today,
       nowTime,
+      minAdvanceMinutes: resolveMinAdvanceMinutes(venue),
     });
   },
 });
@@ -196,6 +203,7 @@ export const getSlotsForAllTherapists = query({
         allBookingsForVenueByDate,
         todayDate: today,
         nowTime,
+        minAdvanceMinutes: resolveMinAdvanceMinutes(venue),
       });
     }
 
