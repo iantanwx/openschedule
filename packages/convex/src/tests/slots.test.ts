@@ -154,4 +154,65 @@ describe("computeAvailableSlots", () => {
       endTime: "09:30",
     });
   });
+
+  test("filters slots within minAdvanceMinutes on today", () => {
+    const result = computeAvailableSlots({
+      schedule: baseSchedule,
+      serviceDuration: 60,
+      dates: ["2025-06-16"], // Monday
+      blockouts: [],
+      bookings: [],
+      venueCapacity: 3,
+      allBookingsForVenueByDate: {},
+      todayDate: "2025-06-16",
+      nowTime: "10:00",
+      minAdvanceMinutes: 90,
+    });
+
+    // nowTime=10:00, advance=90min → cutoff=11:30
+    // Slots with startTime < 11:30 are excluded
+    // First valid slot starts at 11:30
+    const slots = result["2025-06-16"]!;
+    expect(slots[0]).toEqual({ startTime: "11:30", endTime: "12:30" });
+    // From 11:30 to 16:00 at 15-min intervals: (16:00-11:30)/15 + 1 = 19
+    expect(slots).toHaveLength(19);
+  });
+
+  test("does not filter advance time on future dates", () => {
+    const result = computeAvailableSlots({
+      schedule: baseSchedule,
+      serviceDuration: 60,
+      dates: ["2025-06-16", "2025-06-17"], // Mon, Tue
+      blockouts: [],
+      bookings: [],
+      venueCapacity: 3,
+      allBookingsForVenueByDate: {},
+      todayDate: "2025-06-16",
+      nowTime: "10:00",
+      minAdvanceMinutes: 90,
+    });
+
+    // Tomorrow should have all 29 slots (no advance filtering)
+    expect(result["2025-06-17"]).toHaveLength(29);
+  });
+
+  test("minAdvanceMinutes=0 falls back to existing past-time filter", () => {
+    const result = computeAvailableSlots({
+      schedule: baseSchedule,
+      serviceDuration: 60,
+      dates: ["2025-06-16"],
+      blockouts: [],
+      bookings: [],
+      venueCapacity: 3,
+      allBookingsForVenueByDate: {},
+      todayDate: "2025-06-16",
+      nowTime: "10:00",
+      minAdvanceMinutes: 0,
+    });
+
+    // With minAdvanceMinutes=0, only past slots are filtered (startTime < 10:00)
+    // First valid: 10:00. From 10:00 to 16:00 at 15-min = 25 slots
+    expect(result["2025-06-16"]![0]).toEqual({ startTime: "10:00", endTime: "11:00" });
+    expect(result["2025-06-16"]).toHaveLength(25);
+  });
 });
