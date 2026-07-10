@@ -122,7 +122,7 @@ export function CreateVenueCard({ orgId }: CreateVenueCardProps) {
               onChange={(e) => setCapacity(Number(e.target.value))}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="create-venue-start">Day Start</Label>
               <Input id="create-venue-start" type="time" value={dayStart} onChange={(e) => setDayStart(e.target.value)} />

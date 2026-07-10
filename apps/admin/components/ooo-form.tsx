@@ -159,7 +159,7 @@ export function OooForm({ therapistId, editingId, therapists, isOwner, onClose }
           )}
 
           {/* Start date + time */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="ooo-start-date">Start Date</Label>
               <Input
@@ -192,7 +192,7 @@ export function OooForm({ therapistId, editingId, therapists, isOwner, onClose }
           </div>
 
           {/* End date + time */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="ooo-end-date">End Date</Label>
               <Input
