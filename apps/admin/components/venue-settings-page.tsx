@@ -7,6 +7,7 @@ import { convexApi } from "@/lib/convex-api";
 import { Button } from "@opencal/ui/components/button";
 import { Input } from "@opencal/ui/components/input";
 import { Label } from "@opencal/ui/components/label";
+import { Switch } from "@opencal/ui/components/switch";
 import { Textarea } from "@opencal/ui/components/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@opencal/ui/components/card";
 import { Spinner } from "@opencal/ui/components/spinner";
@@ -36,6 +37,8 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
   const [placeId, setPlaceId] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [coverImageId, setCoverImageId] = useState<string | null>(null);
+  const [minAdvanceBookingEnabled, setMinAdvanceBookingEnabled] = useState(false);
+  const [minAdvanceBookingHours, setMinAdvanceBookingHours] = useState(1.5);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -60,6 +63,8 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
     setPlaceId(venue.placeId ?? null);
     setDescription(venue.description ?? "");
     setCoverImageId(venue.coverImageId ?? null);
+    setMinAdvanceBookingEnabled(venue.minAdvanceBookingEnabled ?? false);
+    setMinAdvanceBookingHours((venue.minAdvanceBookingMinutes ?? 90) / 60);
     setIsInitialized(true);
   }
 
@@ -95,6 +100,10 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
         placeId: placeId || undefined,
         description: description || undefined,
         coverImageId: coverImageId || undefined,
+        minAdvanceBookingEnabled,
+        minAdvanceBookingMinutes: minAdvanceBookingEnabled
+          ? Math.round(minAdvanceBookingHours * 60)
+          : undefined,
       });
       toast.success("Venue settings saved");
     } finally {
@@ -199,6 +208,36 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
                 onChange={(e) => setDayEnd(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Switch
+                id="venue-min-advance"
+                checked={minAdvanceBookingEnabled}
+                onCheckedChange={setMinAdvanceBookingEnabled}
+              />
+              <Label htmlFor="venue-min-advance">
+                Require minimum advance notice for online bookings
+              </Label>
+            </div>
+            {minAdvanceBookingEnabled && (
+              <div className="ml-6 space-y-1">
+                <Label htmlFor="venue-min-advance-hours">Minimum advance notice</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="venue-min-advance-hours"
+                    type="number"
+                    min={0.5}
+                    step={0.5}
+                    value={minAdvanceBookingHours}
+                    onChange={(e) => setMinAdvanceBookingHours(Number(e.target.value))}
+                    className="w-24"
+                  />
+                  <span className="text-sm text-muted-foreground">hours</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">

@@ -10,8 +10,8 @@ export const listByOrg = query({
       .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
       .take(100);
     const activeVenues = venues.filter((v) => v.status === "active");
-    return activeVenues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates, placeId, description, coverImageId }) => ({
-      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates, placeId, description, coverImageId,
+    return activeVenues.map(({ _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates, placeId, description, coverImageId, minAdvanceBookingEnabled, minAdvanceBookingMinutes }) => ({
+      _id, _creationTime, orgId, name, slug, timezone, capacity, dayStart, dayEnd, status, address, coordinates, placeId, description, coverImageId, minAdvanceBookingEnabled, minAdvanceBookingMinutes,
     }));
   },
 });
@@ -58,6 +58,7 @@ export const getBySlugFull = query({
       capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
       status: venue.status, address: venue.address, coordinates: venue.coordinates, placeId: venue.placeId,
       description: venue.description, coverImageId: venue.coverImageId,
+      minAdvanceBookingEnabled: venue.minAdvanceBookingEnabled, minAdvanceBookingMinutes: venue.minAdvanceBookingMinutes,
     };
   },
 });
@@ -73,6 +74,7 @@ export const get = query({
       capacity: venue.capacity, dayStart: venue.dayStart, dayEnd: venue.dayEnd,
       status: venue.status, address: venue.address, coordinates: venue.coordinates, placeId: venue.placeId,
       description: venue.description, coverImageId: venue.coverImageId,
+      minAdvanceBookingEnabled: venue.minAdvanceBookingEnabled, minAdvanceBookingMinutes: venue.minAdvanceBookingMinutes,
     };
   },
 });
