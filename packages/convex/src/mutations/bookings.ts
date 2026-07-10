@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { internal } from "../_generated/api";
-import { timeRangesOverlap } from "../lib/time";
+import { timeRangesOverlap, todayInTimezone, nowTimeInTimezone, timeToMinutes } from "../lib/time";
 import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 import { performCancel } from "../lib/bookings";
 import { hasRole, Role } from "../lib/roles";
@@ -27,6 +27,19 @@ export const create = mutation({
     const venue = await ctx.db.get(args.venueId);
     if (!venue) {
       throw new Error("Venue not found");
+    }
+
+    // Enforce minimum advance booking time for customer bookings
+    if (args.createdBy === "customer" && venue.minAdvanceBookingEnabled) {
+      const advanceMinutes = venue.minAdvanceBookingMinutes ?? 90;
+      const today = todayInTimezone(venue.timezone);
+      if (args.date === today) {
+        const nowTime = nowTimeInTimezone(venue.timezone);
+        const cutoff = timeToMinutes(nowTime) + advanceMinutes;
+        if (timeToMinutes(args.startTime) < cutoff) {
+          throw new Error("This time slot is no longer available for online booking");
+        }
+      }
     }
 
     // Reject booking if target therapist is inactive
