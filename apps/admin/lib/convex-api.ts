@@ -69,6 +69,8 @@ export const convexApi = api as unknown as {
         placeId?: string;
         description?: string;
         coverImageId?: string;
+        minAdvanceBookingEnabled?: boolean;
+        minAdvanceBookingMinutes?: number;
       } | null>;
     };
     bookings: {
@@ -363,6 +365,8 @@ export const convexApi = api as unknown as {
         placeId?: string;
         description?: string;
         coverImageId?: string;
+        minAdvanceBookingEnabled?: boolean;
+        minAdvanceBookingMinutes?: number;
       }, void>;
       archive: FunctionReference<"mutation", "public", { id: string }, void>;
       unarchive: FunctionReference<"mutation", "public", { id: string }, void>;
