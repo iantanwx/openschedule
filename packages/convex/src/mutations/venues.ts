@@ -146,3 +146,42 @@ export const unarchive = mutation({
     await ctx.db.patch(args.id, { status: "active" });
   },
 });
+
+export const setPaymentMethod = mutation({
+  args: {
+    id: v.id("venues"),
+    paymentMethodId: v.id("paymentMethods"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    assertRole(user, ["owner"]);
+
+    const venue = await ctx.db.get(args.id);
+    if (!venue) throw new Error("Venue not found");
+    assertOrgAccess(user, venue.orgId);
+
+    // Verify payment method exists and is active
+    const method = await ctx.db.get(args.paymentMethodId);
+    if (!method) throw new Error("Payment method not found");
+    if (method.status !== "active") throw new Error("Payment method is inactive");
+    if (method.orgId.toString() !== venue.orgId.toString()) {
+      throw new Error("Payment method belongs to a different organization");
+    }
+
+    await ctx.db.patch(args.id, { paymentMethodId: args.paymentMethodId });
+  },
+});
+
+export const clearPaymentMethod = mutation({
+  args: { id: v.id("venues") },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    assertRole(user, ["owner"]);
+
+    const venue = await ctx.db.get(args.id);
+    if (!venue) throw new Error("Venue not found");
+    assertOrgAccess(user, venue.orgId);
+
+    await ctx.db.patch(args.id, { paymentMethodId: undefined });
+  },
+});
