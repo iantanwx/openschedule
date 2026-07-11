@@ -4,6 +4,7 @@ import { StatusBadge } from "../components/status-badge";
 import { DetailsCard } from "../components/details-card";
 import { StaticMap } from "../components/static-map";
 import { EmailButton } from "../components/email-button";
+import { PaymentInfoEmail, paymentInfoPlainText } from "../components/payment-info-email";
 
 export interface BookingCreatedProps {
   customerName: string;
@@ -19,6 +20,19 @@ export interface BookingCreatedProps {
   cancelUrl: string;
   calendarUrl: string;
   googleMapsApiKey?: string;
+  paymentInfo?: {
+    type: "bank_account" | "qr_code";
+    label: string;
+    holderName?: string;
+    bankName?: string;
+    accountNumber?: string;
+    reference?: string;
+    method?: string;
+    identifierType?: string;
+    identifierValue?: string;
+    imageUrl?: string;
+    notes?: string;
+  };
 }
 
 export function BookingCreated(props: BookingCreatedProps) {
@@ -79,6 +93,10 @@ export function BookingCreated(props: BookingCreatedProps) {
         </EmailButton>
       </Section>
 
+      {props.paymentInfo && (
+        <PaymentInfoEmail {...props.paymentInfo} />
+      )}
+
       <Text style={cancelText}>
         Need to cancel?{" "}
         <Link href={cancelUrl} style={cancelLink}>
@@ -117,6 +135,10 @@ export function bookingCreatedPlainText(props: BookingCreatedProps): string {
     `Need to cancel? Use this link:`,
     props.cancelUrl,
   );
+
+  if (props.paymentInfo) {
+    lines.push(paymentInfoPlainText(props.paymentInfo));
+  }
 
   return lines.join("\n");
 }
