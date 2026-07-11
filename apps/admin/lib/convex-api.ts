@@ -71,6 +71,7 @@ export const convexApi = api as unknown as {
         coverImageId?: string;
         minAdvanceBookingEnabled?: boolean;
         minAdvanceBookingMinutes?: number;
+        paymentMethodId?: string;
       } | null>;
     };
     bookings: {
@@ -307,6 +308,89 @@ export const convexApi = api as unknown as {
         createdAt: number;
       }>>;
     };
+    paymentMethods: {
+      list: FunctionReference<"query", "public", { orgId: string }, Array<{
+        _id: string;
+        _creationTime: number;
+        orgId: string;
+        type: "bank_account" | "qr_code";
+        label: string;
+        status: "active" | "inactive";
+        details: {
+          _id: string;
+          paymentMethodId: string;
+          type: "bank_account" | "qr_code";
+          holderName?: string;
+          bankName?: string;
+          accountNumber?: string;
+          reference?: string;
+          method?: string;
+          identifierType?: string;
+          identifierValue?: string;
+          imageId?: string;
+          notes?: string;
+        } | null;
+      }>>;
+      get: FunctionReference<"query", "public", { id: string }, {
+        _id: string;
+        _creationTime: number;
+        orgId: string;
+        type: "bank_account" | "qr_code";
+        label: string;
+        status: "active" | "inactive";
+        details: {
+          _id: string;
+          paymentMethodId: string;
+          type: "bank_account" | "qr_code";
+          holderName?: string;
+          bankName?: string;
+          accountNumber?: string;
+          reference?: string;
+          method?: string;
+          identifierType?: string;
+          identifierValue?: string;
+          imageId?: string;
+          notes?: string;
+        } | null;
+      } | null>;
+      getForVenue: FunctionReference<"query", "public", { venueId: string }, {
+        _id: string;
+        type: "bank_account" | "qr_code";
+        label: string;
+        status: "active" | "inactive";
+        details: {
+          _id: string;
+          paymentMethodId: string;
+          type: "bank_account" | "qr_code";
+          holderName?: string;
+          bankName?: string;
+          accountNumber?: string;
+          reference?: string;
+          method?: string;
+          identifierType?: string;
+          identifierValue?: string;
+          imageId?: string;
+          notes?: string;
+        } | null;
+        imageUrl: string | null;
+      } | null>;
+      listVenuesUsingMethod: FunctionReference<"query", "public", { id: string }, Array<{
+        _id: string;
+        name: string;
+      }>>;
+    };
+    payments: {
+      getForBooking: FunctionReference<"query", "public", { bookingId: string }, {
+        _id: string;
+        _creationTime: number;
+        bookingId: string;
+        paymentMethodId: string;
+        reference?: string;
+        markedBy: string;
+        markedAt: number;
+        status: "paid" | "voided";
+      } | null>;
+    };
   };
   mutations: {
     bookings: {
@@ -370,6 +454,8 @@ export const convexApi = api as unknown as {
       }, void>;
       archive: FunctionReference<"mutation", "public", { id: string }, void>;
       unarchive: FunctionReference<"mutation", "public", { id: string }, void>;
+      setPaymentMethod: FunctionReference<"mutation", "public", { id: string; paymentMethodId: string }, void>;
+      clearPaymentMethod: FunctionReference<"mutation", "public", { id: string }, void>;
     };
     schedules: {
       upsert: FunctionReference<"mutation", "public", {
@@ -441,6 +527,45 @@ export const convexApi = api as unknown as {
     notifications: {
       markRead: FunctionReference<"mutation", "public", { id: string }, void>;
       markAllRead: FunctionReference<"mutation", "public", Record<string, never>, void>;
+    };
+    paymentMethods: {
+      create: FunctionReference<"mutation", "public", {
+        orgId: string;
+        type: "bank_account" | "qr_code";
+        label: string;
+        holderName?: string;
+        bankName?: string;
+        accountNumber?: string;
+        reference?: string;
+        method?: string;
+        identifierType?: string;
+        identifierValue?: string;
+        imageId?: string;
+        notes?: string;
+      }, string>;
+      update: FunctionReference<"mutation", "public", {
+        id: string;
+        label?: string;
+        holderName?: string;
+        bankName?: string;
+        accountNumber?: string;
+        reference?: string;
+        method?: string;
+        identifierType?: string;
+        identifierValue?: string;
+        imageId?: string;
+        notes?: string;
+      }, void>;
+      deactivate: FunctionReference<"mutation", "public", { id: string }, void>;
+      reactivate: FunctionReference<"mutation", "public", { id: string }, void>;
+    };
+    payments: {
+      create: FunctionReference<"mutation", "public", {
+        bookingId: string;
+        paymentMethodId: string;
+        reference?: string;
+      }, string>;
+      voidPayment: FunctionReference<"mutation", "public", { id: string }, void>;
     };
     generateUploadUrl: {
       generateUploadUrl: FunctionReference<"mutation", "public", Record<string, never>, string>;
