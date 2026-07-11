@@ -224,11 +224,11 @@ export function PaymentMethodForm({
 
       {type === "qr_code" && (
         <>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="flex items-end gap-3">
             <div className="space-y-2">
               <Label htmlFor="pm-method">Provider</Label>
               <Select value={method} onValueChange={(v) => setMethod(v as "paynow")}>
-                <SelectTrigger id="pm-method">
+                <SelectTrigger id="pm-method" className="w-auto">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -239,7 +239,7 @@ export function PaymentMethodForm({
             <div className="space-y-2">
               <Label htmlFor="pm-id-type">Type</Label>
               <Select value={identifierType} onValueChange={(v) => setIdentifierType(v as "phone" | "uen")}>
-                <SelectTrigger id="pm-id-type">
+                <SelectTrigger id="pm-id-type" className="w-auto">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
