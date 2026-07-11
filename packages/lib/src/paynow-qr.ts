@@ -17,8 +17,8 @@ export interface PayNowQROptions {
   proxyValue: string;
   /** Whether the payer can edit the amount (default: true) */
   editable?: boolean;
-  /** Fixed amount in dollars (e.g. "10.00"). Omit for open amount. */
-  amount?: string;
+  /** Amount in cents (e.g. 8800 = $88.00). Omit for open amount. */
+  amountCents?: number;
   /** Merchant/business name (max 25 chars). Defaults to "NA". */
   merchantName?: string;
   /** Reference/comment for reconciliation (max 25 chars). Optional. */
@@ -95,11 +95,14 @@ export function generatePayNowQRString(options: PayNowQROptions): string {
     proxyType,
     proxyValue,
     editable = true,
-    amount,
+    amountCents,
     merchantName = "NA",
     reference,
     expiryDate = "99991231",
   } = options;
+
+  // Convert cents to dollars string
+  const amount = amountCents != null ? (amountCents / 100).toFixed(2) : undefined;
 
   // Tag 26: Merchant Account Information (PayNow)
   const proxyTypeCode = proxyType === "uen" ? "2" : "0";

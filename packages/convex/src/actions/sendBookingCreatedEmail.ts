@@ -117,7 +117,7 @@ export const send = internalAction({
             proxyType: method.details.identifierType as "phone" | "uen",
             proxyValue: method.details.identifierValue,
             editable: !servicePrice,
-            amount: servicePrice ? (servicePrice / 100).toFixed(2) : undefined,
+            amountCents: servicePrice,
           });
           const pngBuffer = await QRCode.toBuffer(qrString, {
             type: "png",

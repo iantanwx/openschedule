@@ -18,7 +18,7 @@ interface PaymentInfoProps {
     notes?: string
   } | null
   imageUrl: string | null
-  /** Service price in dollars (e.g. 80) */
+  /** Service price in cents (e.g. 8800 = $88.00) */
   amount?: number
   /** Org logo URL to embed in QR center. Falls back to PayNow logo. */
   logoUrl?: string | null
@@ -33,7 +33,7 @@ export function PaymentInfo({ type, label, details, amount, logoUrl }: PaymentIn
           proxyType: (details.identifierType as "phone" | "uen") ?? "phone",
           proxyValue: details.identifierValue,
           editable: !amount,
-          amount: amount ? amount.toFixed(2) : undefined,
+          amountCents: amount,
         })
       : null
 
@@ -93,7 +93,7 @@ export function PaymentInfo({ type, label, details, amount, logoUrl }: PaymentIn
           {amount && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Amount</span>
-              <span className="font-medium">${amount.toFixed(2)}</span>
+              <span className="font-medium">${(amount / 100).toFixed(2)}</span>
             </div>
           )}
           {details.method && (
