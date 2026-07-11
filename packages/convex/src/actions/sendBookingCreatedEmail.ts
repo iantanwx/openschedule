@@ -12,6 +12,7 @@ import {
   generateIcs,
   buildGoogleCalendarUrl,
 } from "@opencal/emails";
+import type { BookingCreatedProps } from "@opencal/emails";
 
 export const send = internalAction({
   args: { bookingId: v.id("bookings") },
@@ -91,6 +92,30 @@ export const send = internalAction({
     const placeId = venue.placeId;
     const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
 
+    // Resolve payment method if configured
+    let paymentInfo: BookingCreatedProps["paymentInfo"] = undefined;
+    if (venue.paymentMethodId) {
+      const method = await ctx.runQuery(
+        internal.queries.internal.paymentMethods.getForVenueInternal,
+        { venueId: venue._id },
+      );
+      if (method && method.details) {
+        paymentInfo = {
+          type: method.type as "bank_account" | "qr_code",
+          label: method.label,
+          holderName: method.details.holderName ?? undefined,
+          bankName: method.details.bankName ?? undefined,
+          accountNumber: method.details.accountNumber ?? undefined,
+          reference: method.details.reference ?? undefined,
+          method: method.details.method ?? undefined,
+          identifierType: method.details.identifierType ?? undefined,
+          identifierValue: method.details.identifierValue ?? undefined,
+          imageUrl: method.imageUrl ?? undefined,
+          notes: method.details.notes ?? undefined,
+        };
+      }
+    }
+
     // Build Google Calendar URL
     const startDateTime = `${booking.date.replace(/-/g, "")}T${booking.startTime.replace(/:/g, "")}00`;
     const endDateTime = `${booking.date.replace(/-/g, "")}T${booking.endTime.replace(/:/g, "")}00`;
@@ -130,6 +155,7 @@ export const send = internalAction({
       cancelUrl,
       calendarUrl,
       googleMapsApiKey,
+      paymentInfo,
     };
 
     // Render HTML

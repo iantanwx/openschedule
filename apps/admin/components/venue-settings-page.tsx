@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@opencal/ui/components
 import { Spinner } from "@opencal/ui/components/spinner";
 import { AddressAutocomplete } from "./address-autocomplete";
 import { TimezoneCombobox } from "./timezone-combobox";
+import { VenuePaymentMethodSelect } from "./venue-payment-method-select";
 
 interface VenueSettingsPageProps {
   orgSlug: string;
@@ -239,6 +240,15 @@ export function VenueSettingsPage({ orgSlug, venueSlug }: VenueSettingsPageProps
               </div>
             )}
           </div>
+
+          {org && (
+            <VenuePaymentMethodSelect
+              venueId={venue._id}
+              orgId={org._id}
+              orgSlug={orgSlug}
+              currentPaymentMethodId={venue.paymentMethodId}
+            />
+          )}
 
           <div className="space-y-1">
             <Label htmlFor="venue-address">Address</Label>

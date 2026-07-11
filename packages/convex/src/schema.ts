@@ -27,6 +27,7 @@ export default defineSchema({
     status: v.union(v.literal("active"), v.literal("archived")),
     minAdvanceBookingEnabled: v.optional(v.boolean()),
     minAdvanceBookingMinutes: v.optional(v.number()),
+    paymentMethodId: v.optional(v.id("paymentMethods")),
   })
     .index("by_orgId", ["orgId"])
     .index("by_orgId_and_slug", ["orgId", "slug"]),
@@ -154,6 +155,39 @@ export default defineSchema({
   })
     .index("by_recipientId_and_createdAt", ["recipientId", "createdAt"])
     .index("by_recipientId_and_read", ["recipientId", "read"]),
+
+  paymentMethods: defineTable({
+    orgId: v.id("organizations"),
+    type: v.union(v.literal("bank_account"), v.literal("qr_code")),
+    label: v.string(),
+    status: v.union(v.literal("active"), v.literal("inactive")),
+  }).index("by_orgId", ["orgId"]),
+
+  paymentMethodDetails: defineTable({
+    paymentMethodId: v.id("paymentMethods"),
+    type: v.union(v.literal("bank_account"), v.literal("qr_code")),
+    // Bank account fields
+    holderName: v.optional(v.string()),
+    bankName: v.optional(v.string()),
+    accountNumber: v.optional(v.string()),
+    reference: v.optional(v.string()),
+    // QR code fields
+    method: v.optional(v.union(v.literal("paynow"))),
+    identifierType: v.optional(v.union(v.literal("phone"), v.literal("uen"))),
+    identifierValue: v.optional(v.string()),
+    imageId: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  }).index("by_paymentMethodId", ["paymentMethodId"]),
+
+  payments: defineTable({
+    bookingId: v.id("bookings"),
+    paymentMethodId: v.id("paymentMethods"),
+    amount: v.optional(v.number()),
+    reference: v.optional(v.string()),
+    markedBy: v.id("users"),
+    markedAt: v.number(),
+    status: v.union(v.literal("paid"), v.literal("voided")),
+  }).index("by_bookingId", ["bookingId"]),
 
   users: defineTable({
     authId: v.string(),
