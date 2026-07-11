@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { OrgSettingsForm } from "./org-settings-form";
+import { PaymentMethodsSection } from "./payment-methods-section";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Button } from "@opencal/ui/components/button";
@@ -41,6 +42,8 @@ export function OrgSettingsWrapper({ orgSlug }: OrgSettingsWrapperProps) {
   return (
     <div className="space-y-6">
       <OrgSettingsForm orgId={org._id} />
+
+      <PaymentMethodsSection orgId={org._id} />
 
       <Card>
         <CardHeader>
