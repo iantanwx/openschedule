@@ -7,6 +7,9 @@
  * Reference: EMVCo Merchant QR Spec v1.1 + PayNow implementation.
  */
 
+/** Path to the vendored PayNow logo (relative to public/). */
+export const PAYNOW_LOGO_PATH = "/static/paynow-logo.png";
+
 export interface PayNowQROptions {
   /** "phone" or "uen" */
   proxyType: "phone" | "uen";

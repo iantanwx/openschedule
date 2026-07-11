@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
+import { generatePayNowQRString, PAYNOW_LOGO_PATH } from "@opencal/lib/paynow-qr";
 import { convexApi } from "@/lib/convex-api";
 import { PaymentMethodForm } from "./payment-method-form";
 import { Button } from "@opencal/ui/components/button";
@@ -122,61 +124,92 @@ export function PaymentMethodsSection({ orgId }: PaymentMethodsSectionProps) {
 
         {!showForm && !editingId && methods.length > 0 && (
           <div className="space-y-3">
-            {methods.map((m) => (
-              <div
-                key={m._id}
-                className="flex items-center justify-between rounded-md border p-3"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{m.label}</span>
-                    <Badge variant="outline">
-                      {m.type === "bank_account" ? "Bank Account" : "QR Code"}
-                    </Badge>
-                    {m.status === "inactive" && (
-                      <Badge variant="secondary">Inactive</Badge>
+            {methods.map((m) => {
+              const qrString =
+                m.type === "qr_code" &&
+                m.details?.method === "paynow" &&
+                m.details?.identifierValue
+                  ? generatePayNowQRString({
+                      proxyType: (m.details.identifierType as "phone" | "uen") ?? "phone",
+                      proxyValue: m.details.identifierValue,
+                      editable: true,
+                    })
+                  : null;
+
+              return (
+                <div
+                  key={m._id}
+                  className="flex items-center justify-between rounded-md border p-3"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{m.label}</span>
+                      <Badge variant="outline">
+                        {m.type === "bank_account" ? "Bank Account" : "QR Code"}
+                      </Badge>
+                      {m.status === "inactive" && (
+                        <Badge variant="secondary">Inactive</Badge>
+                      )}
+                    </div>
+                    {m.type === "bank_account" && m.details?.bankName && (
+                      <p className="text-sm text-muted-foreground">
+                        {m.details.bankName} &mdash; {m.details.accountNumber}
+                      </p>
                     )}
+                    {m.type === "qr_code" && m.details?.method && (
+                      <p className="text-sm text-muted-foreground">
+                        {m.details.method === "paynow" ? "PayNow" : m.details.method}{" "}
+                        ({m.details.identifierType === "phone" ? "Phone" : "UEN"}:{" "}
+                        {m.details.identifierValue})
+                      </p>
+                    )}
+                    <div className="flex gap-1 pt-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingId(m._id)}
+                      >
+                        Edit
+                      </Button>
+                      {m.status === "active" ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setDeactivatingId(m._id)}
+                        >
+                          Deactivate
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleReactivate(m._id)}
+                        >
+                          Reactivate
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  {m.type === "bank_account" && m.details?.bankName && (
-                    <p className="text-xs text-muted-foreground">
-                      {m.details.bankName} &mdash; {m.details.accountNumber}
-                    </p>
-                  )}
-                  {m.type === "qr_code" && m.details?.method && (
-                    <p className="text-xs text-muted-foreground">
-                      {m.details.method} ({m.details.identifierType}:{" "}
-                      {m.details.identifierValue})
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setEditingId(m._id)}
-                  >
-                    Edit
-                  </Button>
-                  {m.status === "active" ? (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setDeactivatingId(m._id)}
-                    >
-                      Deactivate
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleReactivate(m._id)}
-                    >
-                      Reactivate
-                    </Button>
+                  {qrString && (
+                    <div className="shrink-0 rounded border bg-white p-1">
+                      <QRCodeSVG
+                        value={qrString}
+                        size={64}
+                        level="H"
+                        imageSettings={{
+                          src: PAYNOW_LOGO_PATH,
+                          x: undefined,
+                          y: undefined,
+                          height: 8,
+                          width: 40,
+                          excavate: true,
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>

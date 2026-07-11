@@ -1,10 +1,8 @@
 "use client"
 
 import { QRCodeSVG } from "qrcode.react"
-import { generatePayNowQRString } from "@opencal/lib/paynow-qr"
+import { generatePayNowQRString, PAYNOW_LOGO_PATH } from "@opencal/lib/paynow-qr"
 import { Card } from "@opencal/ui/components/card"
-
-const PAYNOW_LOGO_URL = "/static/paynow-logo.png"
 
 interface PaymentInfoProps {
   type: "bank_account" | "qr_code"
@@ -39,7 +37,7 @@ export function PaymentInfo({ type, label, details, amount, logoUrl }: PaymentIn
         })
       : null
 
-  const qrLogoUrl = logoUrl ?? PAYNOW_LOGO_URL
+  const qrLogoUrl = logoUrl ?? PAYNOW_LOGO_PATH
 
   return (
     <Card className="space-y-3 p-4">

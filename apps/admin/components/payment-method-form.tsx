@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
-import { generatePayNowQRString, normalizePayNowPhone } from "@opencal/lib/paynow-qr";
+import { generatePayNowQRString, normalizePayNowPhone, PAYNOW_LOGO_PATH } from "@opencal/lib/paynow-qr";
 import { convexApi } from "@/lib/convex-api";
 import { Button } from "@opencal/ui/components/button";
 import { Input } from "@opencal/ui/components/input";
@@ -17,8 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@opencal/ui/components/select";
-
-const PAYNOW_LOGO_URL = "/static/paynow-logo.png";
 
 interface PaymentMethodFormProps {
   orgId: string;
@@ -288,7 +286,7 @@ export function PaymentMethodForm({
                   size={160}
                   level="H"
                   imageSettings={{
-                    src: PAYNOW_LOGO_URL,
+                    src: PAYNOW_LOGO_PATH,
                     x: undefined,
                     y: undefined,
                     height: 16,
