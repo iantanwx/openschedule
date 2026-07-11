@@ -26,8 +26,8 @@ interface PaymentMethodFormProps {
     bankName?: string;
     accountNumber?: string;
     reference?: string;
-    method?: string;
-    identifierType?: string;
+    method?: "paynow";
+    identifierType?: "phone" | "uen";
     identifierValue?: string;
     imageId?: string;
     notes?: string;
@@ -53,8 +53,8 @@ export function PaymentMethodForm({
   );
   const [reference, setReference] = useState(initialData?.reference ?? "");
   // QR fields
-  const [method, setMethod] = useState(initialData?.method ?? "paynow");
-  const [identifierType, setIdentifierType] = useState(
+  const [method, setMethod] = useState<"paynow">(initialData?.method ?? "paynow");
+  const [identifierType, setIdentifierType] = useState<"phone" | "uen">(
     initialData?.identifierType ?? "phone",
   );
   const [identifierValue, setIdentifierValue] = useState(
@@ -226,16 +226,18 @@ export function PaymentMethodForm({
         <>
           <div className="space-y-2">
             <Label htmlFor="pm-method">Provider</Label>
-            <Input
-              id="pm-method"
-              value={method}
-              onChange={(e) => setMethod(e.target.value)}
-              placeholder="paynow"
-            />
+            <Select value={method} onValueChange={(v) => setMethod(v as "paynow")}>
+              <SelectTrigger id="pm-method">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="paynow">PayNow</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="pm-id-type">Identifier Type</Label>
-            <Select value={identifierType} onValueChange={setIdentifierType}>
+            <Select value={identifierType} onValueChange={(v) => setIdentifierType(v as "phone" | "uen")}>
               <SelectTrigger id="pm-id-type">
                 <SelectValue />
               </SelectTrigger>

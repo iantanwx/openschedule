@@ -172,8 +172,8 @@ export default defineSchema({
     accountNumber: v.optional(v.string()),
     reference: v.optional(v.string()),
     // QR code fields
-    method: v.optional(v.string()),
-    identifierType: v.optional(v.string()),
+    method: v.optional(v.union(v.literal("paynow"))),
+    identifierType: v.optional(v.union(v.literal("phone"), v.literal("uen"))),
     identifierValue: v.optional(v.string()),
     imageId: v.optional(v.string()),
     notes: v.optional(v.string()),
