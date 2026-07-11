@@ -112,7 +112,7 @@ export function BookingPaymentStatus({
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button size="sm" variant="ghost" disabled={isSubmitting}>
+              <Button size="sm" variant="destructive" disabled={isSubmitting}>
                 Void
               </Button>
             </AlertDialogTrigger>
