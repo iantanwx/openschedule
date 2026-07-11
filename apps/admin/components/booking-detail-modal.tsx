@@ -152,7 +152,6 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
           {!readOnly && booking.status !== "cancelled" && venue && (
             <BookingPaymentStatus
               bookingId={bookingId}
-              venueId={booking.venueId}
               orgId={venue.orgId}
             />
           )}

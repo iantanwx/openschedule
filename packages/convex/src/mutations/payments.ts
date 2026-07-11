@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
-import { getAuthenticatedUser, assertRole } from "../lib/auth";
+import { getAuthenticatedUser, assertRole, assertOrgAccess } from "../lib/auth";
 
 export const create = mutation({
   args: {
@@ -14,6 +14,11 @@ export const create = mutation({
 
     const booking = await ctx.db.get(args.bookingId);
     if (!booking) throw new Error("Booking not found");
+
+    // Verify org access via venue
+    const venue = await ctx.db.get(booking.venueId);
+    if (!venue) throw new Error("Venue not found");
+    assertOrgAccess(user, venue.orgId);
 
     // Verify no existing non-voided payment
     const existing = await ctx.db
@@ -46,6 +51,13 @@ export const voidPayment = mutation({
     const payment = await ctx.db.get(args.id);
     if (!payment) throw new Error("Payment not found");
     if (payment.status === "voided") throw new Error("Payment already voided");
+
+    // Verify org access
+    const booking = await ctx.db.get(payment.bookingId);
+    if (!booking) throw new Error("Booking not found");
+    const venue = await ctx.db.get(booking.venueId);
+    if (!venue) throw new Error("Venue not found");
+    assertOrgAccess(user, venue.orgId);
 
     await ctx.db.patch(args.id, { status: "voided" });
   },

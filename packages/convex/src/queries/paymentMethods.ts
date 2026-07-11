@@ -50,6 +50,7 @@ export const get = query({
   },
 });
 
+/** Public query — no auth required. Used by customer booking confirmation page. */
 export const getForVenue = query({
   args: { venueId: v.id("venues") },
   handler: async (ctx, args) => {
@@ -74,7 +75,21 @@ export const getForVenue = query({
       imageUrl = url ?? null;
     }
 
-    return { ...method, details, imageUrl };
+    return {
+      type: method.type,
+      label: method.label,
+      details: details ? {
+        holderName: details.holderName,
+        bankName: details.bankName,
+        accountNumber: details.accountNumber,
+        reference: details.reference,
+        method: details.method,
+        identifierType: details.identifierType,
+        identifierValue: details.identifierValue,
+        notes: details.notes,
+      } : null,
+      imageUrl,
+    };
   },
 });
 
@@ -93,7 +108,7 @@ export const listVenuesUsingMethod = query({
       .take(100);
 
     return venues
-      .filter((venue) => venue.paymentMethodId?.toString() === args.id.toString())
+      .filter((venue) => venue.paymentMethodId === args.id)
       .map((venue) => ({ _id: venue._id, name: venue.name }));
   },
 });

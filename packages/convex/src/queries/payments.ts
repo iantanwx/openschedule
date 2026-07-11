@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 
+/** Public query — used by both admin and customer pages. markedBy intentionally excluded. */
 export const getForBooking = query({
   args: { bookingId: v.id("bookings") },
   handler: async (ctx, args) => {
@@ -11,6 +12,14 @@ export const getForBooking = query({
 
     // Return the active (non-voided) payment if one exists
     const active = payments.find((p) => p.status === "paid");
-    return active ?? null;
+    if (!active) return null;
+    return {
+      _id: active._id,
+      bookingId: active.bookingId,
+      paymentMethodId: active.paymentMethodId,
+      reference: active.reference,
+      markedAt: active.markedAt,
+      status: active.status,
+    };
   },
 });

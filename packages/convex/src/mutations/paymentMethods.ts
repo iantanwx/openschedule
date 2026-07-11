@@ -112,7 +112,7 @@ export const deactivate = mutation({
       .withIndex("by_orgId", (q) => q.eq("orgId", paymentMethod.orgId))
       .take(100);
     for (const venue of venues) {
-      if (venue.paymentMethodId?.toString() === args.id.toString()) {
+      if (venue.paymentMethodId === args.id) {
         await ctx.db.patch(venue._id, { paymentMethodId: undefined });
       }
     }

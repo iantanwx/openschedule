@@ -29,7 +29,6 @@ import {
 
 interface BookingPaymentStatusProps {
   bookingId: string;
-  venueId: string;
   orgId: string;
 }
 
@@ -41,10 +40,6 @@ export function BookingPaymentStatus({
     bookingId,
   });
   const methods = useQuery(convexApi.queries.paymentMethods.list, { orgId });
-  const markedByUser = useQuery(
-    convexApi.queries.users.getPublic,
-    payment && payment.status === "paid" ? { id: payment.markedBy } : "skip",
-  );
 
   const createPayment = useMutation(convexApi.mutations.payments.create);
   const voidPayment = useMutation(convexApi.mutations.payments.voidPayment);
@@ -142,7 +137,7 @@ export function BookingPaymentStatus({
           {method && <p>Method: {method.label}</p>}
           {payment.reference && <p>Reference: {payment.reference}</p>}
           <p>
-            Marked by {markedByUser?.name ?? "..."} on{" "}
+            Marked paid on{" "}
             {new Date(payment.markedAt).toLocaleDateString()}
           </p>
         </div>
