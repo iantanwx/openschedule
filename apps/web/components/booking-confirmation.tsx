@@ -133,7 +133,7 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
           label={paymentMethod.label}
           details={paymentMethod.details}
           imageUrl={paymentMethod.imageUrl}
-          amount={service?.price}
+          amount={service?.price ? service.price / 100 : undefined}
           logoUrl={paymentMethod.logoUrl}
         />
       )}
