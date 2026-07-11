@@ -13,6 +13,8 @@ import {
   buildGoogleCalendarUrl,
 } from "@opencal/emails";
 import type { BookingCreatedProps } from "@opencal/emails";
+import { generatePayNowQRString } from "@opencal/lib/paynow-qr";
+import QRCode from "qrcode";
 
 export const send = internalAction({
   args: { bookingId: v.id("bookings") },
@@ -100,6 +102,33 @@ export const send = internalAction({
         { venueId: venue._id },
       );
       if (method && method.details) {
+        let qrImageUrl: string | undefined;
+
+        // Generate PayNow QR and upload to storage
+        if (
+          method.type === "qr_code" &&
+          method.details.method === "paynow" &&
+          method.details.identifierType &&
+          method.details.identifierValue
+        ) {
+          const qrString = generatePayNowQRString({
+            proxyType: method.details.identifierType as "phone" | "uen",
+            proxyValue: method.details.identifierValue,
+            editable: true,
+          });
+          const pngBuffer = await QRCode.toBuffer(qrString, {
+            type: "png",
+            width: 300,
+            margin: 2,
+          });
+          const blob = new Blob([new Uint8Array(pngBuffer)], { type: "image/png" });
+          const storageId = await ctx.storage.store(blob);
+          const url = await ctx.storage.getUrl(storageId);
+          if (url) {
+            qrImageUrl = url;
+          }
+        }
+
         paymentInfo = {
           type: method.type as "bank_account" | "qr_code",
           label: method.label,
@@ -110,7 +139,7 @@ export const send = internalAction({
           method: method.details.method ?? undefined,
           identifierType: method.details.identifierType ?? undefined,
           identifierValue: method.details.identifierValue ?? undefined,
-          imageUrl: method.imageUrl ?? undefined,
+          imageUrl: qrImageUrl,
           notes: method.details.notes ?? undefined,
         };
       }

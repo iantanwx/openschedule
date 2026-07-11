@@ -24,15 +24,18 @@
   "dependencies": {
     "@convex-dev/better-auth": "^0.12.4",
     "@opencal/emails": "workspace:*",
+    "@opencal/lib": "workspace:*",
     "@react-email/render": "^1.4.0",
     "better-auth": "^1.6.18",
     "convex": "^1.21.0",
     "date-fns": "^4.1.0",
-    "date-fns-tz": "^3.2.0"
+    "date-fns-tz": "^3.2.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^4.0.0",
     "@opencal/typescript-config": "workspace:*",
+    "@types/qrcode": "^1.5.6",
     "convex-test": "^0.0.36",
     "typescript": "^5",
     "vite": "^8.0.16",

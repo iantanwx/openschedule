@@ -1,5 +1,7 @@
 "use client"
 
+import { QRCodeSVG } from "qrcode.react"
+import { generatePayNowQRString } from "@opencal/lib/paynow-qr"
 import { Card } from "@opencal/ui/components/card"
 
 interface PaymentInfoProps {
@@ -18,8 +20,17 @@ interface PaymentInfoProps {
   imageUrl: string | null
 }
 
-export function PaymentInfo({ type, label, details, imageUrl }: PaymentInfoProps) {
+export function PaymentInfo({ type, label, details }: PaymentInfoProps) {
   if (!details) return null
+
+  const qrString =
+    type === "qr_code" && details.method === "paynow" && details.identifierValue
+      ? generatePayNowQRString({
+          proxyType: (details.identifierType as "phone" | "uen") ?? "phone",
+          proxyValue: details.identifierValue,
+          editable: true,
+        })
+      : null
 
   return (
     <Card className="space-y-3 p-4">
@@ -55,12 +66,10 @@ export function PaymentInfo({ type, label, details, imageUrl }: PaymentInfoProps
 
       {type === "qr_code" && (
         <div className="space-y-3 text-sm">
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={`${label} QR code`}
-              className="mx-auto h-48 w-48 rounded border object-contain"
-            />
+          {qrString && (
+            <div className="flex justify-center">
+              <QRCodeSVG value={qrString} size={192} level="M" />
+            </div>
           )}
           {details.method && (
             <div className="flex justify-between">

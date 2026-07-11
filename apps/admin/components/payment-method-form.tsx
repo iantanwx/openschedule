@@ -60,39 +60,11 @@ export function PaymentMethodForm({
   const [identifierValue, setIdentifierValue] = useState(
     initialData?.identifierValue ?? "",
   );
-  const [imageId, setImageId] = useState(initialData?.imageId ?? "");
   const [notes, setNotes] = useState(initialData?.notes ?? "");
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const createMutation = useMutation(convexApi.mutations.paymentMethods.create);
   const updateMutation = useMutation(convexApi.mutations.paymentMethods.update);
-  const generateUploadUrl = useMutation(
-    convexApi.mutations.generateUploadUrl.generateUploadUrl,
-  );
-
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploading(true);
-    try {
-      const uploadUrl = await generateUploadUrl({});
-      const result = await fetch(uploadUrl, {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      if (!result.ok) throw new Error("Upload failed");
-      const { storageId } = (await result.json()) as { storageId: string };
-      setImageId(storageId);
-      setImagePreviewUrl(URL.createObjectURL(file));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setIsUploading(false);
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -119,7 +91,6 @@ export function PaymentMethodForm({
             type === "qr_code" ? identifierType || undefined : undefined,
           identifierValue:
             type === "qr_code" ? identifierValue || undefined : undefined,
-          imageId: type === "qr_code" ? imageId || undefined : undefined,
           notes: type === "qr_code" ? notes || undefined : undefined,
         });
         toast.success("Payment method updated");
@@ -141,7 +112,6 @@ export function PaymentMethodForm({
             type === "qr_code" ? identifierType || undefined : undefined,
           identifierValue:
             type === "qr_code" ? identifierValue || undefined : undefined,
-          imageId: type === "qr_code" ? imageId || undefined : undefined,
           notes: type === "qr_code" ? notes || undefined : undefined,
         });
         toast.success("Payment method created");
@@ -261,26 +231,6 @@ export function PaymentMethodForm({
                 }
               />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="pm-qr-image">QR Code Image</Label>
-            <Input
-              id="pm-qr-image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={isUploading}
-            />
-            {imagePreviewUrl && (
-              <img
-                src={imagePreviewUrl}
-                alt="QR preview"
-                className="mt-2 h-32 w-32 rounded border object-contain"
-              />
-            )}
-            {imageId && !imagePreviewUrl && (
-              <p className="text-xs text-muted-foreground">Image uploaded</p>
-            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="pm-notes">Additional Notes</Label>
