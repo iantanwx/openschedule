@@ -257,7 +257,7 @@ export function PaymentMethodForm({
                 value={identifierValue}
                 onChange={(e) => setIdentifierValue(e.target.value)}
                 placeholder={
-                  identifierType === "phone" ? "+65 9123 4567" : "UEN number"
+                  identifierType === "phone" ? "9123 4567" : "UEN number"
                 }
               />
             </div>
