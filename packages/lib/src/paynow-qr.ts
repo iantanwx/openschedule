@@ -25,6 +25,37 @@ export interface PayNowQROptions {
 }
 
 /**
+ * Normalize a Singapore phone number for PayNow.
+ *
+ * - Strips spaces/dashes
+ * - If already "+65XXXXXXXX", validates 8 digits after prefix
+ * - If "65XXXXXXXX" or "XXXXXXXX", normalizes to "+65XXXXXXXX"
+ *
+ * Returns the normalized "+65XXXXXXXX" string, or null if invalid.
+ */
+export function normalizePayNowPhone(input: string): string | null {
+  // Strip whitespace, dashes, and parentheses
+  const cleaned = input.replace(/[\s\-()]/g, "");
+
+  let digits: string;
+
+  if (cleaned.startsWith("+65")) {
+    digits = cleaned.slice(3);
+  } else if (cleaned.startsWith("65") && cleaned.length === 10) {
+    digits = cleaned.slice(2);
+  } else {
+    digits = cleaned;
+  }
+
+  // Singapore mobile/landline numbers are 8 digits, starting with 3, 6, 8, or 9
+  if (digits.length !== 8 || !/^[3689]/.test(digits)) {
+    return null;
+  }
+
+  return `+65${digits}`;
+}
+
+/**
  * Encode a TLV field: tag (2 digits) + length (2 digits) + value.
  */
 function tlv(tag: string, value: string): string {

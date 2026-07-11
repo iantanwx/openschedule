@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
-import { generatePayNowQRString } from "@opencal/lib/paynow-qr";
+import { generatePayNowQRString, normalizePayNowPhone } from "@opencal/lib/paynow-qr";
 import { convexApi } from "@/lib/convex-api";
 import { Button } from "@opencal/ui/components/button";
 import { Input } from "@opencal/ui/components/input";
@@ -71,11 +71,21 @@ export function PaymentMethodForm({
   const updateMutation = useMutation(convexApi.mutations.paymentMethods.update);
 
   // Generate QR preview string when we have valid QR data
+  const normalizedPhone =
+    type === "qr_code" && identifierType === "phone" && identifierValue.trim()
+      ? normalizePayNowPhone(identifierValue.trim())
+      : null;
+  const qrProxyValue =
+    type === "qr_code"
+      ? identifierType === "phone"
+        ? normalizedPhone
+        : identifierValue.trim() || null
+      : null;
   const qrPreviewString =
-    type === "qr_code" && method === "paynow" && identifierValue.trim()
+    qrProxyValue && method === "paynow"
       ? generatePayNowQRString({
           proxyType: identifierType,
-          proxyValue: identifierValue.trim(),
+          proxyValue: qrProxyValue,
           editable: true,
         })
       : null;
@@ -86,8 +96,22 @@ export function PaymentMethodForm({
       toast.error("Label is required");
       return;
     }
+    // Validate phone number for PayNow phone type
+    if (type === "qr_code" && identifierType === "phone" && identifierValue.trim()) {
+      const normalized = normalizePayNowPhone(identifierValue.trim());
+      if (!normalized) {
+        toast.error("Invalid Singapore phone number. Enter 8 digits (e.g. 9123 4567).");
+        return;
+      }
+    }
     setIsSaving(true);
     try {
+      // Normalize phone number before saving
+      const normalizedIdentifierValue =
+        type === "qr_code" && identifierType === "phone" && identifierValue.trim()
+          ? normalizePayNowPhone(identifierValue.trim()) ?? identifierValue.trim()
+          : identifierValue.trim() || undefined;
+
       if (isEditing && initialData) {
         await updateMutation({
           id: initialData.id,
@@ -104,7 +128,7 @@ export function PaymentMethodForm({
           identifierType:
             type === "qr_code" ? identifierType || undefined : undefined,
           identifierValue:
-            type === "qr_code" ? identifierValue || undefined : undefined,
+            type === "qr_code" ? normalizedIdentifierValue : undefined,
           notes: type === "qr_code" ? notes || undefined : undefined,
         });
         toast.success("Payment method updated");
@@ -125,7 +149,7 @@ export function PaymentMethodForm({
           identifierType:
             type === "qr_code" ? identifierType || undefined : undefined,
           identifierValue:
-            type === "qr_code" ? identifierValue || undefined : undefined,
+            type === "qr_code" ? normalizedIdentifierValue : undefined,
           notes: type === "qr_code" ? notes || undefined : undefined,
         });
         toast.success("Payment method created");
