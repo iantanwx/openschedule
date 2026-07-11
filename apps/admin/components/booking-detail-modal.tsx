@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { convexApi } from "@/lib/convex-api";
 import { RescheduleView } from "./reschedule-view";
+import { BookingPaymentStatus } from "./booking-payment-status";
 import { useState } from "react";
 import { Button } from "@opencal/ui/components/button";
 import { StatusBadge } from "@opencal/ui/components/status-badge";
@@ -60,7 +61,7 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
 
   const venue = useQuery(
     convexApi.queries.venues.get,
-    booking && !venueName ? { id: booking.venueId } : "skip",
+    booking ? { id: booking.venueId } : "skip",
   );
   const resolvedVenueName = venueName ?? venue?.name;
 
@@ -146,6 +147,15 @@ export function BookingDetailModal({ bookingId, venueId, readOnly = false, custo
             {customer?.email && <p className="text-muted-foreground">{customer.email}</p>}
             {customer?.phone && <p className="text-muted-foreground">{customer.phone}</p>}
           </div>
+
+          {/* Payment status */}
+          {!readOnly && booking.status !== "cancelled" && venue && (
+            <BookingPaymentStatus
+              bookingId={bookingId}
+              venueId={booking.venueId}
+              orgId={venue.orgId}
+            />
+          )}
 
           {/* Actions — hidden in read-only mode */}
           {!readOnly && booking.status !== "cancelled" && (
