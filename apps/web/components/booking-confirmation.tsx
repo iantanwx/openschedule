@@ -10,6 +10,7 @@ import { Button } from "@opencal/ui/components/button"
 import { Card } from "@opencal/ui/components/card"
 import { ArrowLeft } from "lucide-react"
 import { VenueMap } from "./venue-map"
+import { PaymentInfo } from "./payment-info"
 
 // FilterApi doesn't fully resolve across package boundaries in monorepo .d.ts
 const convexApi = api as unknown as {
@@ -18,6 +19,8 @@ const convexApi = api as unknown as {
     users: { getPublic: FunctionReference<"query"> }
     organizations: { getBySlug: FunctionReference<"query"> }
     venues: { getBySlug: FunctionReference<"query"> }
+    paymentMethods: { getForVenue: FunctionReference<"query"> }
+    payments: { getForBooking: FunctionReference<"query"> }
   }
 }
 
@@ -25,6 +28,8 @@ const bookingsGet = convexApi.queries.bookings.get
 const usersGetPublic = convexApi.queries.users.getPublic
 const orgGetBySlug = convexApi.queries.organizations.getBySlug
 const venueGetBySlug = convexApi.queries.venues.getBySlug
+const paymentMethodsGetForVenue = convexApi.queries.paymentMethods.getForVenue
+const paymentsGetForBooking = convexApi.queries.payments.getForBooking
 
 interface BookingConfirmationProps {
   bookingId: string
@@ -39,6 +44,14 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
   const booking = useQuery(bookingsGet, { id: bookingId })
   const org = useQuery(orgGetBySlug, { slug: orgSlug })
   const venue = useQuery(venueGetBySlug, org ? { orgId: org._id, slug: venueSlug } : "skip")
+  const paymentMethod = useQuery(
+    paymentMethodsGetForVenue,
+    venue ? { venueId: venue._id } : "skip",
+  )
+  const payment = useQuery(
+    paymentsGetForBooking,
+    booking ? { bookingId: booking._id } : "skip",
+  )
 
   if (booking === undefined) {
     return (
@@ -107,6 +120,15 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
         </div>
         <TherapistLine therapistId={booking.therapistId} />
       </Card>
+
+      {paymentMethod && !payment && booking.status !== "cancelled" && (
+        <PaymentInfo
+          type={paymentMethod.type}
+          label={paymentMethod.label}
+          details={paymentMethod.details}
+          imageUrl={paymentMethod.imageUrl}
+        />
+      )}
 
       {booking.status !== "cancelled" && token && (
         <div className="text-center">
