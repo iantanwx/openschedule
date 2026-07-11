@@ -80,13 +80,13 @@ export function PaymentInfo({ type, label, details, amount, logoUrl }: PaymentIn
               <QRCodeSVG
                 value={qrString}
                 size={192}
-                level="M"
+                level="H"
                 imageSettings={{
                   src: qrLogoUrl,
                   x: undefined,
                   y: undefined,
-                  height: 40,
-                  width: 40,
+                  height: 20,
+                  width: 100,
                   excavate: true,
                 }}
               />

@@ -286,13 +286,13 @@ export function PaymentMethodForm({
                 <QRCodeSVG
                   value={qrPreviewString}
                   size={160}
-                  level="M"
+                  level="H"
                   imageSettings={{
                     src: PAYNOW_LOGO_URL,
                     x: undefined,
                     y: undefined,
-                    height: 32,
-                    width: 32,
+                    height: 16,
+                    width: 80,
                     excavate: true,
                   }}
                 />
