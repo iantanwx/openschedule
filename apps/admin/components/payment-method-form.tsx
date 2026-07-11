@@ -224,39 +224,43 @@ export function PaymentMethodForm({
 
       {type === "qr_code" && (
         <>
-          <div className="space-y-2">
-            <Label htmlFor="pm-method">Provider</Label>
-            <Select value={method} onValueChange={(v) => setMethod(v as "paynow")}>
-              <SelectTrigger id="pm-method">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="paynow">PayNow</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="pm-id-type">Identifier Type</Label>
-            <Select value={identifierType} onValueChange={(v) => setIdentifierType(v as "phone" | "uen")}>
-              <SelectTrigger id="pm-id-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="phone">Phone</SelectItem>
-                <SelectItem value="uen">UEN</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="pm-id-value">Identifier Value</Label>
-            <Input
-              id="pm-id-value"
-              value={identifierValue}
-              onChange={(e) => setIdentifierValue(e.target.value)}
-              placeholder={
-                identifierType === "phone" ? "+65 9123 4567" : "UEN number"
-              }
-            />
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="pm-method">Provider</Label>
+              <Select value={method} onValueChange={(v) => setMethod(v as "paynow")}>
+                <SelectTrigger id="pm-method">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="paynow">PayNow</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pm-id-type">Type</Label>
+              <Select value={identifierType} onValueChange={(v) => setIdentifierType(v as "phone" | "uen")}>
+                <SelectTrigger id="pm-id-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="uen">UEN</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pm-id-value">
+                {identifierType === "phone" ? "Phone" : "UEN"}
+              </Label>
+              <Input
+                id="pm-id-value"
+                value={identifierValue}
+                onChange={(e) => setIdentifierValue(e.target.value)}
+                placeholder={
+                  identifierType === "phone" ? "+65 9123 4567" : "UEN number"
+                }
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="pm-qr-image">QR Code Image</Label>
