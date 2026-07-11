@@ -224,7 +224,7 @@ export function PaymentMethodForm({
 
       {type === "qr_code" && (
         <>
-          <div className="flex items-end gap-3">
+          <div className="flex items-start gap-3">
             <div className="space-y-2">
               <Label htmlFor="pm-method">Provider</Label>
               <Select value={method} onValueChange={(v) => setMethod(v as "paynow")}>
