@@ -39,6 +39,11 @@ export const get = query({
   handler: async (ctx, args) => {
     const service = await ctx.db.get(args.id);
     if (!service) return null;
-    return { _id: service._id, name: service.name, duration: service.duration };
+    return {
+      _id: service._id,
+      name: service.name,
+      duration: service.duration,
+      price: service.price,
+    };
   },
 });

@@ -4,6 +4,8 @@ import { QRCodeSVG } from "qrcode.react"
 import { generatePayNowQRString } from "@opencal/lib/paynow-qr"
 import { Card } from "@opencal/ui/components/card"
 
+const PAYNOW_LOGO_URL = "/static/paynow-logo.png"
+
 interface PaymentInfoProps {
   type: "bank_account" | "qr_code"
   label: string
@@ -18,9 +20,13 @@ interface PaymentInfoProps {
     notes?: string
   } | null
   imageUrl: string | null
+  /** Service price in dollars (e.g. 80) */
+  amount?: number
+  /** Org logo URL to embed in QR center. Falls back to PayNow logo. */
+  logoUrl?: string | null
 }
 
-export function PaymentInfo({ type, label, details }: PaymentInfoProps) {
+export function PaymentInfo({ type, label, details, amount, logoUrl }: PaymentInfoProps) {
   if (!details) return null
 
   const qrString =
@@ -28,9 +34,12 @@ export function PaymentInfo({ type, label, details }: PaymentInfoProps) {
       ? generatePayNowQRString({
           proxyType: (details.identifierType as "phone" | "uen") ?? "phone",
           proxyValue: details.identifierValue,
-          editable: true,
+          editable: !amount,
+          amount: amount ? amount.toFixed(2) : undefined,
         })
       : null
+
+  const qrLogoUrl = logoUrl ?? PAYNOW_LOGO_URL
 
   return (
     <Card className="space-y-3 p-4">
@@ -68,7 +77,25 @@ export function PaymentInfo({ type, label, details }: PaymentInfoProps) {
         <div className="space-y-3 text-sm">
           {qrString && (
             <div className="flex justify-center">
-              <QRCodeSVG value={qrString} size={192} level="M" />
+              <QRCodeSVG
+                value={qrString}
+                size={192}
+                level="M"
+                imageSettings={{
+                  src: qrLogoUrl,
+                  x: undefined,
+                  y: undefined,
+                  height: 40,
+                  width: 40,
+                  excavate: true,
+                }}
+              />
+            </div>
+          )}
+          {amount && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Amount</span>
+              <span className="font-medium">${amount.toFixed(2)}</span>
             </div>
           )}
           {details.method && (

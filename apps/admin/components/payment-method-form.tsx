@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
+import { generatePayNowQRString } from "@opencal/lib/paynow-qr";
 import { convexApi } from "@/lib/convex-api";
 import { Button } from "@opencal/ui/components/button";
 import { Input } from "@opencal/ui/components/input";
@@ -15,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@opencal/ui/components/select";
+
+const PAYNOW_LOGO_URL = "/static/paynow-logo.png";
 
 interface PaymentMethodFormProps {
   orgId: string;
@@ -65,6 +69,16 @@ export function PaymentMethodForm({
 
   const createMutation = useMutation(convexApi.mutations.paymentMethods.create);
   const updateMutation = useMutation(convexApi.mutations.paymentMethods.update);
+
+  // Generate QR preview string when we have valid QR data
+  const qrPreviewString =
+    type === "qr_code" && method === "paynow" && identifierValue.trim()
+      ? generatePayNowQRString({
+          proxyType: identifierType,
+          proxyValue: identifierValue.trim(),
+          editable: true,
+        })
+      : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -241,6 +255,26 @@ export function PaymentMethodForm({
               placeholder="Any additional instructions"
             />
           </div>
+          {qrPreviewString && (
+            <div className="space-y-2">
+              <Label>Preview</Label>
+              <div className="flex justify-center rounded-md border bg-white p-4">
+                <QRCodeSVG
+                  value={qrPreviewString}
+                  size={160}
+                  level="M"
+                  imageSettings={{
+                    src: PAYNOW_LOGO_URL,
+                    x: undefined,
+                    y: undefined,
+                    height: 32,
+                    width: 32,
+                    excavate: true,
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </>
       )}
 

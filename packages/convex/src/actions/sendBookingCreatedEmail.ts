@@ -68,6 +68,7 @@ export const send = internalAction({
 
     // Resolve service name
     let serviceName = "Appointment";
+    let servicePrice: number | undefined;
     if (booking.serviceId) {
       const service = await ctx.runQuery(
         internal.queries.internal.services.getInternal,
@@ -75,6 +76,7 @@ export const send = internalAction({
       );
       if (service) {
         serviceName = service.name;
+        servicePrice = service.price;
       }
     }
 
@@ -114,7 +116,8 @@ export const send = internalAction({
           const qrString = generatePayNowQRString({
             proxyType: method.details.identifierType as "phone" | "uen",
             proxyValue: method.details.identifierValue,
-            editable: true,
+            editable: !servicePrice,
+            amount: servicePrice ? servicePrice.toFixed(2) : undefined,
           });
           const pngBuffer = await QRCode.toBuffer(qrString, {
             type: "png",

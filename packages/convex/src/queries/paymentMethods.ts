@@ -75,6 +75,22 @@ export const getForVenue = query({
       imageUrl = url ?? null;
     }
 
+    // Resolve org logo URL for QR code center image
+    let logoUrl: string | null = null;
+    const settingsDoc = await ctx.db
+      .query("settings")
+      .withIndex("by_scope_and_scopeId", (q) =>
+        q.eq("scope", "org").eq("scopeId", venue.orgId),
+      )
+      .unique();
+    if (settingsDoc) {
+      const data = settingsDoc.data as { logoStorageId?: string | null };
+      if (data.logoStorageId) {
+        const url = await ctx.storage.getUrl(data.logoStorageId as Id<"_storage">);
+        logoUrl = url ?? null;
+      }
+    }
+
     return {
       type: method.type,
       label: method.label,
@@ -89,6 +105,7 @@ export const getForVenue = query({
         notes: details.notes,
       } : null,
       imageUrl,
+      logoUrl,
     };
   },
 });

@@ -21,6 +21,7 @@ const convexApi = api as unknown as {
     venues: { getBySlug: FunctionReference<"query"> }
     paymentMethods: { getForVenue: FunctionReference<"query"> }
     payments: { getForBooking: FunctionReference<"query"> }
+    services: { get: FunctionReference<"query"> }
   }
 }
 
@@ -30,6 +31,7 @@ const orgGetBySlug = convexApi.queries.organizations.getBySlug
 const venueGetBySlug = convexApi.queries.venues.getBySlug
 const paymentMethodsGetForVenue = convexApi.queries.paymentMethods.getForVenue
 const paymentsGetForBooking = convexApi.queries.payments.getForBooking
+const servicesGet = convexApi.queries.services.get
 
 interface BookingConfirmationProps {
   bookingId: string
@@ -51,6 +53,10 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
   const payment = useQuery(
     paymentsGetForBooking,
     booking ? { bookingId: booking._id } : "skip",
+  )
+  const service = useQuery(
+    servicesGet,
+    booking?.serviceId ? { id: booking.serviceId } : "skip",
   )
 
   if (booking === undefined) {
@@ -127,6 +133,8 @@ export function BookingConfirmation({ bookingId, orgSlug, venueSlug }: BookingCo
           label={paymentMethod.label}
           details={paymentMethod.details}
           imageUrl={paymentMethod.imageUrl}
+          amount={service?.price}
+          logoUrl={paymentMethod.logoUrl}
         />
       )}
 
